@@ -33,27 +33,27 @@
     "types": "npx -p typescript tsc src/**/*.js --declaration --allowJs --emitDeclarationOnly --outDir types"
   },
   "dependencies": {
-    "@discordjs/rest": "^2.2.0",
+    "@discordjs/rest": "^2.3.0",
     "@mirasaki/logger": "^1.0.5",
     "common-tags": "^1.8.2",
-    "discord.js": "^14.14.1",
-    "dotenv": "^16.3.1"
+    "discord.js": "^14.15.3",
+    "dotenv": "^16.4.5"
   },
   "devDependencies": {
     "@semantic-release/changelog": "^6.0.3",
-    "@semantic-release/commit-analyzer": "^11.1.0",
+    "@semantic-release/commit-analyzer": "^13.0.0",
     "@semantic-release/git": "^10.0.1",
-    "@semantic-release/github": "^10.0.3",
-    "@semantic-release/npm": "^12.0.0",
-    "@semantic-release/release-notes-generator": "^12.1.0",
+    "@semantic-release/github": "^10.1.4",
+    "@semantic-release/npm": "^12.0.1",
+    "@semantic-release/release-notes-generator": "^14.0.1",
     "commitizen": "^4.3.0",
     "cz-conventional-changelog": "^3.3.0",
     "docdash": "^2.0.2",
-    "eslint": "^9.0.0",
-    "jsdoc": "^4.0.2",
-    "jsdoc-to-markdown": "^8.0.0",
-    "nodemon": "^3.1.0",
-    "semantic-release": "^23.0.8"
+    "eslint": "^9.9.0",
+    "jsdoc": "^4.0.3",
+    "jsdoc-to-markdown": "^8.0.3",
+    "nodemon": "^3.1.4",
+    "semantic-release": "^24.0.0"
   },
   "repository": {
     "type": "git",
