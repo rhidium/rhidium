@@ -53,7 +53,7 @@
     "jsdoc": "^4.0.3",
     "jsdoc-to-markdown": "^8.0.3",
     "nodemon": "^3.1.4",
-    "semantic-release": "^24.0.0"
+    "semantic-release": "^24.1.0"
   },
   "repository": {
     "type": "git",
