@@ -33,7 +33,7 @@
     "types": "npx -p typescript tsc src/**/*.js --declaration --allowJs --emitDeclarationOnly --outDir types"
   },
   "dependencies": {
-    "@discordjs/rest": "^2.3.0",
+    "@discordjs/rest": "^2.4.0",
     "@mirasaki/logger": "^1.0.5",
     "common-tags": "^1.8.2",
     "discord.js": "^14.15.3",
