@@ -1,14 +1,9 @@
-version: '3.1'
-
 services:
   client:
     build: .
-    container_name: client
     restart: always
     volumes:
-      # Bind mount, read-only app
-      - ./:/app:ro
-      # Anonymous volume
-      - /app/node_modules
+      - ./config:/app/config
+      - ./docs:/app/docs
     env_file:
       - ./.env
