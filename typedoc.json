@@ -1,0 +1,10 @@
+{
+  "name": "Rhidium",
+  "entryPoints": [
+    "./src/lib/index.ts",
+  ],
+  "out": "./docs",
+  "theme": "default",
+  "tsconfig": "./tsconfig.json",
+  "includeVersion": false
+}

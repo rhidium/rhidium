@@ -1,5 +1,47 @@
 {
+  "typescript.format.enable": true,
+  "typescript.referencesCodeLens.enabled": true,
+  "typescript.implementationsCodeLens.enabled": true,
+  "eslint.enable": true,
+  "eslint.format.enable": true,
+  "eslint.lintTask.enable": true,
+  "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+  "editor.detectIndentation": false,
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll": "explicit",
+    "source.fixAll.eslint": "explicit",
+    "source.organizeImports": "never"
+  },
+  "eslint.codeActionsOnSave.mode": "all",
+  "[jsonc]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  },
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact"
+  ],
+  "eslint.useESLintClass": true,
+  "json.schemas": [
+    {
+      "url": "https://cdn.jsdelivr.net/npm/tsup/schema.json",
+      "fileMatch": [
+        "tsup.config.json"
+      ]
+    }
+  ],
+  "cSpell.enabled": true,
   "cSpell.words": [
+    "Blurple",
+    "codepaths",
+    "cooldown",
+    "emojify",
+    "Greyple",
+    "Hillebrand",
+    "Mirasaki",
+    "repliable",
     "Rhidium"
   ]
 }

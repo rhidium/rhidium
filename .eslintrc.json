@@ -1,0 +1,36 @@
+{
+  "extends": "./node_modules/gts/",
+  "parserOptions": {
+    "project": "./tsconfig.json"
+  },
+  "rules": {
+    "prettier/prettier": [
+      "error",
+      {
+        "bracketSpacing": true,
+        "singleQuote": true,
+        "trailingComma": "all",
+        "arrowParens": "always"
+      },
+      {
+        "usePrettierrc": true
+      }
+    ],
+    "n/no-unpublished-import": [
+      "error",
+      {
+        "allowModules": [
+          "tsup",
+          "typedoc"
+        ]
+      }
+    ],
+    "n/no-unsupported-features/node-builtins": [
+      "error",
+      {
+        "version": ">=16.6.0",
+        "ignores": []
+      }
+    ]
+  }
+}
