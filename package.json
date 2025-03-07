@@ -58,12 +58,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:Mirasaki/discord.js-bot-template.git"
+    "url": "git@github.com:rhidium/rhidium.git"
   },
   "bugs": {
-    "url": "https://github.com/Mirasaki/discord.js-bot-template/issues"
+    "url": "https://github.com/rhidium/rhidium/issues"
   },
-  "homepage": "https://github.com/Mirasaki/discord.js-bot-template#readme",
+  "homepage": "https://github.com/rhidium/rhidium#readme",
   "dependencies": {
     "colors": "^1.4.0",
     "common-tags": "^1.8.2",
