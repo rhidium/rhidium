@@ -1,0 +1,88 @@
+{
+  "reason": "Reason",
+  "guildOnly": "This command can only be used on server members, it's not available in DM's.",
+  "moderator": "Moderator",
+  "noReasonProvided": "No reason provided.",
+  "unknown": "Unknown",
+  "none": "None",
+  "never": "Never",
+  "notSet": "Not Set",
+  "input": "Input",
+  "output": "Output",
+  "outputTooLarge": "Output was too large to display, see file attachment",
+  "runtime": "Runtime",
+  "continue": "Continue",
+  "cancel": "Cancel",
+  "saved": "Saved",
+  "cancelled": "Cancelled",
+  "componentNames": {
+    "command": "Command",
+    "component": "Component",
+    "category": "Category",
+    "slash": "Slash",
+    "userContext": "User Context Menu",
+    "messageContext": "Message Context Menu",
+    "button": "Button",
+    "selectMenu": "Select Menu",
+    "modal": "Modal"
+  },
+  "role": "Role",
+  "channel": "Channel",
+  "member": "Member",
+  "embed": "Embed",
+  "field": "Field",
+  "fields": "Fields",
+  "counts": {
+    "label": "Counts",
+    "servers": "Servers",
+    "members": "Members",
+    "channels": "Channels",
+    "roles": "Roles"
+  },
+  "settings": {
+    "notFound": "Guild settings not found"
+  },
+  "requestedBy": "Requested by {{username}}",
+  "statistics": "Statistics",
+  "system": {
+    "label": "System",
+    "latency": "Latency",
+    "apiLatency": "API Latency",
+    "fullCircleLatency": "Full Circle Latency",
+    "memory": "Memory",
+    "memoryUsage": "Memory Usage",
+    "cacheSize": "Cache Size",
+    "uptime": "Uptime",
+    "version": "Version"
+  },
+  "shards": {
+    "onlineAndResponsive": "Shard is online and responsive",
+    "spawnedButNotReady": "Shard has spawned but is not ready",
+    "unavailable": "Shard has not been spawned or is unavailable",
+    "busySpawning": "Shards are still being spawned, please try again later"
+  },
+  "cluster": {
+    "label": "Cluster",
+    "shards": "Shards",
+    "clusters": "Clusters",
+    "totalMembers": "Total Members",
+    "totalGuilds": "Total Guilds",
+    "shardStatus": "Shard Status"
+  },
+  "discord": {
+    "nickname": "Nickname",
+    "serverAvatar": "Server Avatar",
+    "boost": "Boost",
+    "joinedServer": "Joined Server",
+    "joinedDiscord": "Joined Discord",
+    "accountCreated": "Account Created",
+    "joinedAt": "Joined At",
+    "memberCount": "Member Count"
+  },
+  "errors": {
+    "noChannel": "No channel found with ID {{channelId}}",
+    "notTextChannel": "Channel {{channel}} is not text-based",
+    "missingPerms": "No permissions to send message in specified channel {{channel}}, missing permissions: {{permissions}}",
+    "errAfterPermCheck": "An error occurred while sending the member join message, please try again later, the developers have been notified of this error"
+  }
+}

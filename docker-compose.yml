@@ -1,0 +1,59 @@
+# Define a network, which allows containers to communicate
+# with each other, by using their container name as a hostname
+networks:
+  app-network:
+    driver: bridge
+
+services:
+  client:
+    container_name: rhidium-template
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      args:
+        - CI=true # Skips husky in build stage
+    depends_on:
+      - db
+    env_file: .env
+    environment:
+      - NODE_ENV=production
+      - CI=true
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./config/config.json:/app/config/config.json
+      - ./config/config.example.json:/app/config/config.example.json
+    ports:
+      - 9000:9000
+    networks:
+      - app-network
+
+  db:
+    image: postgres
+    restart: unless-stopped
+    shm_size: 128mb
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    networks:
+      - app-network
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+
+  # Web interface for database management
+  # adminer:
+    # image: adminer
+    # restart: always
+    # ports:
+      # - 8080:8080
+
+volumes:
+  pg-data:

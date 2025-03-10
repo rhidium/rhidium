@@ -1,0 +1,105 @@
+generator client {
+  provider = "prisma-client-js"
+  // Note: You will need to declare a binary target for the Prisma Client
+  // when you deploy to Docker, Vercel, AWS Lambda, Google Cloud Functions, Azure Functions,
+  // or similar
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id      String   @id @unique
+  members Member[]
+}
+
+model Member {
+  id      String @id @unique @default(cuid())
+  userId  String
+  user    User   @relation(fields: [userId], references: [id])
+  guildId String
+  guild   Guild  @relation(fields: [guildId], references: [id])
+}
+
+model Guild {
+  id      String   @id @unique
+  Members Member[]
+
+  adminRoleId       String?
+  adminLogChannelId String?
+  modRoleId         String?
+  modLogChannelId   String?
+
+  autoRoleIds String[]
+
+  memberJoinChannelId String?
+  memberJoinEmbed     Embed?  @relation("MemberJoinEmbed", fields: [memberJoinEmbedId], references: [id])
+  memberJoinEmbedId   Int?
+
+  memberLeaveChannelId String?
+  memberLeaveEmbed     Embed?  @relation("MemberLeaveEmbed", fields: [memberLeaveEmbedId], references: [id])
+  memberLeaveEmbedId   Int?
+}
+
+model CommandCooldown {
+  id         Int        @id @default(autoincrement())
+  cooldownId String     @unique
+  duration   Int
+  usages     DateTime[]
+}
+
+// Configurable Messages for users
+// Check out the join/leave feed for an example
+model Embed {
+  id            Int          @id @default(autoincrement())
+  messageText   String?
+  color         Int?
+  authorName    String?
+  authorIconURL String?
+  authorURL     String?
+  title         String?
+  description   String?
+  url           String?
+  imageURL      String?
+  thumbnailURL  String?
+  footerText    String?
+  footerIconURL String?
+  fields        EmbedField[]
+
+  memberJoinEmbed  Guild[] @relation("MemberJoinEmbed")
+  memberLeaveEmbed Guild[] @relation("MemberLeaveEmbed")
+}
+
+model EmbedField {
+  id      Int     @id @unique @default(autoincrement())
+  name    String
+  value   String
+  inline  Boolean
+  Embed   Embed?  @relation(fields: [embedId], references: [id])
+  embedId Int?
+}
+
+model CommandStatistics {
+  id        Int    @id @unique @default(autoincrement())
+  type      Int
+  commandId String @unique
+
+  usages      DateTime[] @default([])
+  lastUsedAt  DateTime?
+  firstUsedAt DateTime?
+
+  errorCount  Int       @default(0)
+  lastError   String?
+  lastErrorAt DateTime?
+
+  runtimeTotal        Float?
+  runtimeMax          Float?
+  runtimeMin          Float?
+  runtimeMean         Float?
+  runtimeMedian       Float?
+  runtimeVariance     Float?
+  runtimeStdDeviation Float?
+}

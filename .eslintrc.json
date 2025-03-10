@@ -3,6 +3,11 @@
   "parserOptions": {
     "project": "./tsconfig.json"
   },
+  "ignorePatterns": [
+    "dist/",
+    "node_modules/",
+    "scripts/"
+  ],
   "rules": {
     "prettier/prettier": [
       "error",
@@ -21,7 +26,8 @@
       {
         "allowModules": [
           "tsup",
-          "typedoc"
+          "typedoc",
+          "ts-json-schema-generator"
         ]
       }
     ],

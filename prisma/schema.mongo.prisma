@@ -1,0 +1,107 @@
+generator client {
+  provider = "prisma-client-js"
+  // Note: You will need to declare a binary target for the Prisma Client
+  // when you deploy to Docker, Vercel, AWS Lambda, Google Cloud Functions, Azure Functions,
+  // or similar
+  // binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id      String @id @default(auto()) @map("_id") @db.ObjectId
+  userId  String @unique
+  members Member[]
+}
+
+model Member {
+  id      String @id @default(auto()) @map("_id") @db.ObjectId
+  userId  String
+  user    User   @relation(fields: [userId], references: [userId])
+  guildId String @db.ObjectId
+  guild   Guild  @relation(fields: [guildId], references: [id])
+}
+
+model Guild {
+  id      String @id @default(auto()) @map("_id") @db.ObjectId
+  guildId String @unique
+  Members   Member[]
+
+  adminRoleId       String?
+  adminLogChannelId String?
+  modRoleId         String?
+  modLogChannelId   String?
+
+  autoRoleIds String[]
+
+  memberJoinChannelId String?
+  memberJoinEmbed     Embed?  @relation("MemberJoinEmbed", fields: [memberJoinEmbedId], references: [id])
+  memberJoinEmbedId   String? @db.ObjectId
+
+  memberLeaveChannelId String?
+  memberLeaveEmbed     Embed?  @relation("MemberLeaveEmbed", fields: [memberLeaveEmbedId], references: [id])
+  memberLeaveEmbedId   String? @db.ObjectId
+}
+
+model CommandCooldown {
+  id         String     @id @default(auto()) @map("_id") @db.ObjectId
+  cooldownId String     @unique
+  duration   Int
+  usages     DateTime[]
+}
+
+// Configurable Messages for users
+// Check out the join/leave feed for an example
+model Embed {
+  id            String       @id @default(auto()) @map("_id") @db.ObjectId
+  messageText   String?
+  color         Int?
+  authorName    String?
+  authorIconURL String?
+  authorURL     String?
+  title         String?
+  description   String?
+  url           String?
+  imageURL      String?
+  thumbnailURL  String?
+  footerText    String?
+  footerIconURL String?
+  fields        EmbedField[]
+
+  memberJoinEmbed  Guild[] @relation("MemberJoinEmbed")
+  memberLeaveEmbed Guild[] @relation("MemberLeaveEmbed")
+}
+
+model EmbedField {
+  id      String  @id @default(auto()) @map("_id") @db.ObjectId
+  name    String
+  value   String
+  inline  Boolean
+  Embed   Embed?  @relation(fields: [embedId], references: [id])
+  embedId String? @db.ObjectId
+}
+
+model CommandStatistics {
+  id        String @id @default(auto()) @map("_id") @db.ObjectId
+  type      Int
+  commandId String @unique
+
+  usages      DateTime[] @default([])
+  lastUsedAt  DateTime?
+  firstUsedAt DateTime?
+
+  errorCount  Int       @default(0)
+  lastError   String?
+  lastErrorAt DateTime?
+
+  runtimeTotal        Float?
+  runtimeMax          Float?
+  runtimeMin          Float?
+  runtimeMean         Float?
+  runtimeMedian       Float?
+  runtimeVariance     Float?
+  runtimeStdDeviation Float?
+}

@@ -6,6 +6,7 @@
   "engines": {
     "node": ">=16.6.0"
   },
+  "packageManager": "pnpm@9.15.4",
   "scripts": {
     "build": "tsup",
     "clean": "gts clean; rimraf docs",
@@ -17,18 +18,31 @@
     "prepare": "npm run build",
     "pretest": "npm run build",
     "posttest": "npm run lint",
-    "start": "node dist/index.js",
+    "start": "node --enable-source-maps dist/index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "commit": "cz",
+    "setup:linux": "pnpm install && cp .env.example .env && cp config/config.example.json config/config.json",
+    "setup:windows": "pnpm install && copy .env.example .env && copy config/config.example.json config/config.json",
+    "generate-schema": "npx ts-json-schema-generator --path 'src/client/config/*.ts' --type 'UserConfigOptions' --tsconfig tsconfig.json",
+    "update-schema": "node scripts/create-config-schema.mjs",
+    "preconfig-editor": "npm run update-schema",
+    "config-editor": "node scripts/config-editor.mjs",
+    "setup:config": "pnpm add -D @rhidium/json-editor",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate dev"
   },
   "keywords": [
     "discord",
-    "bot",
+    "template",
+    "bot-template",
+    "node",
+    "discordapp",
+    "typescript",
+    "rhidium",
     "framework",
-    "discord.js",
-    "discord-bot-template",
-    "discord-bot-framework",
-    "discord-bot"
+    "discord.js"
   ],
   "author": {
     "name": "Richard Hillebrand",
@@ -36,12 +50,13 @@
     "url": "https://mirasaki.dev"
   },
   "license": "ISC",
-  "packageManager": "pnpm@9.15.4+sha512.b2dc20e2fc72b3e18848459b37359a32064663e5627a51e4c74b2c29dd8e8e0491483c3abb40789cfd578bf362fb6ba8261b05f0387d76792ed6e23ea3b1b6a0",
   "devDependencies": {
     "@types/common-tags": "^1.8.4",
     "@types/node": "^22.7.5",
     "gts": "^6.0.2",
+    "prisma": "^6.4.1",
     "rimraf": "^6.0.1",
+    "ts-json-schema-generator": "^2.3.0",
     "tsup": "^8.4.0",
     "typedoc": "^0.27.9",
     "typescript": "^5.6.3"
@@ -65,6 +80,7 @@
   },
   "homepage": "https://github.com/rhidium/rhidium#readme",
   "dependencies": {
+    "@prisma/client": "6.4.1",
     "colors": "^1.4.0",
     "common-tags": "^1.8.2",
     "cron": "^4.1.0",

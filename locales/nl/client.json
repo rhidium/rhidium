@@ -1,0 +1,16 @@
+{
+	"initialize": {
+		"start": "Client initializeren...",
+		"success": "Client ge-initializeerd in {{duration}}, {{commandSize}} commands geladen/geregistreerd"
+	},
+	"ready": "Client ingelogd als {{username}} na {{duration}}",
+  "clustering": {
+    "config": {
+      "disabled": "CLUSTERING is niet actief, kan cluster niet started - gebruik ~/client/index",
+      "invalid": "Ongeldige cluster configuratie, kan cluster niet started"
+    },
+    "cluster": {
+      "launch": "Cluster {{id}} opstarten..."
+    }
+  }
+}

@@ -1,0 +1,89 @@
+{
+  "reason": "Reden",
+  "guildOnly": "Deze opdracht kan alleen worden gebruikt voor serverleden, het is niet beschikbaar in DM's.",
+  "moderator": "Moderator",
+  "noReasonProvided": "Geen reden opgegeven.",
+  "unknown": "Onbekend",
+  "none": "Geen",
+  "never": "Nooit",
+  "notSet": "Niet ingesteld",
+  "input": "Invoer",
+  "output": "Uitvoer",
+  "outputTooLarge": "Uitvoer was te groot om weer te geven, zie bestandsbijlage",
+  "runtime": "Uitvoeringstijd",
+  "continue": "Doorgaan",
+  "cancel": "Annuleren",
+  "saved": "Opgeslagen",
+  "cancelled": "Geannuleerd",
+  "cmdCooldown": "Je staat in de wachttijd (type {{type}}) voor deze opdracht - wacht alsjeblieft **{{duration}}** voordat je deze opdracht opnieuw gebruikt",
+  "componentNames": {
+    "command": "Opdracht",
+    "component": "Component",
+    "category": "Categorie",
+    "slash": "Slash",
+    "userContext": "Gebruikerscontextmenu",
+    "messageContext": "Berichtcontextmenu",
+    "button": "Knop",
+    "selectMenu": "Selectiemenu",
+    "modal": "Modaal"
+  },
+  "role": "Rol",
+  "channel": "Kanaal",
+  "member": "Lid",
+  "embed": "Insluiten",
+  "field": "Veld",
+  "fields": "Velden",
+  "counts": {
+    "label": "Aantallen",
+    "servers": "Servers",
+    "members": "Leden",
+    "channels": "Kanalen",
+    "roles": "Rollen"
+  },
+  "settings": {
+    "notFound": "Guild-instellingen niet gevonden"
+  },
+  "requestedBy": "Aangevraagd door {{username}}",
+  "statistics": "Statistieken",
+  "system": {
+    "label": "Systeem",
+    "latency": "Vertraging",
+    "apiLatency": "API-vertraging",
+    "fullCircleLatency": "Volledige cirkelvertraging",
+    "memory": "Geheugen",
+    "memoryUsage": "Geheugenverbruik",
+    "cacheSize": "Cache-grootte",
+    "uptime": "Uptime",
+    "version": "Versie"
+  },
+  "shards": {
+    "onlineAndResponsive": "Shard is online en reageert",
+    "spawnedButNotReady": "Shard is gespawnd maar is niet klaar",
+    "unavailable": "Shard is niet gespawnd of is niet beschikbaar",
+    "busySpawning": "Shards worden nog steeds gespawnd, probeer het later opnieuw"
+  },
+  "cluster": {
+    "label": "Cluster",
+    "shards": "Shards",
+    "clusters": "Clusters",
+    "totalMembers": "Totaal Aantal Leden",
+    "totalGuilds": "Totaal Aantal Servers",
+    "shardStatus": "Shard Status"
+  },
+  "discord": {
+    "nickname": "Bijnaam",
+    "serverAvatar": "Serveravatar",
+    "boost": "Boost",
+    "joinedServer": "Toegetreden tot server",
+    "joinedDiscord": "Toegetreden tot Discord",
+    "accountCreated": "Account aangemaakt",
+    "joinedAt": "Toegetreden op",
+    "memberCount": "Aantal leden"
+  },
+  "errors": {
+    "noChannel": "Geen kanaal gevonden met ID {{channelId}}",
+    "notTextChannel": "Kanaal {{channel}} is niet op tekst gebaseerd",
+    "missingPerms": "Geen permissie om bericht te verzenden in het gespecificeerde kanaal {{channel}}, ontbrekende permissies: {{permissions}}",
+    "errAfterPermCheck": "Er is een fout opgetreden bij het verzenden van het lid-bericht, probeer het later opnieuw, de ontwikkelaars zijn op de hoogte gebracht van deze fout"
+  }
+}
