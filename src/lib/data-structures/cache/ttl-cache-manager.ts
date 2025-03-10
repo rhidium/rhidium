@@ -1,4 +1,4 @@
-import { UnitConstants } from 'lib/constants';
+import { UnitConstants } from '../..//constants';
 
 export const DEFAULT_CAPACITY = null;
 export const DEFAULT_TTL = UnitConstants.MS_IN_ONE_HOUR;

@@ -10,19 +10,19 @@ import {
   embedFromUsageStatistics,
   stringCommandTypeFromInteger,
 } from './helpers';
-import CommandStatisticOption from '@/auto-completes/command-statistic';
+import CommandStatisticOption from '@client/auto-completes/command-statistic';
 import {
   ArrayUtils,
   ChatInputCommand,
   InteractionUtils,
   PermLevel,
   isAutoCompleteResponseType,
-} from '@rhidium/core';
+} from '@lib';
 import {
   COMMAND_STATISTICS_ROOT_ID,
   commandStatisticsTTLCache,
-} from '@/database/CommandStatistics';
-import { prisma } from '@/database';
+} from '@client/database/CommandStatistics';
+import { prisma } from '@client/database';
 
 export const compactEntriesPerPage = 10;
 
@@ -66,6 +66,8 @@ const CommandUsageCommand = new ChatInputCommand({
         client,
         allEmbeds.map((e) => ({ embeds: Array.isArray(e) ? e : [e] })),
         interaction,
+        undefined,
+        { ephemeral: CommandUsageCommand.isEphemeral },
       );
     } else if (subcommand === CommandUsageConstants.ITEM_SUBCOMMAND_NAME) {
       const value = await CommandStatisticOption.getValue(interaction, true);

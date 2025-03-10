@@ -1,7 +1,12 @@
-import { UnitConstants } from 'lib/constants';
-import { TimestampStyles, TimestampStylesString, time } from 'discord.js';
+import { UnitConstants } from '../constants';
+import {
+  Locale,
+  TimestampStyles,
+  TimestampStylesString,
+  time,
+} from 'discord.js';
 
-const formatter = new Intl.DateTimeFormat('en-GB', {
+const formatter = new Intl.DateTimeFormat(Locale.EnglishUS, {
   hour: '2-digit',
   minute: '2-digit',
   second: '2-digit',

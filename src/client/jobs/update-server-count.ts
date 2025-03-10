@@ -1,5 +1,5 @@
-import { ClusterServices } from '@/services';
-import { Job, UnitConstants } from '@rhidium/core';
+import { ClusterServices } from '@client/services';
+import { Job, UnitConstants } from '@lib';
 
 const UpdateServerCountJob = new Job({
   id: 'update-server-count',

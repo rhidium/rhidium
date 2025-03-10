@@ -1,5 +1,5 @@
-import { Client } from 'lib/client';
-import { PermLevel } from 'lib/managers';
+import { Client } from '../client';
+import { PermLevel } from '../managers';
 import {
   APIInteractionGuildMember,
   Guild,
@@ -10,7 +10,7 @@ import {
   Snowflake,
 } from 'discord.js';
 import { StringUtils } from './strings';
-import { CommandType } from 'lib/commands';
+import { CommandType } from '../commands';
 
 const validPermValues = Object.values(PermissionsBitField.Flags);
 

@@ -1,6 +1,6 @@
 import { Colors } from 'discord.js';
 import { ArrayUtils } from '.';
-import { UnitConstants } from 'lib/constants';
+import { UnitConstants } from '../constants';
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 

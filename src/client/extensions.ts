@@ -1,4 +1,4 @@
-import { Client } from '@rhidium/core';
+import { Client } from '@lib';
 import { usageStatisticsQueue } from './jobs/process-usage-statistics';
 
 export const clientExtensions = { usageStatisticsQueue };

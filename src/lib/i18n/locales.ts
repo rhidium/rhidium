@@ -1,3 +1,3 @@
 import { Locale } from 'discord.js';
 
-export const locales: Locale[] = [Locale.EnglishGB, Locale.Dutch];
+export const locales: Locale[] = [Locale.EnglishUS, Locale.Dutch];

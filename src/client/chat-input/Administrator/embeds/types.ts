@@ -1,7 +1,7 @@
-import { GuildWithEmbeds } from '@/database';
+import { GuildWithEmbeds } from '@client/database';
 import { Prisma } from '@prisma/client';
 import { ChatInputCommandInteraction } from 'discord.js';
-import { GuildCommandController } from '@rhidium/core';
+import { GuildCommandController } from '@lib';
 
 /**
  * Nothing is required in this data structure, all fields are optional

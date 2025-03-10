@@ -6,16 +6,17 @@ import {
   Events,
   If,
   Locale,
+  MessageFlags,
   version as discordJsVersion,
 } from 'discord.js';
 import { ClusterClient } from 'discord-hybrid-sharding';
-import { Directories, InteractionUtils } from 'lib/utils';
+import { Directories, InteractionUtils } from '../utils';
 import {
   CommandMiddleware,
   CommandMiddlewareContext,
   CommandMiddlewareMetaContext,
   CommandMiddlewareOptions,
-} from 'lib/middleware';
+} from '../middleware';
 import {
   ChatInputCommand,
   CommandThrottle,
@@ -23,25 +24,25 @@ import {
   MessageContextCommand,
   ModalCommand,
   UserContextCommand,
-} from 'lib/commands';
+} from '../commands';
 import {
   Logger,
   FileLoggerOptions,
   LoggerOptions,
   DiscordLogger,
-} from 'lib/logger';
+} from '../logger';
 import { i18n } from 'i18next';
 import {
   CommandManager,
   CommandManagerCommandsOptions,
   ClientPermissionOptions,
   ClientPermissions,
-} from 'lib/managers';
+} from '../managers';
 import { IEmojis, UserColors } from './config';
 import { Embeds } from '.';
-import { ClientJobManager } from 'lib/jobs';
+import { ClientJobManager } from '../jobs';
 import pkg from '../../../package.json';
-import { Constants } from 'lib/constants';
+import { Constants } from '../constants';
 
 export type ClientWithCluster<Ready extends boolean = boolean> =
   Client<Ready> & {
@@ -259,7 +260,7 @@ export class Client<
   }
 
   registerEssentialListeners = () => {
-    this.once(Events.ClientReady, (c) => {
+    this.once(Events.ClientReady, async (c) => {
       // Apply branding to our embeds once we log-in
       if (c.user && !this.embeds.brandingOptions.author)
         this.embeds.brandingOptions.author = {
@@ -271,6 +272,12 @@ export class Client<
         this as Client<true>,
         this.commandManager.jobs.toJSON(),
       );
+
+      this.logger.info(
+        this.jobManager.tag,
+        `Client is ready, initializing (${this.jobManager.jobs.size}) jobs...`,
+      );
+      await this.jobManager.startAll();
     });
 
     this.on(Events.InteractionCreate, async (interaction) => {
@@ -378,7 +385,7 @@ export class Client<
               ),
             }),
           ],
-          ephemeral: true,
+          flags: [MessageFlags.Ephemeral],
         });
         return;
       }

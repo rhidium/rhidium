@@ -9,8 +9,7 @@ import {
   EmbedConfigurationConstants,
 } from './enums';
 import { maxFieldNameLength } from './helpers';
-import { EmbedConstants } from '@rhidium/core';
-import { Lang } from 'lib/i18n';
+import { Lang, EmbedConstants } from '@lib';
 
 export const embedOptions = [
   {

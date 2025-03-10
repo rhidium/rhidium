@@ -1,4 +1,4 @@
-import { ClientPermissionLevel } from '@rhidium/core';
+import { ClientPermissionLevel } from '@lib';
 import { guildSettingsFromCache } from './database';
 import { PermissionFlagsBits } from 'discord.js';
 

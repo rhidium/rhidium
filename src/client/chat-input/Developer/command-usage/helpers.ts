@@ -1,13 +1,13 @@
 import { ApplicationCommandType } from 'discord.js';
 import { stripIndents } from 'common-tags';
 import {
+  Lang,
   Client,
   ComponentCommandType,
   TimeUtils,
   UnitConstants,
-} from '@rhidium/core';
-import { CommandStatisticsPayload } from '@/database/CommandStatistics';
-import { Lang } from 'lib/i18n';
+} from '@lib';
+import { CommandStatisticsPayload } from '@client/database/CommandStatistics';
 
 const unknown = Lang.t('general:unknown');
 const never = Lang.t('general:never');

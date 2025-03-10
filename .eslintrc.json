@@ -25,7 +25,6 @@
       "error",
       {
         "allowModules": [
-          "tsup",
           "typedoc",
           "ts-json-schema-generator"
         ]

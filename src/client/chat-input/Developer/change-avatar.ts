@@ -4,7 +4,7 @@ import {
   CommandCooldownType,
   PermLevel,
   UnitConstants,
-} from '@rhidium/core';
+} from '@lib';
 
 const ChangeAvatarCommand = new ChatInputCommand({
   permLevel: PermLevel['Bot Administrator'],

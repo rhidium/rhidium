@@ -2,6 +2,7 @@ import {
   APIInteractionGuildMember,
   ApplicationCommand,
   ApplicationCommandOptionType,
+  ApplicationCommandType,
   BaseInteraction,
   Collection,
   ContextMenuCommandBuilder,
@@ -15,7 +16,7 @@ import {
 } from 'discord.js';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import path from 'path';
-import { type Client } from 'lib/client';
+import { type Client } from '../client';
 import {
   APICommandData,
   APICommandType,
@@ -25,12 +26,9 @@ import {
   MessageContextCommand,
   UserContextCommand,
   isCommand,
-} from 'lib/commands';
-import {
-  CommandCooldownType,
-  resolveCooldownType,
-} from 'lib/commands/cooldown';
-import { PermLevel, resolvePermLevel } from 'lib/managers';
+} from '../commands';
+import { CommandCooldownType, resolveCooldownType } from '../commands/cooldown';
+import { PermLevel, resolvePermLevel } from '../managers';
 import {
   Directories,
   FileUtils,
@@ -39,12 +37,12 @@ import {
   PermissionUtils,
   StringUtils,
   TimeUtils,
-} from 'lib/utils';
-import { AutoCompleteOption } from 'lib/commands/auto-complete';
-import { EmbedConstants, UnitConstants } from 'lib/constants';
+} from '../utils';
+import { AutoCompleteOption } from '../commands/auto-complete';
+import { EmbedConstants, UnitConstants } from '../constants';
 import { ClientEventListener } from '.';
 import { stripIndents } from 'common-tags';
-import { Job } from 'lib/jobs';
+import { Job } from '../jobs';
 
 export type ExcludedCommandNames =
   | 'components'
@@ -392,6 +390,7 @@ export class CommandManager {
           cmd = cmd.default;
 
         if (!isCommand(cmd)) {
+          console.log(cmd);
           this.client.logger.debug(
             `Skipping non-command: ${FileUtils.getProjectRelativePath(cmdPath)}`,
           );
@@ -726,15 +725,15 @@ export class CommandManager {
               // as they are false positives
               .filter((f) => {
                 const isFalsePositive =
-                  f.key.endsWith('.type') &&
+                  (f.key === 'type' || f.key.endsWith('.type')) &&
                   (f.oldValue === ApplicationCommandOptionType.Subcommand ||
                     f.oldValue ===
-                      ApplicationCommandOptionType.SubcommandGroup) &&
+                      ApplicationCommandOptionType.SubcommandGroup ||
+                    f.oldValue === ApplicationCommandType.ChatInput) &&
                   f.newValue === undefined;
                 if (isFalsePositive) {
                   this.client.logger.debug(
                     `Skipping false positive command change in Command "${e.name}": ${f.key}`,
-                    'Type: Subcommand(group) false positive',
                   );
                 }
                 return !isFalsePositive;
@@ -825,7 +824,17 @@ export class CommandManager {
         return false;
       }
 
-      writeFileSync(cmdDataPath, JSON.stringify(latestDeployCommands));
+      writeFileSync(
+        cmdDataPath,
+        JSON.stringify(
+          latestDeployCommands.map((e) => {
+            return {
+              ...e,
+              type: 'type' in e ? e.type : ApplicationCommandType.ChatInput,
+            };
+          }),
+        ),
+      );
       logger.success(
         `Initial synchronization for ${options.type} command data completed`,
       );

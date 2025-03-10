@@ -1,4 +1,4 @@
-import { UnitConstants } from 'lib/constants';
+import { UnitConstants } from '../../constants';
 import { TTLCacheManager, TTLCacheManagerOptions } from '.';
 
 export interface AsyncTTLCacheManagerOptions<T> extends TTLCacheManagerOptions {

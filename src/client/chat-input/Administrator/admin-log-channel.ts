@@ -1,8 +1,7 @@
-import { guildSettingsFromCache, updateGuildSettings } from '@/database';
-import { LoggingServices } from '@/services';
+import { guildSettingsFromCache, updateGuildSettings } from '@client/database';
+import { LoggingServices } from '@client/services';
 import { ChannelType, SlashCommandBuilder } from 'discord.js';
-import { ChatInputCommand, InteractionUtils, PermLevel } from '@rhidium/core';
-import { Lang } from 'lib/i18n';
+import { Lang, ChatInputCommand, InteractionUtils, PermLevel } from '@lib';
 
 const AdminLogChannelCommand = new ChatInputCommand({
   permLevel: PermLevel.Administrator,

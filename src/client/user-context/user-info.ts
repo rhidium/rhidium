@@ -1,5 +1,5 @@
-import { Lang } from 'lib/i18n';
-import { UserContextCommand, ArrayUtils, TimeUtils } from '@rhidium/core';
+import { Lang, UserContextCommand, ArrayUtils, TimeUtils } from '@lib';
+import { MessageFlags } from 'discord.js';
 
 const UserInfoCommand = new UserContextCommand({
   disabled: process.env.NODE_ENV === 'production',
@@ -9,7 +9,7 @@ const UserInfoCommand = new UserContextCommand({
     if (!guild) {
       await UserInfoCommand.reply(interaction, {
         content: Lang.t('general:guildOnly'),
-        ephemeral: true,
+        flags: [MessageFlags.Ephemeral],
       });
       return;
     }
@@ -20,7 +20,7 @@ const UserInfoCommand = new UserContextCommand({
     if (!target) {
       await UserInfoCommand.reply(interaction, {
         content: Lang.t('commands:user-info.noMember'),
-        ephemeral: true,
+        flags: [MessageFlags.Ephemeral],
       });
       return;
     }

@@ -1,10 +1,10 @@
-import { stringCommandTypeFromInteger } from '@/chat-input/Developer/command-usage/helpers';
+import { stringCommandTypeFromInteger } from '@client/chat-input/Developer/command-usage/helpers';
 import {
   COMMAND_STATISTICS_ROOT_ID,
   CommandStatisticsPayload,
   commandStatisticsTTLCache,
-} from '@/database/CommandStatistics';
-import { AutoCompleteOption } from '@rhidium/core';
+} from '@client/database/CommandStatistics';
+import { AutoCompleteOption } from '@lib';
 
 const CommandStatisticOption = new AutoCompleteOption<CommandStatisticsPayload>(
   {

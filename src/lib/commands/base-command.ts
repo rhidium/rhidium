@@ -7,6 +7,7 @@ import {
   EmbedBuilder,
   GuildMember,
   InteractionReplyOptions,
+  MessageFlags,
   PermissionResolvable,
   PermissionsBitField,
 } from 'discord.js';
@@ -28,22 +29,23 @@ import {
   throttleFromCache,
   throttleTTLCache,
 } from './cooldown';
-import { Client, defaultEmojis } from 'lib/client';
+import { Client, defaultEmojis } from '../client';
 import {
   CommandMiddleware,
   CommandMiddlewareContext,
   CommandMiddlewareMetaContext,
   CommandMiddlewareOptions,
-} from 'lib/middleware';
-import { CommandManager, PermLevel } from 'lib/managers';
+} from '../middleware';
+import { CommandManager, PermLevel } from '../managers';
 import {
   FileUtils,
   InteractionReplyDynamicOptions,
   InteractionUtils,
   PermissionUtils,
   TimeUtils,
-} from 'lib/utils';
-import { DiscordLogger } from 'lib/logger';
+} from '../utils';
+import { DiscordLogger } from '../logger';
+import { defaultLanguage } from '../i18n';
 
 export type CommandType =
   | ComponentCommandBase
@@ -415,7 +417,7 @@ export class BaseCommand<I extends BaseInteraction = BaseInteraction> {
     );
     if (nameLocalization) {
       cmdInstance.data.setNameLocalizations(nameLocalization);
-      const defaultLocalization = nameLocalization['en-GB'];
+      const defaultLocalization = nameLocalization[defaultLanguage];
       if (!cmdInstance.data.name && defaultLocalization)
         cmdInstance.data.setName(defaultLocalization);
     }
@@ -426,7 +428,7 @@ export class BaseCommand<I extends BaseInteraction = BaseInteraction> {
         cmdInstance.resolveDescriptionLocalizations(cmdInstance.data.name);
       if (descriptionLocalization) {
         cmdInstance.data.setDescriptionLocalizations(descriptionLocalization);
-        const defaultLocalization = descriptionLocalization['en-GB'];
+        const defaultLocalization = descriptionLocalization[defaultLanguage];
         if (!cmdInstance.data.description && defaultLocalization)
           cmdInstance.data.setDescription(defaultLocalization);
       }
@@ -442,7 +444,9 @@ export class BaseCommand<I extends BaseInteraction = BaseInteraction> {
       !interaction.replied &&
       !interaction.deferred
     )
-      await interaction.deferReply({ ephemeral: this.isEphemeral });
+      await interaction.deferReply({
+        flags: this.isEphemeral ? [MessageFlags.Ephemeral] : [],
+      });
   };
 
   /**
@@ -478,7 +482,7 @@ export class BaseCommand<I extends BaseInteraction = BaseInteraction> {
     if (this.disabled) {
       void InteractionUtils.replyDynamic(client, interaction, {
         content: client.I18N.t('lib:commands.commandDisabledTitle'),
-        ephemeral: true,
+        flags: [MessageFlags.Ephemeral],
       });
       return false;
     }
@@ -512,7 +516,7 @@ export class BaseCommand<I extends BaseInteraction = BaseInteraction> {
     if (!interaction.inGuild() && this.guildOnly) {
       void InteractionUtils.replyDynamic(client, interaction, {
         content: client.I18N.t('lib:commands.notAvailableInDMs'),
-        ephemeral: true,
+        flags: [MessageFlags.Ephemeral],
       });
       return false;
     }
@@ -553,7 +557,7 @@ export class BaseCommand<I extends BaseInteraction = BaseInteraction> {
         : client.I18N.t('lib:commands.userMissingPermissions');
       void InteractionUtils.replyDynamic(client, interaction, {
         content: msg,
-        ephemeral: true,
+        flags: [MessageFlags.Ephemeral],
         embeds: [
           new EmbedBuilder()
             // Note: Internally, for errors, we should use red
@@ -589,7 +593,7 @@ export class BaseCommand<I extends BaseInteraction = BaseInteraction> {
             description: client.I18N.t('lib:commands.isNotComponentUser'),
           }),
         ],
-        ephemeral: true,
+        flags: [MessageFlags.Ephemeral],
       });
       return false;
     }
@@ -608,7 +612,7 @@ export class BaseCommand<I extends BaseInteraction = BaseInteraction> {
     if (permLevel < this.permLevel) {
       void InteractionUtils.replyDynamic(client, interaction, {
         content: client.I18N.t('lib:commands.permLevelTooLow'),
-        ephemeral: true,
+        flags: [MessageFlags.Ephemeral],
       });
       return false;
     }
@@ -626,7 +630,7 @@ export class BaseCommand<I extends BaseInteraction = BaseInteraction> {
     if (!channel) {
       void InteractionUtils.replyDynamic(client, interaction, {
         content: client.I18N.t('lib:commands.noChannelForNSFWCheck'),
-        ephemeral: true,
+        flags: [MessageFlags.Ephemeral],
       });
       return false;
     }
@@ -636,7 +640,7 @@ export class BaseCommand<I extends BaseInteraction = BaseInteraction> {
     if (channel.isDMBased()) {
       void InteractionUtils.replyDynamic(client, interaction, {
         content: client.I18N.t('lib:commands.noNSFWInDM'),
-        ephemeral: true,
+        flags: [MessageFlags.Ephemeral],
       });
       return false;
     }
@@ -645,7 +649,7 @@ export class BaseCommand<I extends BaseInteraction = BaseInteraction> {
     if (channel.isThread()) {
       void InteractionUtils.replyDynamic(client, interaction, {
         content: client.I18N.t('lib:commands.noNSFWInThread'),
-        ephemeral: true,
+        flags: [MessageFlags.Ephemeral],
       });
       return false;
     }
@@ -654,7 +658,7 @@ export class BaseCommand<I extends BaseInteraction = BaseInteraction> {
     if (!channel.nsfw) {
       void InteractionUtils.replyDynamic(client, interaction, {
         content: client.I18N.t('lib:commands.noNSFWInSFWChannel'),
-        ephemeral: true,
+        flags: [MessageFlags.Ephemeral],
       });
       return false;
     }
@@ -701,7 +705,7 @@ export class BaseCommand<I extends BaseInteraction = BaseInteraction> {
                 `${this.client?.clientEmojis.error ?? defaultEmojis} \`${e}\``,
             )
             .join(', ')}`,
-          ephemeral: true,
+          flags: [MessageFlags.Ephemeral],
         });
         return false;
       }
@@ -939,7 +943,7 @@ export class BaseCommand<I extends BaseInteraction = BaseInteraction> {
           type: CommandCooldownType[cooldown.type],
           expiresIn: relativeOutput,
         }),
-        ephemeral: true,
+        flags: [MessageFlags.Ephemeral],
       });
       return true;
     }

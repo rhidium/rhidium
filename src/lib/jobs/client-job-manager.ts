@@ -1,7 +1,7 @@
-import { Client } from 'lib/client';
+import { Client } from '../client';
 import { Job } from '.';
 import { Collection } from 'discord.js';
-import { ClusterUtils } from 'lib/utils';
+import { ClusterUtils } from '../utils';
 
 export class ClientJobManager {
   client: Client<true>;
@@ -14,13 +14,6 @@ export class ClientJobManager {
     this.tag = ClusterUtils.hasCluster(client)
       ? `[ClientJobManager Cluster-${client.cluster.id}]`
       : '[ClientJobManager]';
-    client.once('ready', async () => {
-      client.logger.info(
-        this.tag,
-        `Client is ready, initializing (${this.jobs.size}) jobs...`,
-      );
-      await this.startAll();
-    });
   }
 
   async startAll() {

@@ -148,7 +148,7 @@ In any scope with a valid interaction context:
 
 ```ts
 import { ComponentType } = from 'discord.js';
-import { UnitConstants } from '@rhidium/core';
+import { UnitConstants } from 'lib';
 
 // Fetching the message attached to the received interaction
 const interactionMessage = await interaction.fetchReply();

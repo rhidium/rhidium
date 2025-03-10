@@ -1,5 +1,5 @@
 import { BaseInteraction } from 'discord.js';
-import { UnitConstants } from 'lib/constants';
+import { UnitConstants } from '../../constants';
 
 /**
  * Available command cooldown types

@@ -1,6 +1,6 @@
 import winston from 'winston';
 import WinstonRotator from 'winston-daily-rotate-file';
-import { Client } from 'lib/client';
+import { Client } from '../client';
 
 const logFormat = winston.format.combine(
   winston.format.timestamp(),

@@ -1,5 +1,5 @@
-import { appConfig } from '@/config';
-import { guildSettingsFromCache } from '@/database';
+import { appConfig } from '@client/config';
+import { guildSettingsFromCache } from '@client/database';
 import {
   EmbedBuilder,
   Guild,
@@ -8,8 +8,7 @@ import {
   MessagePayload,
   PermissionFlagsBits,
 } from 'discord.js';
-import { Client } from '@rhidium/core';
-import { Lang } from 'lib/i18n';
+import { Lang, Client } from '@lib';
 
 /**
  * Perform logging of a mod action to a specific server,

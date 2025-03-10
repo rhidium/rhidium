@@ -20,20 +20,20 @@ import {
 } from './components';
 import { Prisma } from '@prisma/client';
 import { EmbedConfigurationConstants } from './enums';
-import { LoggingServices } from '@/services';
+import { LoggingServices } from '@client/services';
 import {
   buildDiscordPlaceholders,
   replacePlaceholders,
   replacePlaceholdersAcrossEmbed,
-} from '@/placeholders';
+} from '@client/placeholders';
 import {
+  Lang,
   EmbedConstants,
   InteractionUtils,
   StringUtils,
   UnitConstants,
-} from '@rhidium/core';
-import { guildTTLCache, prisma } from '@/database';
-import { Lang } from 'lib/i18n';
+} from '@lib';
+import { guildTTLCache, prisma } from '@client/database';
 
 const jsonCodeBlockOffset = 12;
 
@@ -90,7 +90,7 @@ export const configureEmbedController: EmbedController = async (
     content: `${Lang.t('commands:embeds.previewPrompt')}${messageSuffix}`,
     embeds: [embed],
     components: [configureEmbedControlRow],
-    fetchReply: true,
+    withResponse: true,
   });
 
   if (!msg) {

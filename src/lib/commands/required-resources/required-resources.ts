@@ -1,6 +1,6 @@
-import { BaseInteraction, Snowflake } from 'discord.js';
-import { Client } from 'lib/client';
-import { InteractionUtils } from 'lib/utils';
+import { BaseInteraction, MessageFlags, Snowflake } from 'discord.js';
+import { Client } from '../../client';
+import { InteractionUtils } from '../../utils';
 
 export interface IRequiredResources {
   guilds: Snowflake[];
@@ -38,7 +38,7 @@ export class RequiredResources<I extends BaseInteraction>
       if (handleInteraction) {
         await InteractionUtils.replyDynamic(client, interaction, {
           content: client.I18N.t('lib:commands.notAvailableInCurrentServer'),
-          ephemeral: true,
+          flags: [MessageFlags.Ephemeral],
         });
       }
       return false;
@@ -58,7 +58,7 @@ export class RequiredResources<I extends BaseInteraction>
       if (handleInteraction) {
         await InteractionUtils.replyDynamic(client, interaction, {
           content: client.I18N.t('lib:commands.notAvailableInCurrentChannel'),
-          ephemeral: true,
+          flags: [MessageFlags.Ephemeral],
         });
       }
       return false;
@@ -79,7 +79,7 @@ export class RequiredResources<I extends BaseInteraction>
       if (handleInteraction) {
         await InteractionUtils.replyDynamic(client, interaction, {
           content: client.I18N.t('lib:commands.notAvailableInDMs'),
-          ephemeral: true,
+          flags: [MessageFlags.Ephemeral],
         });
       }
       return false;
@@ -90,7 +90,7 @@ export class RequiredResources<I extends BaseInteraction>
       if (handleInteraction) {
         await InteractionUtils.replyDynamic(client, interaction, {
           content: client.I18N.t('lib:commands.requiredRolesMissingServer'),
-          ephemeral: true,
+          flags: [MessageFlags.Ephemeral],
         });
       }
       return false;
@@ -103,7 +103,7 @@ export class RequiredResources<I extends BaseInteraction>
       if (handleInteraction) {
         await InteractionUtils.replyDynamic(client, interaction, {
           content: client.I18N.t('lib:commands.requiredRolesMissing'),
-          ephemeral: true,
+          flags: [MessageFlags.Ephemeral],
         });
       }
       return false;
@@ -123,7 +123,7 @@ export class RequiredResources<I extends BaseInteraction>
       if (handleInteraction) {
         await InteractionUtils.replyDynamic(client, interaction, {
           content: client.I18N.t('lib:commands.requiredUsersMissing'),
-          ephemeral: true,
+          flags: [MessageFlags.Ephemeral],
         });
       }
       return false;
@@ -145,7 +145,7 @@ export class RequiredResources<I extends BaseInteraction>
       if (handleInteraction) {
         await InteractionUtils.replyDynamic(client, interaction, {
           content: client.I18N.t('lib:commands.requiredCategoryMissing'),
-          ephemeral: true,
+          flags: [MessageFlags.Ephemeral],
         });
       }
       return false;

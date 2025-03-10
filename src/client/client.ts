@@ -15,11 +15,12 @@ import {
   CommandCooldownType,
   ClientOptions as RhidiumClientOptions,
   RequiredClientOptions,
-} from '@rhidium/core';
+  Lang,
+  locales,
+} from '@lib';
 
 import { permConfig } from './permissions';
 import { appConfig } from './config';
-import { Lang, locales } from 'lib/i18n';
 import pkg from '../../package.json';
 import { processUsageStatisticsMiddleware } from './middleware/process-usage-statistics';
 import { persistentCooldownMiddleware } from './middleware/persistent-cooldown';

@@ -1,11 +1,11 @@
 import { OAuth2Scopes, SlashCommandBuilder } from 'discord.js';
 import {
+  Lang,
   ChatInputCommand,
   CommandCooldownType,
   PermissionUtils,
   UnitConstants,
-} from '@rhidium/core';
-import { Lang } from 'lib/i18n';
+} from '@lib';
 
 const InviteCommand = new ChatInputCommand({
   data: new SlashCommandBuilder(),

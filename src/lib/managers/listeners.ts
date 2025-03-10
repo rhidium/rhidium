@@ -1,4 +1,4 @@
-import { Client } from 'lib/client';
+import { Client } from '../client';
 import { ClientEvents } from 'discord.js';
 
 export interface ClientEventListenerOptions<K extends keyof ClientEvents> {

@@ -1,5 +1,5 @@
-import { cooldownTTLCache, prisma } from '@/database';
-import { Job } from '@rhidium/core';
+import { cooldownTTLCache, prisma } from '@client/database';
+import { Job } from '@lib';
 
 const CleanCooldownData = new Job({
   id: 'clean-cooldown-data',

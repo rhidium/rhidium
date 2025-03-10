@@ -1,14 +1,13 @@
-import { embedFromEmbedModel } from '@/chat-input/Administrator/embeds/helpers';
-import { guildSettingsFromCache } from '@/database';
+import { embedFromEmbedModel } from '@client/chat-input/Administrator/embeds/helpers';
+import { guildSettingsFromCache } from '@client/database';
 import {
   buildDiscordPlaceholders,
   replacePlaceholders,
   replacePlaceholdersAcrossEmbed,
-} from '@/placeholders';
-import { LoggingServices } from '@/services';
+} from '@client/placeholders';
+import { LoggingServices } from '@client/services';
 import { EmbedBuilder, Events, PermissionFlagsBits } from 'discord.js';
-import { ClientEventListener, PermissionUtils, TimeUtils } from '@rhidium/core';
-import { Lang } from 'lib/i18n';
+import { Lang, ClientEventListener, PermissionUtils, TimeUtils } from '@lib';
 
 const requiredPermissions = [
   PermissionFlagsBits.SendMessages,

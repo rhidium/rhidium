@@ -4,8 +4,7 @@ import {
   InteractionReplyOptions,
   escapeCodeBlock,
 } from 'discord.js';
-import { EmbedConstants, MessageContextCommand } from '@rhidium/core';
-import { Lang } from 'lib/i18n';
+import { Lang, EmbedConstants, MessageContextCommand } from '@lib';
 
 const PrintEmbedCommand = new MessageContextCommand({
   run: async (client, interaction) => {

@@ -5,7 +5,7 @@ import {
   AsyncTTLCacheManager,
   ComponentCommandType,
   UnitConstants,
-} from '@rhidium/core';
+} from '@lib';
 
 export type CommandStatisticsPayload = Prisma.CommandStatisticsGetPayload<
   Record<string, never>

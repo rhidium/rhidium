@@ -1,9 +1,9 @@
-import { Lang } from 'lib/i18n';
 import {
+  Lang,
   APICommandType,
   AutoCompleteOption,
   PermissionUtils,
-} from '@rhidium/core';
+} from '@lib';
 
 export enum CommandAutoCompleteQueryType {
   CATEGORY = 'category',

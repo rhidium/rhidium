@@ -1,4 +1,4 @@
-import { Client } from 'lib/client';
+import { Client } from '../client';
 import { BaseInteraction, ChatInputCommandInteraction } from 'discord.js';
 import {
   CreateMiddleware,

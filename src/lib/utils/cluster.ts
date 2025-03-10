@@ -1,4 +1,4 @@
-import { Client, ClientWithCluster } from 'lib/client';
+import { Client, ClientWithCluster } from '../client';
 import {
   APIChannel,
   APIGuild,

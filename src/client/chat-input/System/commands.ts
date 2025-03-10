@@ -1,9 +1,8 @@
 import { SlashCommandBuilder } from 'discord.js';
-import { ChatInputCommand, CommandType, PermissionUtils } from '@rhidium/core';
+import { Lang, ChatInputCommand, CommandType, PermissionUtils } from '@lib';
 import CommandOption, {
   CommandAutoCompleteQueryType,
 } from '../../auto-completes/command';
-import { Lang } from 'lib/i18n';
 
 const CommandsHelpCommand = new ChatInputCommand({
   isEphemeral: true,

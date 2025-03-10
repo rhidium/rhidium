@@ -1,7 +1,7 @@
 import { Colors, resolveColor } from 'discord.js';
 import { AppConfig, NodeEnvValues, UserConfigOptions } from './types';
 import { validateConfig } from './validate';
-import { resolveColorConfig } from 'lib/client';
+import { resolveColorConfig } from '@lib';
 import { userConfig as _userConfig } from './user-config';
 
 /**

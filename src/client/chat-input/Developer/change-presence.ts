@@ -3,7 +3,7 @@ import {
   CommandCooldownType,
   PermLevel,
   UnitConstants,
-} from '@rhidium/core';
+} from '@lib';
 import {
   ActivitiesOptions,
   ActivityType,

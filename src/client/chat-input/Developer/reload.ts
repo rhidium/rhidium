@@ -1,10 +1,10 @@
-import { SlashCommandBuilder } from 'discord.js';
+import { MessageFlags, SlashCommandBuilder } from 'discord.js';
 import {
   ChatInputCommand,
   PermLevel,
   isAutoCompleteResponseType,
   isCommand,
-} from '@rhidium/core';
+} from '@lib';
 import CommandOption from '../../auto-completes/command';
 
 /**
@@ -22,7 +22,9 @@ const ReloadCommand = new ChatInputCommand({
     .setDescription('Reloads a command')
     .addStringOption(CommandOption.addOptionHandler),
   run: async (client, interaction) => {
-    await interaction.deferReply({ ephemeral: ReloadCommand.isEphemeral });
+    await interaction.deferReply({
+      flags: ReloadCommand.isEphemeral ? [MessageFlags.Ephemeral] : [],
+    });
 
     const command = await CommandOption.getValue(interaction, true);
     if (isAutoCompleteResponseType(command)) return;

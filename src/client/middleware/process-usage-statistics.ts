@@ -4,8 +4,8 @@ import {
   CommandMiddlewareFunctionWithResult,
   MessageContextCommand,
   UserContextCommand,
-} from '@rhidium/core';
-import { ClientExtensions } from '@/extensions';
+} from '@lib';
+import { ClientExtensions } from '@client/extensions';
 
 export const processUsageStatisticsMiddleware: CommandMiddlewareFunctionWithResult =
   async ({ client, interaction, startRunTs, invokedAt, next, error }) => {

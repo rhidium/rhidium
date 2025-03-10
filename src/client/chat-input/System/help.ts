@@ -4,9 +4,8 @@ import {
   ButtonStyle,
   SlashCommandBuilder,
 } from 'discord.js';
-import { ChatInputCommand, Client, StringUtils } from '@rhidium/core';
-import { appConfig } from '@/config';
-import { Lang } from 'lib/i18n';
+import { Lang, ChatInputCommand, Client, StringUtils } from '@lib';
+import { appConfig } from '@client/config';
 
 /** Note: Not localized for obvious reasons */
 export const helpDescription = async (client: Client) => {

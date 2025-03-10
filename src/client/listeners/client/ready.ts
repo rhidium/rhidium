@@ -1,6 +1,5 @@
-import { Lang } from 'lib/i18n';
 import { Events } from 'discord.js';
-import { ClientEventListener } from '@rhidium/core';
+import { Lang, ClientEventListener } from '@lib';
 
 export default new ClientEventListener({
   once: true,

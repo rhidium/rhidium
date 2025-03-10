@@ -1,9 +1,9 @@
-import colors from 'colors/safe';
+import colors from 'colors/safe.js';
 import { FileLogger, FileLoggerOptions } from '.';
 import winston from 'winston';
-import { TimeUtils } from 'lib/utils';
-import { UnitConstants } from 'lib/constants';
-import { Client } from 'lib/client';
+import { TimeUtils } from '../utils';
+import { UnitConstants } from '../constants';
+import { Client } from '../client';
 
 export enum LogLevel {
   ERROR = 0,

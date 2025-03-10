@@ -5,9 +5,8 @@ import {
   Colors,
   EmbedBuilder,
 } from 'discord.js';
-import { ButtonCommand, Embeds, PermLevel } from '@rhidium/core';
+import { Lang, ButtonCommand, Embeds, PermLevel } from '@lib';
 import EvalConstants from '../enums/eval';
-import { Lang } from 'lib/i18n';
 
 const EvalDeclineCommand = new ButtonCommand({
   customId: EvalConstants.CANCEL_CODE_EVALUATION,

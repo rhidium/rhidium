@@ -1,6 +1,6 @@
 import { BaseInteraction } from 'discord.js';
 import { RunFunction } from '../base-command';
-import { Client } from 'lib/client';
+import { Client } from '../../client';
 import { AvailableGuildInteraction, DMInteraction } from './interactions';
 
 export type Controller<Params extends unknown[] = [], ReturnType = void> = (

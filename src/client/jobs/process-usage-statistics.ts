@@ -1,6 +1,6 @@
-import { prisma } from '@/database';
-import { dbCommandByName } from '@/database/CommandStatistics';
-import { ClientExtensions } from '@/extensions';
+import { prisma } from '@client/database';
+import { dbCommandByName } from '@client/database/CommandStatistics';
+import { ClientExtensions } from '@client/extensions';
 import { Prisma } from '@prisma/client';
 import {
   ClientWithCluster,
@@ -11,7 +11,7 @@ import {
   QueueCallbackFunction,
   QueueManager,
   UnitConstants,
-} from '@rhidium/core';
+} from '@lib';
 import { ApplicationCommandType } from 'discord.js';
 
 export type CommandUsageStatistics = {
@@ -28,6 +28,7 @@ export type CommandUsageStatistics = {
 export const processUsageStatistics: QueueCallbackFunction<
   CommandUsageStatistics[]
 > = async (item) => {
+  console.log('Processing usage statistics');
   const dataToSave: Prisma.CommandStatisticsGetPayload<
     Record<string, never>
   >[] = [];
@@ -110,11 +111,16 @@ export const processUsageStatistics: QueueCallbackFunction<
   );
 };
 
+const isProd = process.env.NODE_ENV === 'production';
 export const usageStatisticsQueue = new QueueManager<CommandUsageStatistics[]>({
   maxQueueSize: 1,
   stopOnEmpty: true,
-  nextDelay: UnitConstants.MS_IN_ONE_MINUTE * 30,
-  waitOnEmpty: UnitConstants.MS_IN_ONE_MINUTE * 5,
+  nextDelay: isProd
+    ? UnitConstants.MS_IN_ONE_MINUTE * 30
+    : UnitConstants.MS_IN_ONE_SECOND * 30,
+  waitOnEmpty: isProd
+    ? UnitConstants.MS_IN_ONE_MINUTE * 5
+    : UnitConstants.MS_IN_ONE_SECOND * 5,
   processFunction: processUsageStatistics,
 });
 

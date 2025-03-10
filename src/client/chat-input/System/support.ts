@@ -1,11 +1,11 @@
 import { SlashCommandBuilder } from 'discord.js';
 import {
+  Lang,
   ChatInputCommand,
   CommandCooldownType,
   UnitConstants,
-} from '@rhidium/core';
-import { appConfig } from '@/config';
-import { Lang } from 'lib/i18n';
+} from '@lib';
+import { appConfig } from '@client/config';
 
 const SupportCommand = new ChatInputCommand({
   data: new SlashCommandBuilder().setDescription('Receive support for the bot'),

@@ -1,4 +1,4 @@
-import { AsyncTTLCacheManager, UnitConstants } from '@rhidium/core';
+import { AsyncTTLCacheManager, UnitConstants } from '@lib';
 import { prisma } from '.';
 import { CommandCooldown, Prisma } from '@prisma/client';
 

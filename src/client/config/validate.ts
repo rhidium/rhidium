@@ -1,7 +1,7 @@
 import { stripIndents } from 'common-tags';
 import type { AppConfig } from '.';
-import { PortConstants } from '@/enums/ports';
-import { logger } from '@rhidium/core';
+import { PortConstants } from '@client/enums/ports';
+import { logger } from '@lib';
 
 /**
  * Validates the resolved `appConfig`, warning users when

@@ -1,12 +1,13 @@
-import { cooldownFromCache, prisma, updateCooldown } from '@/database';
-import { Lang } from 'lib/i18n';
+import { cooldownFromCache, prisma, updateCooldown } from '@client/database';
 import {
+  Lang,
   CommandCooldownType,
   CommandMiddlewareFunction,
   InteractionUtils,
   TimeUtils,
   cooldownResourceId,
-} from '@rhidium/core';
+} from '@lib';
+import { MessageFlags } from 'discord.js';
 
 export const persistentCooldownMiddleware: CommandMiddlewareFunction = async ({
   client,
@@ -59,7 +60,7 @@ export const persistentCooldownMiddleware: CommandMiddlewareFunction = async ({
         type: CommandCooldownType[cooldown.type],
         expiresIn: relativeOutput,
       }),
-      ephemeral: true,
+      flags: [MessageFlags.Ephemeral],
     });
     // Don't go next =)
     // Doesn't continue to next middleware, command is not executed

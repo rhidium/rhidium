@@ -4,11 +4,12 @@ import {
   AutocompleteInteraction,
   ChatInputCommandInteraction,
   DiscordAPIError,
+  MessageFlags,
   SlashCommandStringOption,
 } from 'discord.js';
-import { Client } from 'lib/client';
-import { DiscordConstants } from 'lib/constants';
-import { InteractionUtils } from 'lib/utils';
+import { Client } from '../../client';
+import { DiscordConstants } from '../../constants';
+import { InteractionUtils } from '../../utils';
 
 export enum AutoCompleteResponseType {
   MISSING_REQUIRED = 'missing_required',
@@ -217,7 +218,7 @@ export class AutoCompleteOption<T = undefined> {
               ),
             }),
           ],
-          ephemeral: true,
+          flags: [MessageFlags.Ephemeral],
         });
       else
         await interaction.respond([

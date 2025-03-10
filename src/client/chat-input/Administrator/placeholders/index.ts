@@ -3,17 +3,16 @@ import { PlaceholderConstants } from './enums';
 import {
   discordPlaceholders,
   groupedDiscordPlaceholders,
-} from '@/placeholders';
+} from '@client/placeholders';
 import {
   listPlaceholderSubcommandGroup,
   placeholderInfoSubcommand,
 } from './options';
-import PlaceholderGroupOption from '@/auto-completes/placeholder-group';
-import PlaceholderOption from '@/auto-completes/placeholder';
+import PlaceholderGroupOption from '@client/auto-completes/placeholder-group';
+import PlaceholderOption from '@client/auto-completes/placeholder';
 import { stripIndents } from 'common-tags';
 import ConfigureEmbedsCommand from '../embeds';
-import { ChatInputCommand, InteractionUtils, PermLevel } from '@rhidium/core';
-import { Lang } from 'lib/i18n';
+import { Lang, ChatInputCommand, InteractionUtils, PermLevel } from '@lib';
 
 const PlaceholdersCommand = new ChatInputCommand({
   permLevel: PermLevel.Administrator,

@@ -1,6 +1,6 @@
 import { SlashCommandSubcommandBuilder } from 'discord.js';
 import { CommandUsageConstants } from './enums';
-import CommandStatisticOption from '@/auto-completes/command-statistic';
+import CommandStatisticOption from '@client/auto-completes/command-statistic';
 
 export const leaderboardSubcommand = new SlashCommandSubcommandBuilder()
   .setName(CommandUsageConstants.LEADERBOARD_SUBCOMMAND_NAME)

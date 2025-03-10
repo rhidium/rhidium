@@ -1,10 +1,10 @@
 import { SlashCommandBuilder, SlashCommandUserOption } from 'discord.js';
 import {
+  Lang,
   ChatInputCommand,
   PermissionUtils,
   resolvePermLevel,
-} from '@rhidium/core';
-import { Lang } from 'lib/i18n';
+} from '@lib';
 
 const PermLevelCommand = new ChatInputCommand({
   isEphemeral: true,

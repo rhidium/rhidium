@@ -1,10 +1,5 @@
 import type { PresenceStatusData, Snowflake } from 'discord.js';
-import type {
-  CommandCooldownType,
-  IColors,
-  IEmojis,
-  UserColors,
-} from '@rhidium/core';
+import type { CommandCooldownType, IColors, IEmojis, UserColors } from '@lib';
 
 /**
  * Represents essential options to configure clustering & sharding

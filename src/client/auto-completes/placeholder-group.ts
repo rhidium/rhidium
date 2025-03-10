@@ -1,5 +1,5 @@
-import { groupedDiscordPlaceholders } from '@/placeholders';
-import { CommandType, AutoCompleteOption } from '@rhidium/core';
+import { groupedDiscordPlaceholders } from '@client/placeholders';
+import { CommandType, AutoCompleteOption } from '@lib';
 
 const PlaceholderGroupOption = new AutoCompleteOption<CommandType>({
   name: 'placeholder-group',

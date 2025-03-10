@@ -1,4 +1,4 @@
-import { Client, ClusterUtils } from '@rhidium/core';
+import { Client, ClusterUtils } from '@lib';
 import { ActivityType } from 'discord.js';
 
 const updateServerCount = async (client: Client<true>): Promise<number> => {

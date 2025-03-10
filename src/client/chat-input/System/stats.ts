@@ -1,5 +1,4 @@
-import { Lang } from 'lib/i18n';
-import { ChatInputCommand, TimeUtils, UnitConstants } from '@rhidium/core';
+import { Lang, ChatInputCommand, TimeUtils, UnitConstants } from '@lib';
 import { stripIndents } from 'common-tags';
 import { getInfo } from 'discord-hybrid-sharding';
 import { SlashCommandBuilder, version } from 'discord.js';
@@ -19,10 +18,10 @@ const StatsCommand = new ChatInputCommand({
     // Latency
     const reply = await interaction.reply({
       content: Lang.t('commands:stats.pinging'),
-      fetchReply: true,
+      withResponse: true,
     });
     const fullCircleLatency =
-      reply.createdTimestamp - interaction.createdTimestamp;
+      reply.interaction.createdTimestamp - interaction.createdTimestamp;
     const latencyEmoji = (ms: number) => {
       let emoji;
       if (ms < 150) emoji = '🟢';

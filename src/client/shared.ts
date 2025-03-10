@@ -1,5 +1,7 @@
-import { logger } from '@rhidium/core';
-import { init as initLang } from 'lib/i18n';
+import 'dotenv/config';
+import './module-aliases';
+
+import { logger, init as initLang } from '@lib';
 import { appConfig } from './config';
 
 /**

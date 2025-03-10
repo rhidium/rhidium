@@ -1,4 +1,4 @@
-import { TTLCacheManager } from 'lib/data-structures';
+import { TTLCacheManager } from '../../data-structures';
 
 export type CommandThrottleData = {
   id: string;

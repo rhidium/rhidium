@@ -5,7 +5,7 @@ import {
   TextInputBuilder,
   TextInputStyle,
 } from 'discord.js';
-import { ChatInputCommand, PermLevel } from '@rhidium/core';
+import { ChatInputCommand, PermLevel } from '@lib';
 import EvalConstants from '../../enums/eval';
 
 const EvalCommand = new ChatInputCommand({

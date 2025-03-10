@@ -1,8 +1,8 @@
 import {
   discordPlaceholderStrings,
   lowercaseDiscordPlaceholderStrings,
-} from '@/placeholders';
-import { CommandType, AutoCompleteOption } from '@rhidium/core';
+} from '@client/placeholders';
+import { CommandType, AutoCompleteOption } from '@lib';
 
 const PlaceholderOption = new AutoCompleteOption<CommandType>({
   name: 'placeholder',

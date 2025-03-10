@@ -1,7 +1,7 @@
 import { EmbedBuilder, type EmbedData } from 'discord.js';
 import { IEmojis, UserColors } from './config';
-import { StringUtils, TimeUtils } from 'lib/utils';
-import { EmbedConstants } from 'lib/constants';
+import { StringUtils, TimeUtils } from '../utils';
+import { EmbedConstants } from '../constants';
 
 export type EmbedStatus =
   | 'success'

@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from 'discord.js';
-import { ChatInputCommand, PermLevel } from '@rhidium/core';
+import { ChatInputCommand, PermLevel } from '@lib';
 
 const DeployCommand = new ChatInputCommand({
   permLevel: PermLevel['Bot Administrator'],

@@ -1,5 +1,5 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
-import { ModalCommand, PermLevel } from '@rhidium/core';
+import { ModalCommand, PermLevel } from '@lib';
 import EvalConstants from '../enums/eval';
 
 const CodeModalCommand = new ModalCommand({

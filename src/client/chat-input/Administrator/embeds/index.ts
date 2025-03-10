@@ -10,9 +10,8 @@ import {
   manageEmbedFieldsController,
 } from './controllers';
 import { EmbedConfigurationConstants } from './enums';
-import { ChatInputCommand, InteractionUtils, PermLevel } from '@rhidium/core';
-import { guildSettingsFromCache } from '@/database';
-import { Lang } from 'lib/i18n';
+import { Lang, ChatInputCommand, InteractionUtils, PermLevel } from '@lib';
+import { guildSettingsFromCache } from '@client/database';
 
 const ConfigureEmbedsCommand = new ChatInputCommand({
   permLevel: PermLevel.Administrator,

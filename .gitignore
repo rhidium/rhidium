@@ -1,5 +1,10 @@
-dist/
-docs/
-node_modules/
 config/config.json
 config/config.json.bak
+data/
+dist/
+docs/
+logs/
+node_modules/
+
+*.env*
+!.env.example

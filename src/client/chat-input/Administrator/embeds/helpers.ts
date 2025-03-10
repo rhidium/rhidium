@@ -1,8 +1,8 @@
 import { ConfigureEmbedData, EmbedWithFields } from './types';
 import { EmbedBuilder } from 'discord.js';
 import { AvailableEmbedConfiguration } from './enums';
-import { EmbedConstants, StringUtils } from '@rhidium/core';
-import { appConfig } from '@/config';
+import { EmbedConstants, StringUtils } from '@lib';
+import { appConfig } from '@client/config';
 
 export const fieldIdentificationLength = 6;
 export const maxFieldNameLength =

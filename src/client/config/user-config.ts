@@ -1,14 +1,10 @@
-import { logger } from '@rhidium/core';
+import { logger } from '@lib';
 import { existsSync, readFileSync } from 'fs';
 import type { UserConfigOptions } from './types';
 
 const configFileExists = existsSync('./config/config.json');
 
-if (
-  !configFileExists &&
-  process.env.CI !== 'true' &&
-  process.env.DRY_RUN !== 'true'
-) {
+if (!configFileExists && process.env.DRY_RUN !== 'true') {
   logger._warn(
     [
       './config/config.json does not exist, did you forget to create it?',

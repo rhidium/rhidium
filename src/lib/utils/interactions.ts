@@ -21,6 +21,7 @@ import {
   InteractionReplyOptions,
   JSONEncodable,
   MentionableSelectMenuBuilder,
+  MessageFlags,
   RepliableInteraction,
   RoleSelectMenuBuilder,
   SlashCommandBooleanOption,
@@ -32,9 +33,9 @@ import {
   DiscordConstants,
   InteractionConstants,
   UnitConstants,
-} from 'lib/constants';
-import { Client } from 'lib/client';
-import { AvailableGuildInteraction } from 'lib/commands/controllers'; // [DEV] Looks like scope should be moved
+} from '../constants';
+import { Client } from '../client';
+import { AvailableGuildInteraction } from '../commands/controllers'; // [DEV] Looks like scope should be moved
 
 export interface InteractionReplyDynamicOptions {
   preferFollowUp?: boolean;
@@ -127,7 +128,7 @@ const replyFn = <I extends BaseInteraction>(
  * log critical errors if they are encountered while replying
  * to interactions - it's worth all the client not null checks
  *
- * @returns Reply method return value - use `fetchReply` if appropriate
+ * @returns Reply method return value - use `withResponse` if appropriate
  */
 const replyDynamic = async <I extends BaseInteraction>(
   client: Client,
@@ -155,18 +156,19 @@ const replyDynamic = async <I extends BaseInteraction>(
       client,
       interaction,
       options,
-      // @ts-expect-error - Bind resolves to any of overload signatures
+      // @ts-expect-error - Bind returns the type of any overload
     )(content);
   } catch (err) {
     logReplyErr(err, content);
     const errCtx = {
       content: client.I18N.t('lib:commands.errorWhileReplyingToInteraction'),
-      ephemeral: true,
+      flags: [MessageFlags.Ephemeral] as const,
     };
     await InteractionUtils.replyFn(
       client,
       interaction,
       options,
+      // @ts-expect-error - Bind returns the type of any overload
     )(errCtx).catch((err: unknown) => {
       logReplyErr(err, errCtx);
     });
@@ -237,7 +239,7 @@ const requireGuild = <I extends BaseInteraction>(
   if (!interaction.inGuild()) {
     void InteractionUtils.replyDynamic(client, interaction, {
       content: client.I18N.t('lib:commands.notAvailableInDMs'),
-      ephemeral: true,
+      flags: [MessageFlags.Ephemeral],
     });
     return false;
   }
@@ -245,7 +247,7 @@ const requireGuild = <I extends BaseInteraction>(
   if (!interaction.inCachedGuild()) {
     void InteractionUtils.replyDynamic(client, interaction, {
       content: client.I18N.t('lib:commands.missingCachedServer'),
-      ephemeral: true,
+      flags: [MessageFlags.Ephemeral],
     });
     return false;
   }
@@ -261,7 +263,7 @@ const requireAvailableGuild = <I extends BaseInteraction>(
   if (!interaction.guild.available) {
     void InteractionUtils.replyDynamic(client, interaction, {
       content: client.I18N.t('lib:commands.serverUnavailable'),
-      ephemeral: true,
+      flags: [MessageFlags.Ephemeral],
     });
     return false;
   }
@@ -281,7 +283,9 @@ const paginator = async (
   pages: BaseMessageOptions[],
   interaction: RepliableInteraction,
   duration = UnitConstants.MS_IN_ONE_HOUR,
-  options?: InteractionReplyDynamicOptions,
+  options?: InteractionReplyDynamicOptions & {
+    ephemeral?: boolean;
+  },
 ) => {
   const goToFirstId = `@pagination:${id}:first`;
   const goToPreviousId = `@pagination:${id}:previous`;
@@ -330,21 +334,22 @@ const paginator = async (
     });
   };
 
-  const initialReply = await InteractionUtils.replyDynamic(
-    client,
-    interaction,
-    {
-      ...pages[0],
-      components: [controlRow()],
-      fetchReply: true,
-      ...options,
-    },
-  );
+  if (!interaction.replied) {
+    await interaction.deferReply({
+      flags: options?.ephemeral ? [MessageFlags.Ephemeral] : undefined,
+    });
+  }
+
+  const initialReply = await interaction.editReply({
+    ...pages[0],
+    components: [controlRow()],
+    ...options,
+  });
 
   if (!initialReply) {
     void InteractionUtils.replyDynamic(client, interaction, {
       content: client.I18N.t('lib:commands.missingInitialReply'),
-      ephemeral: true,
+      flags: [MessageFlags.Ephemeral],
       ...options,
     });
     return;
@@ -360,7 +365,7 @@ const paginator = async (
     if (button.user.id !== interaction.user.id) {
       void InteractionUtils.replyDynamic(client, interaction, {
         content: client.I18N.t('lib:commands.isNotUserPaginator'),
-        ephemeral: true,
+        flags: [MessageFlags.Ephemeral],
         ...options,
       });
       return;
@@ -436,7 +441,7 @@ const slashConfirmationOptionHandler = (
   if (!value) {
     void InteractionUtils.replyDynamic(client, interaction, {
       content: client.I18N.t('lib:commands.confirmationRequired'),
-      ephemeral: true,
+      flags: [MessageFlags.Ephemeral],
     });
     return false;
   }
@@ -490,13 +495,13 @@ const promptConfirmation = async ({
     ...content,
     ...options,
     components,
-    fetchReply: true,
+    withResponse: true,
   });
 
   if (!message) {
     void InteractionUtils.replyDynamic(client, interaction, {
       content: client.I18N.t('lib:commands.missingInitialReply'),
-      ephemeral: true,
+      flags: [MessageFlags.Ephemeral],
     });
     return false;
   }
@@ -512,7 +517,7 @@ const promptConfirmation = async ({
         if (button.user.id !== interaction.user.id) {
           void InteractionUtils.replyDynamic(client, interaction, {
             content: client.I18N.t('lib:commands.isNotComponentUser'),
-            ephemeral: true,
+            flags: [MessageFlags.Ephemeral],
           });
           return;
         }

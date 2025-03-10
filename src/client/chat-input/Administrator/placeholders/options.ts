@@ -3,8 +3,8 @@ import {
   SlashCommandSubcommandGroupBuilder,
 } from 'discord.js';
 import { PlaceholderConstants } from './enums';
-import PlaceholderOption from '@/auto-completes/placeholder';
-import PlaceholderGroupOption from '@/auto-completes/placeholder-group';
+import PlaceholderOption from '@client/auto-completes/placeholder';
+import PlaceholderGroupOption from '@client/auto-completes/placeholder-group';
 
 export const listPlaceholderSubcommandGroup =
   new SlashCommandSubcommandGroupBuilder()

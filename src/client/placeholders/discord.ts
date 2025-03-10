@@ -1,4 +1,4 @@
-import { ArrayUtils, InteractionUtils, TimeUtils } from '@rhidium/core';
+import { ArrayUtils, InteractionUtils, TimeUtils } from '@lib';
 import {
   APIInteractionGuildMember,
   ChannelType,

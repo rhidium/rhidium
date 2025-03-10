@@ -6,7 +6,7 @@ import {
   PermLevel,
   TimeUtils,
   UnitConstants,
-} from '@rhidium/core';
+} from '@lib';
 
 const ExecCommand = new ChatInputCommand({
   permLevel: PermLevel['Bot Administrator'],

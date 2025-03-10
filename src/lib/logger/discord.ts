@@ -1,6 +1,6 @@
-import { Client } from 'lib/client';
-import { CommandType } from 'lib/commands';
-import { TimeUtils } from 'lib/utils';
+import { Client } from '../client';
+import { CommandType } from '../commands';
+import { TimeUtils } from '../utils';
 import { BaseInteraction, PermissionFlagsBits } from 'discord.js';
 
 const tryWithErrorLogging = async <T>(

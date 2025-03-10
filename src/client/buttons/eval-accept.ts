@@ -7,14 +7,14 @@ import {
   EmbedBuilder,
 } from 'discord.js';
 import {
+  Lang,
   ButtonCommand,
   EmbedConstants,
   Embeds,
   PermLevel,
   TimeUtils,
-} from '@rhidium/core';
+} from '@lib';
 import EvalConstants from '../enums/eval';
-import { Lang } from 'lib/i18n';
 
 const EvalAcceptCommand = new ButtonCommand({
   customId: EvalConstants.ACCEPT_CODE_EVALUATION,
@@ -57,7 +57,8 @@ const EvalAcceptCommand = new ButtonCommand({
     let evaluated: unknown;
     const startEval = process.hrtime.bigint();
     try {
-      evaluated = eval(codeInput);
+      // Note: Use indirect eval (https://esbuild.github.io/content-types/#direct-eval)
+      evaluated = (0, eval)(codeInput);
       if (evaluated instanceof Promise) evaluated = await evaluated;
     } catch (err) {
       await EvalAcceptCommand.reply(

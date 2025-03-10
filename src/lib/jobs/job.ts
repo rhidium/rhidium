@@ -1,6 +1,6 @@
 import { sendAt, CronJob } from 'cron';
-import { Client } from 'lib/client';
-import { RuntimeUtils } from 'lib/utils';
+import { Client } from '../client';
+import { RuntimeUtils } from '../utils';
 
 export type JobRunFunction = (
   client: Client<true>,
