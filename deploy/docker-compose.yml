@@ -6,7 +6,7 @@ networks:
 
 services:
   client:
-    container_name: rhidium-template
+    container_name: rhidium
     restart: unless-stopped
     build:
       context: .

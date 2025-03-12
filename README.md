@@ -198,9 +198,9 @@ pm2 delete
 
 ```bash
 # Build
-docker build --tag rhidium-template .
+docker build --tag rhidium .
 # Start
-docker run -it -p 9000:9000 --env-file .env -d --name my-discord-bot rhidium-template
+docker run -it -p 9000:9000 --env-file .env -d --name my-discord-bot rhidium
 # Logs
 docker logs my-discord-bot -f
 # Stop

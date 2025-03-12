@@ -5,6 +5,7 @@
   },
   "ignorePatterns": [
     "dist/",
+    "docs/",
     "node_modules/",
     "scripts/"
   ],

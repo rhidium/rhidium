@@ -1,5 +1,6 @@
 .github
 .vscode
+deploy
 dist
 docs
 node_modules
@@ -11,9 +12,6 @@ node_modules
 .gitignore
 .prettierrc.js
 commitlint.config.js
-docker-compose.yml
-Dockerfile
-ecosystem.config.js
 LICENSE
 
 **/*.md
