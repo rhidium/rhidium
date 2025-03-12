@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from 'discord.js';
-import { Lang, ChatInputCommand, CommandType, PermissionUtils } from '@lib';
+import { Lang, ChatInputCommand, CommandType, PermissionUtils } from '@core';
 import CommandOption, {
   CommandAutoCompleteQueryType,
 } from '../../auto-completes/command';
@@ -49,8 +49,8 @@ const CommandsHelpCommand = new ChatInputCommand({
       return;
     }
 
-    // Only use commands usable by the member
-    const memberPermLevel = await PermissionUtils.resolveMemberPermLevel(
+    // Only include commands usable by the member
+    const memberPermLevel = await PermissionUtils.resolveMemberPermissionLevel(
       client,
       member,
       guild,

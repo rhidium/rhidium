@@ -7,7 +7,7 @@ import {
 } from '@client/placeholders';
 import { LoggingServices } from '@client/services';
 import { EmbedBuilder, Events, PermissionFlagsBits } from 'discord.js';
-import { Lang, ClientEventListener, PermissionUtils, TimeUtils } from '@lib';
+import { Lang, ClientEventListener, PermissionUtils, TimeUtils } from '@core';
 
 const requiredPermissions = [
   PermissionFlagsBits.SendMessages,
@@ -43,7 +43,7 @@ export default new ClientEventListener({
         client.embeds.error({
           title: Lang.t('commands:member-leave.errorLabel'),
           description: Lang.t('general:errors.missingPerms', {
-            permissions: PermissionUtils.bigIntPermOutput(
+            permissions: PermissionUtils.displayPermissions(
               requiredPermissions.filter(
                 (permission) =>
                   !channel.permissionsFor(client.user.id)?.has(permission),

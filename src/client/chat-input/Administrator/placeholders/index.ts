@@ -12,7 +12,7 @@ import PlaceholderGroupOption from '@client/auto-completes/placeholder-group';
 import PlaceholderOption from '@client/auto-completes/placeholder';
 import { stripIndents } from 'common-tags';
 import ConfigureEmbedsCommand from '../embeds';
-import { Lang, ChatInputCommand, InteractionUtils, PermLevel } from '@lib';
+import { Lang, ChatInputCommand, InteractionUtils, PermLevel } from '@core';
 
 const PlaceholdersCommand = new ChatInputCommand({
   permLevel: PermLevel.Administrator,

@@ -1,7 +1,7 @@
 import { GuildWithEmbeds } from '@client/database';
 import { Prisma } from '@prisma/client';
 import { ChatInputCommandInteraction } from 'discord.js';
-import { GuildCommandController } from '@lib';
+import { GuildCommandController } from '@core';
 
 /**
  * Nothing is required in this data structure, all fields are optional

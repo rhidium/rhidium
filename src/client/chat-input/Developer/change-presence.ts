@@ -3,7 +3,7 @@ import {
   CommandCooldownType,
   PermLevel,
   UnitConstants,
-} from '@lib';
+} from '@core';
 import {
   ActivitiesOptions,
   ActivityType,

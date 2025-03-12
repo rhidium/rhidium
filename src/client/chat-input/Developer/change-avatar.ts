@@ -4,7 +4,7 @@ import {
   CommandCooldownType,
   PermLevel,
   UnitConstants,
-} from '@lib';
+} from '@core';
 
 const ChangeAvatarCommand = new ChatInputCommand({
   permLevel: PermLevel['Bot Administrator'],

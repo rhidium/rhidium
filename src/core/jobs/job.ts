@@ -203,7 +203,7 @@ export class Job implements CommonJobOptions {
       const firstRun = new Date(now.getTime() + this.timeout);
       client.logger.debug(`${this.tag} First run at ${firstRun.toISOString()}`);
     }
-    if (this.timeout) await RuntimeUtils.wait(this.timeout);
+    if (this.timeout) await RuntimeUtils.sleep(this.timeout);
     if (this.onStart) await this.onStart();
     if (this.isScheduled()) await this.startScheduled(client);
     else if (this.isInterval()) await this.startInterval(client);
@@ -232,7 +232,7 @@ export class Job implements CommonJobOptions {
               client.logger.debug(
                 `${this.tag} Paused, waiting ${this.timeoutOnPause}ms`,
               );
-            await RuntimeUtils.wait(this.timeoutOnPause);
+            await RuntimeUtils.sleep(this.timeoutOnPause);
           }
         }
         this.lastRun = new Date();
@@ -289,7 +289,7 @@ export class Job implements CommonJobOptions {
             client.logger.debug(
               `${this.tag} Paused, waiting ${this.timeoutOnPause}ms`,
             );
-          await RuntimeUtils.wait(this.timeoutOnPause);
+          await RuntimeUtils.sleep(this.timeoutOnPause);
         }
       }
       this.lastRun = new Date();
@@ -339,7 +339,7 @@ export class Job implements CommonJobOptions {
               `${this.tag} Waiting ${this.retryTimeout}ms before retrying`,
             );
           }
-          await RuntimeUtils.wait(this.retryTimeout);
+          await RuntimeUtils.sleep(this.retryTimeout);
         }
         result = await this.tryToRun(client, ...args);
       }

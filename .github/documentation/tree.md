@@ -1,3 +1,5 @@
+# Directory Structure
+
 ## ./src/client
 
 - **`auto-completes`**:
@@ -18,7 +20,7 @@
 
 > 15 directories
 
-## ./src/lib
+## ./src/core
 
 - **`client`**:
 - **`commands`**:

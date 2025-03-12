@@ -5,7 +5,7 @@ import {
   AsyncTTLCacheManager,
   ComponentCommandType,
   UnitConstants,
-} from '@lib';
+} from '@core';
 
 export type CommandStatisticsPayload = Prisma.CommandStatisticsGetPayload<
   Record<string, never>

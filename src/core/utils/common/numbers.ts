@@ -1,15 +1,6 @@
-const isEven = (n: number) => n % 2 === 0;
+const isInt = (n: number) => n % 2 === 0;
+const isFloat = (n: number) => !isInt(n);
 
-const randomInteger = (min: number, max: number) =>
-  Math.floor(Math.random() * (max - min + 1)) + min;
-
-const randomFloat = (min: number, max: number) =>
-  Math.random() * (max - min) + min;
-
-/**
- * Calculate the mean of an array of numbers. Also
- * known as the average. Sensitive to outliers.
- */
 const calculateMean = (values: number[]) => {
   if (values.length === 0) return null;
   const sum = values.reduce((a, b) => a + b, 0);
@@ -17,16 +8,11 @@ const calculateMean = (values: number[]) => {
   return average;
 };
 
-/**
- * The median is the middle value of a dataset when it is ordered from smallest to largest.
- * If there is an even number of values, the median is the average of the two middle values.
- * Not as sensitive to outliers as the mean.
- */
 const calculateMedian = (values: number[]) => {
   if (values.length === 0) return null;
   const sorted = [...values].sort((a, b) => a - b);
   const middleIndex = Math.floor(sorted.length / 2);
-  const isEven = sorted.length % 2 === 0;
+  const isEven = isInt(sorted.length);
   if (isEven) {
     const a = sorted[middleIndex] as number;
     const b = sorted[middleIndex - 1] as number;
@@ -39,10 +25,6 @@ const calculateMedian = (values: number[]) => {
   }
 };
 
-/**
- * Calculate the variance of an array of numbers.
- * It measures how far each value in the dataset is from the mean.
- */
 const calculateVariance = (values: number[]) => {
   if (values.length === 0) return null;
   const mean = calculateMean(values);
@@ -52,22 +34,46 @@ const calculateVariance = (values: number[]) => {
   return variance;
 };
 
-/**
- * The standard deviation is a measure of how spread out numbers are.
- * It is the square root of the variance.
- */
 const calculateStandardDeviation = (values: number[]) => {
   const variance = calculateVariance(values);
   if (typeof variance !== 'number') return null;
   return Math.sqrt(variance);
 };
 
-export class NumberUtils {
-  static readonly isEven = isEven;
-  static readonly randomInteger = randomInteger;
-  static readonly randomFloat = randomFloat;
+class NumberUtils {
+  static readonly isInt = isInt;
+  static readonly isFloat = isFloat;
+  static readonly isEven = isInt;
+  static readonly isOdd = isFloat;
+  /**
+   * Calculate the mean of an array of numbers. Also
+   * known as the average. Sensitive to outliers.
+   * @param values The array of numbers
+   * @returns The mean/average of the numbers
+   */
   static readonly calculateMean = calculateMean;
+  /**
+   * The median is the middle value of a dataset when it is ordered from smallest to largest.
+   * If there is an even number of values, the median is the average of the two middle values.
+   * Not as sensitive to outliers as the mean/average.
+   * @param values The array of numbers
+   * @returns The median of the numbers
+   */
   static readonly calculateMedian = calculateMedian;
+  /**
+   * Calculate the variance of an array of numbers.
+   * It measures how far each value in the dataset is from the mean.
+   * @param values The array of numbers
+   * @returns The variance of the numbers
+   */
   static readonly calculateVariance = calculateVariance;
+  /**
+   * The standard deviation is a measure of how spread out numbers are.
+   * It is the square root of the variance.
+   * @param values The array of numbers
+   * @returns The standard deviation of the numbers
+   */
   static readonly calculateStandardDeviation = calculateStandardDeviation;
 }
+
+export { NumberUtils };

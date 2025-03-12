@@ -3,7 +3,7 @@ import {
   APICommandType,
   AutoCompleteOption,
   PermissionUtils,
-} from '@lib';
+} from '@core';
 
 export enum CommandAutoCompleteQueryType {
   CATEGORY = 'category',
@@ -18,7 +18,7 @@ const CommandOption = new AutoCompleteOption<APICommandType>({
   required: true,
   run: async (query, client, interaction) => {
     const { member, guild } = interaction;
-    const memberPermLevel = await PermissionUtils.resolveMemberPermLevel(
+    const memberPermLevel = await PermissionUtils.resolveMemberPermissionLevel(
       client,
       member,
       guild,

@@ -28,7 +28,7 @@ import {
   isCommand,
 } from '../commands';
 import { CommandCooldownType, resolveCooldownType } from '../commands/cooldown';
-import { PermLevel, resolvePermLevel } from '../managers';
+import { PermLevel, resolvePermLevel } from '.';
 import {
   Directories,
   FileUtils,
@@ -278,7 +278,7 @@ export class CommandManager {
         cooldown: `@${CommandCooldownType[e.cooldown.type]} - ${
           e.cooldown.usages
         }/${Math.round(e.cooldown.duration / UnitConstants.MS_IN_ONE_SECOND)} seconds`,
-        src: FileUtils.getProjectRelativePath(e.sourceFile),
+        src: FileUtils.relativeProjectPath(e.sourceFile),
         disabled: e.disabled,
         global: e.global,
         nsfw: e.nsfw,
@@ -351,7 +351,7 @@ export class CommandManager {
       // Throw an error if the provided dPath doesn't exists/isn't valid
       if (!existsSync(dPath)) {
         this.client.logger.error(
-          `Invalid path: No file/directory exists at provided path "${FileUtils.getProjectRelativePath(
+          `Invalid path: No file/directory exists at provided path "${FileUtils.relativeProjectPath(
             dPath,
           )}"`,
         );
@@ -380,7 +380,7 @@ export class CommandManager {
         );
         if (isExcluded) {
           this.client.logger.debug(
-            `Skipping excluded command: ${FileUtils.getProjectRelativePath(cmdPath)} (reserved file name)`,
+            `Skipping excluded command: ${FileUtils.relativeProjectPath(cmdPath)} (reserved file name)`,
           );
           continue;
         }
@@ -392,7 +392,7 @@ export class CommandManager {
         if (!isCommand(cmd)) {
           console.log(cmd);
           this.client.logger.debug(
-            `Skipping non-command: ${FileUtils.getProjectRelativePath(cmdPath)}`,
+            `Skipping non-command: ${FileUtils.relativeProjectPath(cmdPath)}`,
           );
           continue;
         }
@@ -419,7 +419,7 @@ export class CommandManager {
     const commands = this.findCommandsInFolder<T>(dirPath);
     const dirPaths = typeof dirPath === 'string' ? [dirPath] : dirPath;
     const dirPathOutput = dirPaths
-      .map((e) => FileUtils.getProjectRelativePath(e))
+      .map((e) => FileUtils.relativeProjectPath(e))
       .join(', ');
 
     // Warning, empty command folder provided - return early
@@ -432,7 +432,7 @@ export class CommandManager {
     }
 
     for (const [cmdPath, command] of commands) {
-      const displayPath = FileUtils.getProjectRelativePath(cmdPath);
+      const displayPath = FileUtils.relativeProjectPath(cmdPath);
       if (this.client.debug.enabled) {
         logger.debug(`Loading command ${displayPath}`);
       }
@@ -603,7 +603,7 @@ export class CommandManager {
       const handler = require(resolvedPath);
       if (!(handler.default instanceof AutoCompleteOption)) {
         this.client.logger.warn(
-          `Skipping non-auto-complete file: ${FileUtils.getProjectRelativePath(resolvedPath)}`,
+          `Skipping non-auto-complete file: ${FileUtils.relativeProjectPath(resolvedPath)}`,
         );
         continue;
       }
@@ -631,7 +631,7 @@ export class CommandManager {
       const handler = require(resolvedPath);
       if (!(handler.default instanceof Job)) {
         this.client.logger.warn(
-          `Skipping non-job file: ${FileUtils.getProjectRelativePath(resolvedPath)}`,
+          `Skipping non-job file: ${FileUtils.relativeProjectPath(resolvedPath)}`,
         );
         continue;
       }
@@ -658,7 +658,7 @@ export class CommandManager {
       const listener = require(resolvedPath);
       if (!(listener.default instanceof ClientEventListener)) {
         this.client.logger.warn(
-          `Skipping non-listener file: ${FileUtils.getProjectRelativePath(resolvedPath)}`,
+          `Skipping non-listener file: ${FileUtils.relativeProjectPath(resolvedPath)}`,
         );
         continue;
       }
@@ -714,7 +714,7 @@ export class CommandManager {
     newCommandState.forEach((e) => {
       const match = applicationCommandsFromFile.find((f) => f.name === e.name);
       if (match) {
-        const cmdChanges = ObjectUtils.findChanges(
+        const cmdChanges = ObjectUtils.diffAsChanges(
           match as GenericObject,
           e as GenericObject,
         );
@@ -979,7 +979,7 @@ export class CommandManager {
       cooldown.usages === 1 ? '1 use' : `${cooldown.usages} uses`;
     const cooldownOutput = cooldown.enabled
       ? [
-          `**${cooldownUsagesOutput}** in **${TimeUtils.msToHumanReadableTime(cooldown.duration)}**`,
+          `**${cooldownUsagesOutput}** in **${TimeUtils.msToHumanReadable(cooldown.duration)}**`,
           `(type \`${resolveCooldownType(cooldown.type)}\`)`,
         ].join(' ')
       : 'n/a';
@@ -1039,7 +1039,7 @@ export class CommandManager {
     if (cmd.clientPerms.length > 0) {
       embed.addFields({
         name: '🔑 Client Permissions (me)',
-        value: PermissionUtils.bigIntPermOutput(cmd.clientPerms, '\n'),
+        value: PermissionUtils.displayPermissions(cmd.clientPerms, '\n'),
         inline: true,
       });
     }
@@ -1047,7 +1047,7 @@ export class CommandManager {
     if (cmd.userPerms.length > 0) {
       embed.addFields({
         name: '🔑 User Permissions (you)',
-        value: PermissionUtils.bigIntPermOutput(cmd.userPerms, '\n'),
+        value: PermissionUtils.displayPermissions(cmd.userPerms, '\n'),
         inline: true,
       });
     }

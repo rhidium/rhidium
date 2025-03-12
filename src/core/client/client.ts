@@ -356,9 +356,9 @@ export class Client<
           await InteractionUtils.replyDynamic(readyClient, interaction, {
             embeds: [
               this.embeds.error({
-                title: this.I18N.t('lib:commands.unknownCommandTitle'),
+                title: this.I18N.t('core:commands.unknownCommandTitle'),
                 description: this.I18N.t(
-                  'lib:commands.unknownCommandDescription',
+                  'core:commands.unknownCommandDescription',
                   { commandId },
                 ),
               }),
@@ -379,9 +379,9 @@ export class Client<
         await InteractionUtils.replyDynamic(readyClient, interaction, {
           embeds: [
             this.embeds.error({
-              title: this.I18N.t('lib:commands.commandDisabledTitle'),
+              title: this.I18N.t('core:commands.commandDisabledTitle'),
               description: this.I18N.t(
-                'lib:commands.commandDisabledDescription',
+                'core:commands.commandDisabledDescription',
               ),
             }),
           ],

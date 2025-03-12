@@ -1,7 +1,7 @@
 import { guildSettingsFromCache, updateGuildSettings } from '@client/database';
 import { LoggingServices } from '@client/services';
 import { SlashCommandBuilder } from 'discord.js';
-import { Lang, ChatInputCommand, InteractionUtils, PermLevel } from '@lib';
+import { Lang, ChatInputCommand, InteractionUtils, PermLevel } from '@core';
 
 const ModeratorRoleCommand = new ChatInputCommand({
   permLevel: PermLevel.Administrator,

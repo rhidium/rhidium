@@ -4,7 +4,7 @@ import {
   ChatInputCommand,
   PermissionUtils,
   resolvePermLevel,
-} from '@lib';
+} from '@core';
 
 const PermLevelCommand = new ChatInputCommand({
   isEphemeral: true,
@@ -21,7 +21,7 @@ const PermLevelCommand = new ChatInputCommand({
     const member = targetUser
       ? ((await guild?.members.fetch(targetUser.id).catch(() => null)) ?? null)
       : interaction.member;
-    const memberPermLevel = await PermissionUtils.resolveMemberPermLevel(
+    const memberPermLevel = await PermissionUtils.resolveMemberPermissionLevel(
       client,
       member,
       guild,

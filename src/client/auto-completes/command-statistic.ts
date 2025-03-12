@@ -4,7 +4,7 @@ import {
   CommandStatisticsPayload,
   commandStatisticsTTLCache,
 } from '@client/database/CommandStatistics';
-import { AutoCompleteOption } from '@lib';
+import { AutoCompleteOption } from '@core';
 
 const CommandStatisticOption = new AutoCompleteOption<CommandStatisticsPayload>(
   {

@@ -32,7 +32,7 @@ import {
   InteractionUtils,
   StringUtils,
   UnitConstants,
-} from '@lib';
+} from '@core';
 import { guildTTLCache, prisma } from '@client/database';
 
 const jsonCodeBlockOffset = 12;

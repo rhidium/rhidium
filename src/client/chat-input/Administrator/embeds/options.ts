@@ -9,7 +9,7 @@ import {
   EmbedConfigurationConstants,
 } from './enums';
 import { maxFieldNameLength } from './helpers';
-import { Lang, EmbedConstants } from '@lib';
+import { Lang, EmbedConstants } from '@core';
 
 export const embedOptions = [
   {

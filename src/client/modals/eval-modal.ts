@@ -1,5 +1,5 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
-import { ModalCommand, PermLevel } from '@lib';
+import { ModalCommand, PermLevel } from '@core';
 import EvalConstants from '../enums/eval';
 
 const CodeModalCommand = new ModalCommand({

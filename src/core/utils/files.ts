@@ -1,29 +1,21 @@
 import { lstatSync, readdirSync } from 'fs';
 import path from 'path';
 
-/** Absolute or relative path(s) to the folder/directory that holds your commands */
-export type Directories = string | string[];
-
-/** Include utility fallback for some OS's and containers */
 const projectRoot = process.env.PWD ?? '~/';
 
-/** Returns the path relative to the project root directory */
-const getProjectRelativePath = (source: string) =>
-  source.replace(projectRoot, '~');
+const javascriptExtensions = ['.js', '.mjs', '.cjs'];
 
-const jsSourceFileExtensions = ['.js', '.mjs', '.cjs'];
+const relativeProjectPath = (filePath: string) =>
+  filePath.replace(projectRoot, '~');
 
 const fileNameFromPath = (filePath: string) =>
   filePath.slice(filePath.lastIndexOf(path.sep) + 1, filePath.length);
 
-/**
- * Returns an array of filePaths when given a target path, and a list of extensions to look for
- */
 const getFiles = (
   /** Relative or absolute path to directory to get all files from */
   dirPath: string,
   /** File extension(s) to include when filtering files, including the "." character is optional */
-  extensions: string | string[] = jsSourceFileExtensions,
+  extensions: string | string[] = javascriptExtensions,
   /** Whether to include Typescript files when Javascript files are included */
   omitTsExtensionForJs = false,
 ): string[] => {
@@ -85,45 +77,67 @@ const getFiles = (
   return filePaths;
 };
 
-const getDirectories = (
-  /** Relative or absolute path to directory to get all directories from */
-  dirPath: string,
-) => {
+const getDirectories = (dirPath: string) => {
+  const dirPaths = [];
   let resolvedDirPath = dirPath;
 
-  // First, resolve provided dirPath (relative/absolute)
   if (!path.isAbsolute(dirPath)) resolvedDirPath = path.resolve(dirPath);
 
-  // Next, check if the path points to an existing directory,
-  // and return an empty array if not
   if (!lstatSync(resolvedDirPath).isDirectory()) {
     return [];
   }
 
-  // Initialize our response array, holding all found directories
-  const dirPaths = [];
-
-  // Loop over all directories in the dirPath, recursively
   for (let filePath of readdirSync(dirPath)) {
-    // Resolve the absolute path to the file, and getting
-    // file stats from FS
     filePath = path.resolve(dirPath, filePath);
     const stat = lstatSync(filePath);
 
-    // If target is a directory, recursively keep
-    // adding function results to the existing array
     if (stat.isDirectory()) dirPaths.push(filePath);
   }
 
-  // Finally, return the array of file paths
   return dirPaths;
 };
 
-export class FileUtils {
+class FileUtils {
+  /**
+   * The path for this project's root directory,
+   * including the trailing slash and fallbacks
+   * for some OS's and containers
+   */
   static readonly projectRoot = projectRoot;
-  static readonly jsSourceFileExtensions = jsSourceFileExtensions;
-  static readonly getFiles = getFiles;
-  static readonly getDirectories = getDirectories;
+  /**
+   * List of file extensions for Javascript source files
+   */
+  static readonly javascriptExtensions = javascriptExtensions;
+  /**
+   * Get the relative path of a file from the project root
+   * @param filePath The file path to get the relative path for
+   * @returns The relative path of the file from the project root
+   */
+  static readonly relativeProjectPath = relativeProjectPath;
+  /**
+   * Extracts the file name from a given file path,
+   * be it relative or absolute
+   * @param filePath The file path to extract the name from
+   * @returns The file name
+   */
   static readonly fileNameFromPath = fileNameFromPath;
-  static readonly getProjectRelativePath = getProjectRelativePath;
+  /**
+   * Recursively get all files in a directory, including subdirectories
+   * @param dirPath The target directory to search for files in
+   * @param extensions The file extensions to include when filtering files
+   * @param omitTsExtensionForJs Whether to include Typescript files when Javascript files are included
+   * @returns An array of file paths found in the target directory
+   */
+  static readonly getFiles = getFiles;
+  /**
+   * Recursively get all directories in a directory, including subdirectories
+   * @param dirPath The target directory to search for directories in
+   * @returns An array of directory paths found in the target directory
+   */
+  static readonly getDirectories = getDirectories;
 }
+
+/** Absolute or relative path(s) to the folder/directories that hold your components */
+type Directories = string | string[];
+
+export { FileUtils, type Directories };

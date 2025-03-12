@@ -1,4 +1,4 @@
-import { logger } from '@lib';
+import { logger } from '@core';
 import { existsSync, readFileSync } from 'fs';
 import type { UserConfigOptions } from './types';
 

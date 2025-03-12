@@ -4,7 +4,7 @@ import {
   ChatInputCommand,
   CommandCooldownType,
   UnitConstants,
-} from '@lib';
+} from '@core';
 import { appConfig } from '@client/config';
 
 const SupportCommand = new ChatInputCommand({

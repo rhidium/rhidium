@@ -41,6 +41,7 @@
     "codepaths",
     "commitlint",
     "cooldown",
+    "cuid",
     "discordapp",
     "emojify",
     "Greyple",
@@ -49,6 +50,7 @@
     "isready",
     "Mirasaki",
     "repliable",
-    "Rhidium"
+    "Rhidium",
+    "Vercel"
   ]
 }

@@ -17,7 +17,7 @@ import {
   InteractionUtils,
   PermLevel,
   isAutoCompleteResponseType,
-} from '@lib';
+} from '@core';
 import {
   COMMAND_STATISTICS_ROOT_ID,
   commandStatisticsTTLCache,

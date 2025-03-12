@@ -8,7 +8,7 @@ import {
   MessagePayload,
   PermissionFlagsBits,
 } from 'discord.js';
-import { Lang, Client } from '@lib';
+import { Lang, Client } from '@core';
 
 /**
  * Perform logging of a mod action to a specific server,

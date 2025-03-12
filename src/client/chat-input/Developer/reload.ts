@@ -4,7 +4,7 @@ import {
   PermLevel,
   isAutoCompleteResponseType,
   isCommand,
-} from '@lib';
+} from '@core';
 import CommandOption from '../../auto-completes/command';
 
 /**

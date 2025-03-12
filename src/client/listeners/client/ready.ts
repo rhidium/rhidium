@@ -1,5 +1,5 @@
 import { Events } from 'discord.js';
-import { Lang, ClientEventListener } from '@lib';
+import { Lang, ClientEventListener } from '@core';
 
 export default new ClientEventListener({
   once: true,

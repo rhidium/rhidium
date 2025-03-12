@@ -6,7 +6,7 @@ import {
   PermLevel,
   TimeUtils,
   UnitConstants,
-} from '@lib';
+} from '@core';
 
 const ExecCommand = new ChatInputCommand({
   permLevel: PermLevel['Bot Administrator'],
@@ -41,7 +41,7 @@ const ExecCommand = new ChatInputCommand({
       });
     } catch (err) {
       const error = err instanceof Error ? err : new Error(`${err}`);
-      const execTime = TimeUtils.runTime(execStartTime);
+      const execTime = TimeUtils.bigIntDurationToHumanReadable(execStartTime);
       await ExecCommand.reply(
         interaction,
         client.embeds.error({
@@ -58,7 +58,7 @@ const ExecCommand = new ChatInputCommand({
       return;
     }
 
-    const execTime = TimeUtils.runTime(execStartTime);
+    const execTime = TimeUtils.bigIntDurationToHumanReadable(execStartTime);
     const stdout = output;
     const contentTooLong =
       stdout.length > EmbedConstants.FIELD_VALUE_MAX_LENGTH - 6;

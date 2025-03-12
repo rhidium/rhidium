@@ -1,4 +1,4 @@
-import { Client, ClusterUtils } from '@lib';
+import { Client, ClusterUtils } from '@core';
 import { ActivityType } from 'discord.js';
 
 const updateServerCount = async (client: Client<true>): Promise<number> => {

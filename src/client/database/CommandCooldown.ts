@@ -1,4 +1,4 @@
-import { AsyncTTLCacheManager, UnitConstants } from '@lib';
+import { AsyncTTLCacheManager, UnitConstants } from '@core';
 import { prisma } from '.';
 import { CommandCooldown, Prisma } from '@prisma/client';
 

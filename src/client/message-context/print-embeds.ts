@@ -4,7 +4,7 @@ import {
   InteractionReplyOptions,
   escapeCodeBlock,
 } from 'discord.js';
-import { Lang, EmbedConstants, MessageContextCommand } from '@lib';
+import { Lang, EmbedConstants, MessageContextCommand } from '@core';
 
 const PrintEmbedCommand = new MessageContextCommand({
   run: async (client, interaction) => {

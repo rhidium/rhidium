@@ -1,4 +1,4 @@
-import { ArrayUtils, InteractionUtils, TimeUtils } from '@lib';
+import { ArrayUtils, InteractionUtils, TimeUtils } from '@core';
 import {
   APIInteractionGuildMember,
   ChannelType,
@@ -361,9 +361,9 @@ export const buildDiscordPlaceholders = (
     memberPremiumSinceTS:
       resolvedMember?.premiumSince?.valueOf().toString() ?? 'Unknown',
     memberRoleCount: resolvedMember?.roles.cache.size.toString() ?? 'Unknown',
-    memberRoles: ArrayUtils.joinWithLimit(
+    memberRoles: ArrayUtils.join(
       resolvedMember?.roles.cache.map((role) => role.toString()) ?? [],
-      10,
+      { maxItems: 10 },
     ),
 
     serverAFKChannelId: guild.afkChannelId ?? 'None',

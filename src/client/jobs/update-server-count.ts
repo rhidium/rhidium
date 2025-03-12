@@ -1,5 +1,5 @@
 import { ClusterServices } from '@client/services';
-import { Job, UnitConstants } from '@lib';
+import { Job, UnitConstants } from '@core';
 
 const UpdateServerCountJob = new Job({
   id: 'update-server-count',

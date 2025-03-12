@@ -1,5 +1,5 @@
 import type { PresenceStatusData, Snowflake } from 'discord.js';
-import type { CommandCooldownType, IColors, IEmojis, UserColors } from '@lib';
+import type { CommandCooldownType, IColors, IEmojis, UserColors } from '@core';
 
 /**
  * Represents essential options to configure clustering & sharding

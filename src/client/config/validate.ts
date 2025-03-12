@@ -1,7 +1,7 @@
 import { stripIndents } from 'common-tags';
 import type { AppConfig } from '.';
 import { PortConstants } from '@client/enums/ports';
-import { logger } from '@lib';
+import { logger } from '@core';
 
 /**
  * Validates the resolved `appConfig`, warning users when

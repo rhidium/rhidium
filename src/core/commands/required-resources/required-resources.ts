@@ -37,7 +37,7 @@ export class RequiredResources<I extends BaseInteraction>
     if (!match) {
       if (handleInteraction) {
         await InteractionUtils.replyDynamic(client, interaction, {
-          content: client.I18N.t('lib:commands.notAvailableInCurrentServer'),
+          content: client.I18N.t('core:commands.notAvailableInCurrentServer'),
           flags: [MessageFlags.Ephemeral],
         });
       }
@@ -57,7 +57,7 @@ export class RequiredResources<I extends BaseInteraction>
     if (!match) {
       if (handleInteraction) {
         await InteractionUtils.replyDynamic(client, interaction, {
-          content: client.I18N.t('lib:commands.notAvailableInCurrentChannel'),
+          content: client.I18N.t('core:commands.notAvailableInCurrentChannel'),
           flags: [MessageFlags.Ephemeral],
         });
       }
@@ -78,7 +78,7 @@ export class RequiredResources<I extends BaseInteraction>
       // in this DM channel
       if (handleInteraction) {
         await InteractionUtils.replyDynamic(client, interaction, {
-          content: client.I18N.t('lib:commands.notAvailableInDMs'),
+          content: client.I18N.t('core:commands.notAvailableInDMs'),
           flags: [MessageFlags.Ephemeral],
         });
       }
@@ -89,7 +89,7 @@ export class RequiredResources<I extends BaseInteraction>
       // Never matches until we **can** check if this matches
       if (handleInteraction) {
         await InteractionUtils.replyDynamic(client, interaction, {
-          content: client.I18N.t('lib:commands.requiredRolesMissingServer'),
+          content: client.I18N.t('core:commands.requiredRolesMissingServer'),
           flags: [MessageFlags.Ephemeral],
         });
       }
@@ -102,7 +102,7 @@ export class RequiredResources<I extends BaseInteraction>
     if (!match) {
       if (handleInteraction) {
         await InteractionUtils.replyDynamic(client, interaction, {
-          content: client.I18N.t('lib:commands.requiredRolesMissing'),
+          content: client.I18N.t('core:commands.requiredRolesMissing'),
           flags: [MessageFlags.Ephemeral],
         });
       }
@@ -122,7 +122,7 @@ export class RequiredResources<I extends BaseInteraction>
     if (!match) {
       if (handleInteraction) {
         await InteractionUtils.replyDynamic(client, interaction, {
-          content: client.I18N.t('lib:commands.requiredUsersMissing'),
+          content: client.I18N.t('core:commands.requiredUsersMissing'),
           flags: [MessageFlags.Ephemeral],
         });
       }
@@ -144,7 +144,7 @@ export class RequiredResources<I extends BaseInteraction>
     if (!match) {
       if (handleInteraction) {
         await InteractionUtils.replyDynamic(client, interaction, {
-          content: client.I18N.t('lib:commands.requiredCategoryMissing'),
+          content: client.I18N.t('core:commands.requiredCategoryMissing'),
           flags: [MessageFlags.Ephemeral],
         });
       }

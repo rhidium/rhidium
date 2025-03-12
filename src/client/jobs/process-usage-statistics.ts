@@ -11,7 +11,7 @@ import {
   QueueCallbackFunction,
   QueueManager,
   UnitConstants,
-} from '@lib';
+} from '@core';
 import { ApplicationCommandType } from 'discord.js';
 
 export type CommandUsageStatistics = {

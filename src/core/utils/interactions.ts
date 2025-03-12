@@ -1,3 +1,5 @@
+// [DEV] This file could really use a major refactor. Add examples, `confirmation` wrapper, etc.
+
 import {
   APIActionRowComponent,
   APIActionRowComponentTypes,
@@ -37,38 +39,6 @@ import {
 import { Client } from '../client';
 import { AvailableGuildInteraction } from '../commands/controllers'; // [DEV] Looks like scope should be moved
 
-export interface InteractionReplyDynamicOptions {
-  preferFollowUp?: boolean;
-}
-
-export type PromptConfirmationOptions = {
-  client: Client;
-  interaction: RepliableInteraction;
-  content?: InteractionReplyOptions;
-  options?: InteractionReplyDynamicOptions;
-  onConfirm?: (interaction: ButtonInteraction) => void | Promise<void>;
-  onCancel?: (interaction: ButtonInteraction) => void | Promise<void>;
-  shouldReplyOnConfirm?: boolean;
-  shouldReplyOnCancel?: boolean;
-  removeComponents?: boolean;
-  disableComponents?: boolean;
-  removeEmbeds?: boolean;
-  removeFiles?: boolean;
-};
-
-/**
- * Resolves the applicable reply function for the given interaction
- *
- * Note: This is function should never be assigned to a variable, as it's purpose is
- * dynamically resolving the reply function for the given interaction. If you
- * assign this to a variable, it will always resolve to the same function.
- *
- * Example:
- * ```ts
- * InteractionUtils.replyFn(interaction)(content);
- * ```
- * @returns The applicable reply function for the given interaction and options
- */
 const replyFn = <I extends BaseInteraction>(
   client: Client,
   interaction: I,
@@ -119,17 +89,6 @@ const replyFn = <I extends BaseInteraction>(
   }
 };
 
-/**
- * Reply to an interaction - dynamically resolves the reply function,
- * and calls it with the given content, util to avoid having to
- * directly invoke the replyFn method, as explained in it's declaration
- *
- * Note: It definitely needs the client, as it needs to be able to
- * log critical errors if they are encountered while replying
- * to interactions - it's worth all the client not null checks
- *
- * @returns Reply method return value - use `withResponse` if appropriate
- */
 const replyDynamic = async <I extends BaseInteraction>(
   client: Client,
   interaction: I,
@@ -161,7 +120,7 @@ const replyDynamic = async <I extends BaseInteraction>(
   } catch (err) {
     logReplyErr(err, content);
     const errCtx = {
-      content: client.I18N.t('lib:commands.errorWhileReplyingToInteraction'),
+      content: client.I18N.t('core:commands.errorWhileReplyingToInteraction'),
       flags: [MessageFlags.Ephemeral] as const,
     };
     await InteractionUtils.replyFn(
@@ -238,7 +197,7 @@ const requireGuild = <I extends BaseInteraction>(
 ): interaction is AvailableGuildInteraction<I> => {
   if (!interaction.inGuild()) {
     void InteractionUtils.replyDynamic(client, interaction, {
-      content: client.I18N.t('lib:commands.notAvailableInDMs'),
+      content: client.I18N.t('core:commands.notAvailableInDMs'),
       flags: [MessageFlags.Ephemeral],
     });
     return false;
@@ -246,7 +205,7 @@ const requireGuild = <I extends BaseInteraction>(
 
   if (!interaction.inCachedGuild()) {
     void InteractionUtils.replyDynamic(client, interaction, {
-      content: client.I18N.t('lib:commands.missingCachedServer'),
+      content: client.I18N.t('core:commands.missingCachedServer'),
       flags: [MessageFlags.Ephemeral],
     });
     return false;
@@ -262,7 +221,7 @@ const requireAvailableGuild = <I extends BaseInteraction>(
   if (!InteractionUtils.requireGuild(client, interaction)) return false;
   if (!interaction.guild.available) {
     void InteractionUtils.replyDynamic(client, interaction, {
-      content: client.I18N.t('lib:commands.serverUnavailable'),
+      content: client.I18N.t('core:commands.serverUnavailable'),
       flags: [MessageFlags.Ephemeral],
     });
     return false;
@@ -348,7 +307,7 @@ const paginator = async (
 
   if (!initialReply) {
     void InteractionUtils.replyDynamic(client, interaction, {
-      content: client.I18N.t('lib:commands.missingInitialReply'),
+      content: client.I18N.t('core:commands.missingInitialReply'),
       flags: [MessageFlags.Ephemeral],
       ...options,
     });
@@ -364,7 +323,7 @@ const paginator = async (
   collector.on('collect', async (button) => {
     if (button.user.id !== interaction.user.id) {
       void InteractionUtils.replyDynamic(client, interaction, {
-        content: client.I18N.t('lib:commands.isNotUserPaginator'),
+        content: client.I18N.t('core:commands.isNotUserPaginator'),
         flags: [MessageFlags.Ephemeral],
         ...options,
       });
@@ -440,7 +399,7 @@ const slashConfirmationOptionHandler = (
   const value = interaction.options.getBoolean(slashConfirmationOptionName);
   if (!value) {
     void InteractionUtils.replyDynamic(client, interaction, {
-      content: client.I18N.t('lib:commands.confirmationRequired'),
+      content: client.I18N.t('core:commands.confirmationRequired'),
       flags: [MessageFlags.Ephemeral],
     });
     return false;
@@ -452,12 +411,12 @@ const confirmationButtonRow = (client: Client) =>
   new ActionRowBuilder<ButtonBuilder>().addComponents(
     new ButtonBuilder()
       .setCustomId(InteractionConstants.CONFIRMATION_BUTTON_CONFIRM_ID)
-      .setLabel(client.I18N.t('lib:commands.confirmationButtonLabel'))
+      .setLabel(client.I18N.t('core:commands.confirmationButtonLabel'))
       .setEmoji(client.clientEmojis.success)
       .setStyle(ButtonStyle.Success),
     new ButtonBuilder()
       .setCustomId(InteractionConstants.CONFIRMATION_BUTTON_CANCEL_ID)
-      .setLabel(client.I18N.t('lib:commands.cancelButtonLabel'))
+      .setLabel(client.I18N.t('core:commands.cancelButtonLabel'))
       .setEmoji(client.clientEmojis.error)
       .setStyle(ButtonStyle.Secondary),
   );
@@ -491,7 +450,7 @@ const promptConfirmation = async ({
     : [confirmationRow];
 
   const message = await InteractionUtils.replyDynamic(client, interaction, {
-    content: client.I18N.t('lib:commands.promptConfirmation'),
+    content: client.I18N.t('core:commands.promptConfirmation'),
     ...content,
     ...options,
     components,
@@ -500,7 +459,7 @@ const promptConfirmation = async ({
 
   if (!message) {
     void InteractionUtils.replyDynamic(client, interaction, {
-      content: client.I18N.t('lib:commands.missingInitialReply'),
+      content: client.I18N.t('core:commands.missingInitialReply'),
       flags: [MessageFlags.Ephemeral],
     });
     return false;
@@ -516,7 +475,7 @@ const promptConfirmation = async ({
       collector.on('collect', async (button) => {
         if (button.user.id !== interaction.user.id) {
           void InteractionUtils.replyDynamic(client, interaction, {
-            content: client.I18N.t('lib:commands.isNotComponentUser'),
+            content: client.I18N.t('core:commands.isNotComponentUser'),
             flags: [MessageFlags.Ephemeral],
           });
           return;
@@ -531,7 +490,7 @@ const promptConfirmation = async ({
           if (disableComponents) InteractionUtils.disableComponents(components);
           if (shouldReplyOnConfirm)
             await InteractionUtils.replyDynamic(client, button, {
-              content: client.I18N.t('lib:commands.confirmationAccepted'),
+              content: client.I18N.t('core:commands.confirmationAccepted'),
               embeds: newEmbeds,
               files: newFiles,
               components: removeComponents ? [] : components,
@@ -547,7 +506,7 @@ const promptConfirmation = async ({
           if (disableComponents) InteractionUtils.disableComponents(components);
           if (shouldReplyOnCancel)
             await InteractionUtils.replyDynamic(client, button, {
-              content: client.I18N.t('lib:commands.confirmationCancelled'),
+              content: client.I18N.t('core:commands.confirmationCancelled'),
               embeds: newEmbeds,
               files: newFiles,
               components: removeComponents ? [] : components,
@@ -560,7 +519,7 @@ const promptConfirmation = async ({
         if (collected.size) return;
         InteractionUtils.disableComponents(components);
         await InteractionUtils.replyDynamic(client, interaction, {
-          content: client.I18N.t('lib:commands.confirmationExpired'),
+          content: client.I18N.t('core:commands.confirmationExpired'),
           embeds: newEmbeds,
           files: newFiles,
           components: components,
@@ -571,18 +530,135 @@ const promptConfirmation = async ({
   );
 };
 
-export class InteractionUtils {
+interface InteractionReplyDynamicOptions {
+  preferFollowUp?: boolean;
+}
+
+type PromptConfirmationOptions = {
+  client: Client;
+  interaction: RepliableInteraction;
+  content?: InteractionReplyOptions;
+  options?: InteractionReplyDynamicOptions;
+  onConfirm?: (interaction: ButtonInteraction) => void | Promise<void>;
+  onCancel?: (interaction: ButtonInteraction) => void | Promise<void>;
+  shouldReplyOnConfirm?: boolean;
+  shouldReplyOnCancel?: boolean;
+  removeComponents?: boolean;
+  disableComponents?: boolean;
+  removeEmbeds?: boolean;
+  removeFiles?: boolean;
+};
+
+class InteractionUtils {
+  /**
+   * Resolves the applicable reply function for the given interaction
+   *
+   * Note: This is function should never be assigned to a variable, as it's purpose is
+   * dynamically resolving the reply function for the given interaction. If you
+   * assign this to a variable, it will always resolve to the same function.
+   *
+   * Example:
+   * ```ts
+   * InteractionUtils.replyFn(interaction)(content);
+   * ```
+   * @param client The client instance
+   * @param interaction The interaction to resolve the reply function for
+   * @param options The options to pass to the reply function
+   * @returns The applicable reply function for the given interaction and options
+   */
   static readonly replyFn = replyFn;
+  /**
+   * Reply to an interaction - dynamically resolves the reply function,
+   * and calls it with the given content, util to avoid having to
+   * directly invoke the replyFn method, as explained in it's declaration
+   *
+   * Note: It definitely needs the client, as it needs to be able to
+   * log critical errors if they are encountered while replying
+   * to interactions - it's worth all the client not null checks
+   *
+   * @param client The client instance
+   * @param interaction The interaction to reply to
+   * @param content The content to reply with
+   * @param options The options to pass to the reply function
+   * @returns Reply method return value - use `withResponse` if appropriate
+   */
   static readonly replyDynamic = replyDynamic;
+  /**
+   * Resolves the (discord.js) rows from an array of components
+   * @param components The components to resolve rows from
+   * @returns The resolved rows
+   */
   static readonly resolveRowsFromComponents = resolveRowsFromComponents;
+  /**
+   * Convert a channel type to a human-readable string
+   * @param type The channel type to convert
+   * @returns The human-readable string
+   */
   static readonly channelTypeToString = channelTypeToString;
+  /**
+   * Require that an interaction is in a guild
+   * @param client The client instance
+   * @param interaction The interaction to check
+   * @returns Whether the interaction is in a guild
+   */
   static readonly requireGuild = requireGuild;
+  /**
+   * Require that an interaction is in an available/cached guild
+   * @param client The client instance
+   * @param interaction The interaction to check
+   * @returns Whether the interaction is in an available guild
+   */
   static readonly requireAvailableGuild = requireAvailableGuild;
+  /**
+   * Create a paginator for an interaction
+   * @param id The paginator ID
+   * @param client The client instance
+   * @param pages The pages to paginate
+   * @param interaction The interaction to paginate for
+   * @param duration The duration the paginator should last
+   * @param options The options to pass to the interaction reply
+   */
   static readonly paginator = paginator;
+  /**
+   * Disable all components in a given array
+   * @param components The components to disable
+   * @returns The disabled components
+   */
   static readonly disableComponents = disableComponents;
+  /**
+   * The name of the confirmation option for slash commands
+   */
+  static readonly slashConfirmationOptionName = slashConfirmationOptionName;
+  /**
+   * Add a confirmation option to a slash command
+   * @param i The boolean option to add the confirmation option to
+   * @returns The boolean option with the confirmation option
+   */
   static readonly addSlashConfirmationOption = addSlashConfirmationOption;
+  /**
+   * Handle the confirmation option interaction for slash commands
+   * @param client The client instance
+   * @param interaction The interaction to check
+   * @returns Whether the interaction has the confirmation option
+   */
   static readonly slashConfirmationOptionHandler =
     slashConfirmationOptionHandler;
+  /**
+   * Get the confirmation button row for prompts
+   * @param client The client instance
+   * @returns The confirmation button row
+   */
   static readonly confirmationButtonRow = confirmationButtonRow;
+  /**
+   * Prompt a user for confirmation with a button row
+   * @param options The options for the prompt
+   * @returns The interaction, false if cancelled, or 'expired'
+   */
   static readonly promptConfirmation = promptConfirmation;
 }
+
+export {
+  InteractionUtils,
+  type InteractionReplyDynamicOptions,
+  type PromptConfirmationOptions,
+};

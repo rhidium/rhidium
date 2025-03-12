@@ -1,5 +1,5 @@
 import { groupedDiscordPlaceholders } from '@client/placeholders';
-import { CommandType, AutoCompleteOption } from '@lib';
+import { CommandType, AutoCompleteOption } from '@core';
 
 const PlaceholderGroupOption = new AutoCompleteOption<CommandType>({
   name: 'placeholder-group',

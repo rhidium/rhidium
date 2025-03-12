@@ -1,4 +1,4 @@
-import { Lang, UserContextCommand, ArrayUtils, TimeUtils } from '@lib';
+import { Lang, UserContextCommand, ArrayUtils, TimeUtils } from '@core';
 import { MessageFlags } from 'discord.js';
 
 const UserInfoCommand = new UserContextCommand({
@@ -38,7 +38,10 @@ const UserInfoCommand = new UserContextCommand({
     const joinedDiscord = TimeUtils.discordInfoTimestamp(
       targetUser.createdAt.valueOf(),
     );
-    const roleOutput = ArrayUtils.joinWithLimit(roles, maxRoles, none);
+    const roleOutput = ArrayUtils.join(roles, {
+      maxItems: maxRoles,
+      emptyOutput: none,
+    });
     const hasServerAvatar =
       target.displayAvatarURL() !== null &&
       target.displayAvatarURL() !== targetUser.displayAvatarURL();

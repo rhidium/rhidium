@@ -1,4 +1,4 @@
-import { ClientPermissionLevel } from '@lib';
+import { ClientPermissionLevel } from '@core';
 import { guildSettingsFromCache } from './database';
 import { PermissionFlagsBits } from 'discord.js';
 

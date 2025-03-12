@@ -1,8 +1,7 @@
 generator client {
   provider = "prisma-client-js"
-  // Note: You will need to declare a binary target for the Prisma Client
-  // when you deploy to Docker, Vercel, AWS Lambda, Google Cloud Functions, Azure Functions,
-  // or similar
+  // Note: You will need to declare a binary target for the Prisma Client when you
+  // deploy to Docker, Vercel, AWS Lambda, Google Cloud Functions, Azure Functions, etc.
   binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 

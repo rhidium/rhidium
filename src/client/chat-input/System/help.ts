@@ -4,7 +4,7 @@ import {
   ButtonStyle,
   SlashCommandBuilder,
 } from 'discord.js';
-import { Lang, ChatInputCommand, Client, StringUtils } from '@lib';
+import { Lang, ChatInputCommand, Client, StringUtils } from '@core';
 import { appConfig } from '@client/config';
 
 /** Note: Not localized for obvious reasons */

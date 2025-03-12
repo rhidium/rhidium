@@ -210,10 +210,10 @@ export class AutoCompleteOption<T = undefined> {
           embeds: [
             this.client.embeds.error({
               title: this.client.I18N.t(
-                'lib:commands.missingRequiredOptionTitle',
+                'core:commands.missingRequiredOptionTitle',
               ),
               description: this.client.I18N.t(
-                'lib:commands.missingRequiredACOptionDescription',
+                'core:commands.missingRequiredACOptionDescription',
                 { optionName: this.name },
               ),
             }),
@@ -223,7 +223,9 @@ export class AutoCompleteOption<T = undefined> {
       else
         await interaction.respond([
           {
-            name: this.client.I18N.t('lib:commands.missingRequiredOptionTitle'),
+            name: this.client.I18N.t(
+              'core:commands.missingRequiredOptionTitle',
+            ),
             value: 'null',
           },
         ]);

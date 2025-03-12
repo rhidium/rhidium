@@ -481,7 +481,7 @@ export class BaseCommand<I extends BaseInteraction = BaseInteraction> {
   matchEnabledConstraints = (interaction: I, client: Client): boolean => {
     if (this.disabled) {
       void InteractionUtils.replyDynamic(client, interaction, {
-        content: client.I18N.t('lib:commands.commandDisabledTitle'),
+        content: client.I18N.t('core:commands.commandDisabledTitle'),
         flags: [MessageFlags.Ephemeral],
       });
       return false;
@@ -515,7 +515,7 @@ export class BaseCommand<I extends BaseInteraction = BaseInteraction> {
     // Restrict DM usage if applicable
     if (!interaction.inGuild() && this.guildOnly) {
       void InteractionUtils.replyDynamic(client, interaction, {
-        content: client.I18N.t('lib:commands.notAvailableInDMs'),
+        content: client.I18N.t('core:commands.notAvailableInDMs'),
         flags: [MessageFlags.Ephemeral],
       });
       return false;
@@ -537,7 +537,7 @@ export class BaseCommand<I extends BaseInteraction = BaseInteraction> {
     // so we shouldn't allow it
     if (!channel) {
       void InteractionUtils.replyDynamic(client, interaction, {
-        content: client.I18N.t('lib:commands.noChannelForPermissionCheck'),
+        content: client.I18N.t('core:commands.noChannelForPermissionCheck'),
       });
       return false;
     }
@@ -553,8 +553,8 @@ export class BaseCommand<I extends BaseInteraction = BaseInteraction> {
     if (!hasChannelPerms) {
       const isClient = targetMember.user.id === interaction.client.user.id;
       const msg = isClient
-        ? client.I18N.t('lib:commands.clientMissingPermissions')
-        : client.I18N.t('lib:commands.userMissingPermissions');
+        ? client.I18N.t('core:commands.clientMissingPermissions')
+        : client.I18N.t('core:commands.userMissingPermissions');
       void InteractionUtils.replyDynamic(client, interaction, {
         content: msg,
         flags: [MessageFlags.Ephemeral],
@@ -564,7 +564,7 @@ export class BaseCommand<I extends BaseInteraction = BaseInteraction> {
             // instead of the default or user config color
             .setColor(Colors.Red)
             .setDescription(
-              `${client.I18N.t('lib:commands.missingPermissions')}: \`${channel
+              `${client.I18N.t('core:commands.missingPermissions')}: \`${channel
                 .permissionsFor(targetMember.user.id)
                 ?.missing(perms)
                 .join(', ')}\``,
@@ -589,8 +589,8 @@ export class BaseCommand<I extends BaseInteraction = BaseInteraction> {
       void InteractionUtils.replyDynamic(client, interaction, {
         embeds: [
           client.embeds.error({
-            title: client.I18N.t('lib:invalidUser'),
-            description: client.I18N.t('lib:commands.isNotComponentUser'),
+            title: client.I18N.t('core:invalidUser'),
+            description: client.I18N.t('core:commands.isNotComponentUser'),
           }),
         ],
         flags: [MessageFlags.Ephemeral],
@@ -604,14 +604,14 @@ export class BaseCommand<I extends BaseInteraction = BaseInteraction> {
     client: Client<true>,
     interaction: I,
   ): Promise<false | PermLevel> => {
-    const permLevel = await PermissionUtils.resolveMemberPermLevel(
+    const permLevel = await PermissionUtils.resolveMemberPermissionLevel(
       client,
       interaction.member,
       interaction.guild,
     );
     if (permLevel < this.permLevel) {
       void InteractionUtils.replyDynamic(client, interaction, {
-        content: client.I18N.t('lib:commands.permLevelTooLow'),
+        content: client.I18N.t('core:commands.permLevelTooLow'),
         flags: [MessageFlags.Ephemeral],
       });
       return false;
@@ -629,7 +629,7 @@ export class BaseCommand<I extends BaseInteraction = BaseInteraction> {
     // we shouldn't allow it
     if (!channel) {
       void InteractionUtils.replyDynamic(client, interaction, {
-        content: client.I18N.t('lib:commands.noChannelForNSFWCheck'),
+        content: client.I18N.t('core:commands.noChannelForNSFWCheck'),
         flags: [MessageFlags.Ephemeral],
       });
       return false;
@@ -639,7 +639,7 @@ export class BaseCommand<I extends BaseInteraction = BaseInteraction> {
     // They'll always open without warning, so deny
     if (channel.isDMBased()) {
       void InteractionUtils.replyDynamic(client, interaction, {
-        content: client.I18N.t('lib:commands.noNSFWInDM'),
+        content: client.I18N.t('core:commands.noNSFWInDM'),
         flags: [MessageFlags.Ephemeral],
       });
       return false;
@@ -648,7 +648,7 @@ export class BaseCommand<I extends BaseInteraction = BaseInteraction> {
     // Threads can NOT be marked as NSFW
     if (channel.isThread()) {
       void InteractionUtils.replyDynamic(client, interaction, {
-        content: client.I18N.t('lib:commands.noNSFWInThread'),
+        content: client.I18N.t('core:commands.noNSFWInThread'),
         flags: [MessageFlags.Ephemeral],
       });
       return false;
@@ -657,7 +657,7 @@ export class BaseCommand<I extends BaseInteraction = BaseInteraction> {
     // If the channel is not NSFW, deny execution
     if (!channel.nsfw) {
       void InteractionUtils.replyDynamic(client, interaction, {
-        content: client.I18N.t('lib:commands.noNSFWInSFWChannel'),
+        content: client.I18N.t('core:commands.noNSFWInSFWChannel'),
         flags: [MessageFlags.Ephemeral],
       });
       return false;
@@ -699,7 +699,7 @@ export class BaseCommand<I extends BaseInteraction = BaseInteraction> {
       const me = interaction.guild.members.me;
       if (!me) {
         void InteractionUtils.replyDynamic(client, interaction, {
-          content: `${client.I18N.t('lib:commands.clientMissingPermissions')}\n\n${this.clientPerms
+          content: `${client.I18N.t('core:commands.clientMissingPermissions')}\n\n${this.clientPerms
             .map(
               (e) =>
                 `${this.client?.clientEmojis.error ?? defaultEmojis} \`${e}\``,
@@ -936,10 +936,10 @@ export class BaseCommand<I extends BaseInteraction = BaseInteraction> {
         firstNonExpired.valueOf() + durationInMS,
       );
       const remaining = firstUsageExpires.valueOf() - now;
-      const expiresIn = TimeUtils.msToHumanReadableTime(remaining);
+      const expiresIn = TimeUtils.msToHumanReadable(remaining);
       const relativeOutput = expiresIn === '0 seconds' ? '1 second' : expiresIn;
       void InteractionUtils.replyDynamic(client, interaction, {
-        content: client.I18N.t('lib:commands.onCooldown', {
+        content: client.I18N.t('core:commands.onCooldown', {
           type: CommandCooldownType[cooldown.type],
           expiresIn: relativeOutput,
         }),

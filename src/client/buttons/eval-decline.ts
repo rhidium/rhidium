@@ -5,7 +5,7 @@ import {
   Colors,
   EmbedBuilder,
 } from 'discord.js';
-import { Lang, ButtonCommand, Embeds, PermLevel } from '@lib';
+import { Lang, ButtonCommand, Embeds, PermLevel } from '@core';
 import EvalConstants from '../enums/eval';
 
 const EvalDeclineCommand = new ButtonCommand({

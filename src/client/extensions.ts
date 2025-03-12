@@ -1,4 +1,4 @@
-import { Client } from '@lib';
+import { Client } from '@core';
 import { usageStatisticsQueue } from './jobs/process-usage-statistics';
 
 export const clientExtensions = { usageStatisticsQueue };

@@ -17,7 +17,7 @@ import {
   RequiredClientOptions,
   Lang,
   locales,
-} from '@lib';
+} from '@core';
 
 import { permConfig } from './permissions';
 import { appConfig } from './config';

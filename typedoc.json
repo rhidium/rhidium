@@ -1,7 +1,7 @@
 {
   "name": "Rhidium",
   "entryPoints": [
-    "./src/lib/index.namespaces.ts",
+    "./src/core/index.namespaces.ts",
   ],
   "out": "./docs",
   "theme": "default",

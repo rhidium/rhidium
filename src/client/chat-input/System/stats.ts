@@ -1,4 +1,4 @@
-import { Lang, ChatInputCommand, TimeUtils, UnitConstants } from '@lib';
+import { Lang, ChatInputCommand, TimeUtils, UnitConstants } from '@core';
 import { stripIndents } from 'common-tags';
 import { getInfo } from 'discord-hybrid-sharding';
 import { SlashCommandBuilder, version } from 'discord.js';
@@ -84,7 +84,7 @@ const StatsCommand = new ChatInputCommand({
         },
         {
           name: Lang.t('general:system.uptime'),
-          value: `🕐 ${TimeUtils.msToHumanReadableTime(client.uptime ?? 0)}`,
+          value: `🕐 ${TimeUtils.msToHumanReadable(client.uptime ?? 0)}`,
           inline: false,
         },
         {

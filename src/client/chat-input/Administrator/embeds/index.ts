@@ -10,7 +10,7 @@ import {
   manageEmbedFieldsController,
 } from './controllers';
 import { EmbedConfigurationConstants } from './enums';
-import { Lang, ChatInputCommand, InteractionUtils, PermLevel } from '@lib';
+import { Lang, ChatInputCommand, InteractionUtils, PermLevel } from '@core';
 import { guildSettingsFromCache } from '@client/database';
 
 const ConfigureEmbedsCommand = new ChatInputCommand({

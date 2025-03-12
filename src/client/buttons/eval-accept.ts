@@ -13,7 +13,7 @@ import {
   Embeds,
   PermLevel,
   TimeUtils,
-} from '@lib';
+} from '@core';
 import EvalConstants from '../enums/eval';
 
 const EvalAcceptCommand = new ButtonCommand({
@@ -84,7 +84,7 @@ const EvalAcceptCommand = new ButtonCommand({
     }
 
     const files: AttachmentBuilder[] = [];
-    const runtime = TimeUtils.runTime(startEval);
+    const runtime = TimeUtils.bigIntDurationToHumanReadable(startEval);
     const output = inspect(evaluated, {
       depth: 0,
       showHidden: false,

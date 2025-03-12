@@ -1,7 +1,7 @@
 import { ConfigureEmbedData, EmbedWithFields } from './types';
 import { EmbedBuilder } from 'discord.js';
 import { AvailableEmbedConfiguration } from './enums';
-import { EmbedConstants, StringUtils } from '@lib';
+import { EmbedConstants, StringUtils } from '@core';
 import { appConfig } from '@client/config';
 
 export const fieldIdentificationLength = 6;

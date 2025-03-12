@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from 'discord.js';
-import { ChatInputCommand, PermLevel } from '@lib';
+import { ChatInputCommand, PermLevel } from '@core';
 
 const DeployCommand = new ChatInputCommand({
   permLevel: PermLevel['Bot Administrator'],

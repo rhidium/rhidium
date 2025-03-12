@@ -8,42 +8,6 @@ import {
   APIUser,
 } from 'discord.js';
 
-export interface FetchResourceOptions {
-  force: boolean;
-  cache: boolean;
-  allowUnknownGuild: boolean;
-}
-
-export enum FindResourceAccessor {
-  CHANNEL = 'channels',
-  GUILD = 'guilds',
-  ROLE = 'roles',
-  MEMBER = 'members',
-  USER = 'users',
-}
-
-export type ResourceTypeMap = {
-  [FindResourceAccessor.CHANNEL]: APIChannel;
-  [FindResourceAccessor.GUILD]: APIGuild;
-  [FindResourceAccessor.ROLE]: APIRole;
-  [FindResourceAccessor.MEMBER]: APIGuildMember;
-  [FindResourceAccessor.USER]: APIUser;
-};
-
-// Define a conditional type to map accessors to their return types
-export type ReturnTypeForAccessor<T extends FindResourceAccessor> =
-  T extends FindResourceAccessor.CHANNEL
-    ? APIChannel
-    : T extends FindResourceAccessor.GUILD
-      ? APIGuild
-      : T extends FindResourceAccessor.ROLE
-        ? APIRole
-        : T extends FindResourceAccessor.MEMBER
-          ? APIGuildMember
-          : T extends FindResourceAccessor.USER
-            ? APIUser
-            : null;
-
 const requireCluster = (client: Client): ClientWithCluster => {
   if (!hasCluster(client)) {
     throw new Error('Cluster is not enabled.');
@@ -55,20 +19,6 @@ const hasCluster = (client: Client): client is ClientWithCluster => {
   return !!client.cluster;
 };
 
-/**
- * Find a resource across all clusters. This is useful for
- * finding resources that are not cached on the current cluster.
- *
- * Note: You can provide any Type for T, but you should consider
- * only using the API types (e.g. APIChannel, APIGuild, APIRole, etc.)
- * as functions etc. aren't preserved in broadcast eval
- *
- * @param client The client to use
- * @param id The id of the resource to find
- * @param accessor The accessor to use
- * @param fetchOptions The fetch options to use
- * @returns The resource if found, otherwise undefined
- */
 const findResource = async <
   T extends APIChannel | APIGuild | APIRole | APIGuildMember | APIGuildMember,
 >(
@@ -133,8 +83,80 @@ const findResource = async <
   }
 };
 
-export class ClusterUtils {
+/**
+ * Options to fetch cluster resources with
+ */
+type FetchResourceOptions = {
+  force: boolean;
+  cache: boolean;
+  allowUnknownGuild: boolean;
+};
+
+/**
+ * Available accessors to find resources
+ */
+enum FindResourceAccessor {
+  CHANNEL = 'channels',
+  GUILD = 'guilds',
+  ROLE = 'roles',
+  MEMBER = 'members',
+  USER = 'users',
+}
+
+/**
+ * Type to map accessors to their respective (API) resources
+ */
+type ResourceTypeMap = {
+  [FindResourceAccessor.CHANNEL]: APIChannel;
+  [FindResourceAccessor.GUILD]: APIGuild;
+  [FindResourceAccessor.ROLE]: APIRole;
+  [FindResourceAccessor.MEMBER]: APIGuildMember;
+  [FindResourceAccessor.USER]: APIUser;
+};
+
+/**
+ * Conditional type to map accessors to their return types
+ */
+type AccessorReturnType<T extends FindResourceAccessor> =
+  T extends FindResourceAccessor.CHANNEL
+    ? APIChannel
+    : T extends FindResourceAccessor.GUILD
+      ? APIGuild
+      : T extends FindResourceAccessor.ROLE
+        ? APIRole
+        : T extends FindResourceAccessor.MEMBER
+          ? APIGuildMember
+          : T extends FindResourceAccessor.USER
+            ? APIUser
+            : null;
+
+class ClusterUtils {
+  /**
+   * Assert that the client has a cluster attached/available
+   * @param client The client to check
+   * @returns The client with cluster attached
+   */
   static requireCluster = requireCluster;
+  /**
+   * Type guard that checks if the client has a cluster available
+   * @param client The client to check the cluster for
+   * @returns Whether the client has a cluster attached
+   */
   static hasCluster = hasCluster;
+  /**
+   * Find a resource across all clusters
+   * @param client The client to use
+   * @param id The id of the resource to find
+   * @param accessor The accessor/resource-type to use
+   * @param fetchOptions The fetch options to use
+   * @returns The resource if found, if any
+   */
   static findResource = findResource;
 }
+
+export {
+  ClusterUtils,
+  type FetchResourceOptions,
+  type ResourceTypeMap,
+  type AccessorReturnType,
+};

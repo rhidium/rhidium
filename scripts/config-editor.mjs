@@ -33,6 +33,5 @@ import { readFileSync, writeFileSync } from 'fs';
     dataFilePath,
     createBackup: true,
     schemaString: jsonSchema,
-    // data: JSON.parse(readFileSync(dataFilePath, { encoding: 'utf-8' })),
   });
 })();

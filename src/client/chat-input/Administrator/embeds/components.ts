@@ -2,7 +2,7 @@ import { ButtonStyle, SlashCommandSubcommandBuilder } from 'discord.js';
 import { configureEmbedOptions, embedCommandOption } from './options';
 import { ActionRowBuilder, ButtonBuilder } from 'discord.js';
 import { EmbedConfigurationConstants } from './enums';
-import { Lang } from '@lib';
+import { Lang } from '@core';
 
 export const configureEmbedSubcommand = () => {
   const subcommand = new SlashCommandSubcommandBuilder()

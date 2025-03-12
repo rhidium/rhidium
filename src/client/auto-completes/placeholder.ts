@@ -2,7 +2,7 @@ import {
   discordPlaceholderStrings,
   lowercaseDiscordPlaceholderStrings,
 } from '@client/placeholders';
-import { CommandType, AutoCompleteOption } from '@lib';
+import { CommandType, AutoCompleteOption } from '@core';
 
 const PlaceholderOption = new AutoCompleteOption<CommandType>({
   name: 'placeholder',

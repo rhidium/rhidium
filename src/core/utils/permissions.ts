@@ -9,12 +9,13 @@ import {
   PermissionsBitField,
   Snowflake,
 } from 'discord.js';
-import { StringUtils } from './strings';
+import { StringUtils } from './common/strings';
 import { CommandType } from '../commands';
+import { logger } from '../logger';
 
 const validPermValues = Object.values(PermissionsBitField.Flags);
 
-const permissionEmojis = {
+const permissionEmojis: Record<string, string> = {
   [PermissionFlagsBits.AddReactions.toString()]: '👍',
   [PermissionFlagsBits.Administrator.toString()]: '👑',
   [PermissionFlagsBits.AttachFiles.toString()]: '📎',
@@ -62,35 +63,39 @@ const permissionEmojis = {
   [PermissionFlagsBits.ViewGuildInsights.toString()]: '📈',
 };
 
-const bigIntPermOutput = (permArr: bigint[], joinStr = ', ') => {
-  const permOutput = new PermissionsBitField(permArr)
+for (const permission of Object.values(PermissionFlagsBits)) {
+  if (!permissionEmojis[permission.toString()]) {
+    logger._warn(
+      `Permission emoji not found for ${permission}, using default emoji`,
+    );
+    permissionEmojis[permission.toString()] = '❓';
+  }
+}
+
+const displayPermissions = (perms: bigint[], joinStr = ', ') => {
+  const permOutput = new PermissionsBitField(perms)
     .toArray()
-    .filter((_e, ind) => typeof permArr[ind] !== 'undefined')
+    .filter((_e, ind) => typeof perms[ind] !== 'undefined')
     .map(
       (e, ind) =>
-        `${permissionEmojis[permArr[ind]?.toString() as string]} ${StringUtils.splitOnUppercase(e)}`,
+        `${permissionEmojis[perms[ind].toString()]} ${StringUtils.splitOnUppercase(e)}`,
     )
     .join(joinStr);
   return permOutput;
 };
 
-const getInvalidPerms = (permArr: bigint[]) =>
-  permArr.filter((perm) => !validPermValues.includes(perm));
+const filterInvalidPermissions = (perms: bigint[]) =>
+  perms.filter((perm) => !validPermValues.includes(perm));
 
-/**
- * Check if a user has specific permissions in a channel
- * @returns True if the member has all permissions,
- * or the array of missing permissions
- */
-const hasChannelPerms = (
+const hasChannelPermissions = (
   userId: Snowflake,
   channel: GuildChannel,
-  permArr: bigint[],
+  perms: bigint[],
 ) => {
-  let resolvedPermArr = permArr;
-  if (typeof permArr === 'string') resolvedPermArr = [permArr];
+  let resolvedPermArr = perms;
+  if (typeof perms === 'string') resolvedPermArr = [perms];
 
-  const invalidPerms = getInvalidPerms(resolvedPermArr);
+  const invalidPerms = filterInvalidPermissions(resolvedPermArr);
   if (invalidPerms.length >= 1) {
     throw new Error(
       `Invalid Discord permissions were provided: ${invalidPerms.join(', ')}`,
@@ -108,22 +113,24 @@ const hasChannelPerms = (
   return missingPerms.length >= 1 ? missingPerms : true;
 };
 
-const resolveMemberPermLevel = async (
+const resolveMemberPermissionLevel = async (
   client: Client,
   member: GuildMember | APIInteractionGuildMember | null,
   guild: Guild | null,
 ) => {
-  if (!member || !guild) return PermLevel.User;
+  // Note: Member and guild can be null for DMs
+  if (member === null || guild === null) return PermLevel.User;
+
+  // Note: During outages, guilds can be unavailable
+  if (!guild.available) return PermLevel.User;
 
   const resolvedMember = !(member instanceof GuildMember)
-    ? ((await guild?.members.fetch(member.user.id).catch(() => null)) ?? null)
+    ? ((await guild.members.fetch(member.user.id).catch(() => null)) ?? null)
     : member;
 
-  if (resolvedMember === null || typeof resolvedMember === 'undefined')
-    return PermLevel.User;
+  if (resolvedMember === null) return PermLevel.User;
 
   for await (const permCfg of client.internalPermissions.permConfig) {
-    if (!guild || !guild.available) continue;
     const hasLevel = await permCfg.hasLevel(
       client.internalPermissions,
       resolvedMember,
@@ -134,21 +141,62 @@ const resolveMemberPermLevel = async (
   return PermLevel.User;
 };
 
-const uniqueCommandPermissions = (commands: CommandType[]) => [
+const permissionsForCommands = (
+  commands: CommandType[],
+  accessor: 'clientPerms' | 'userPerms' = 'clientPerms',
+) => [
   ...new Set(
     commands.reduce((acc, cmd) => {
-      const permissions = cmd.clientPerms;
+      const permissions = cmd[accessor];
       return [...acc, ...permissions];
     }, []),
   ),
 ];
 
-export class PermissionUtils {
+class PermissionUtils {
+  /**
+   * Array of valid Discord permission values
+   */
   static readonly validPermValues = validPermValues;
+  /**
+   * Discord permissions mapped to emojis
+   */
   static readonly permissionEmojis = permissionEmojis;
-  static readonly bigIntPermOutput = bigIntPermOutput;
-  static readonly getInvalidPerms = getInvalidPerms;
-  static readonly hasChannelPerms = hasChannelPerms;
-  static readonly resolveMemberPermLevel = resolveMemberPermLevel;
-  static readonly uniqueCommandPermissions = uniqueCommandPermissions;
+  /**
+   * Display an array of (bigint) permissions in a human-readable format
+   * @param perms The array of permissions to display
+   * @param joinStr The string to join the permissions with
+   * @returns The formatted string
+   */
+  static readonly displayPermissions = displayPermissions;
+  /**
+   * Filter out invalid permissions from an array
+   * @param perms The array of permissions to filter
+   * @returns The filtered array
+   */
+  static readonly filterInvalidPermissions = filterInvalidPermissions;
+  /**
+   * Check if a user has specific permissions in a channel
+   * @param userId The user ID to check
+   * @param channel The channel to check
+   * @param perms The permissions to check
+   * @returns True if the member has all permissions, or the array of missing permissions
+   */
+  static readonly hasChannelPermissions = hasChannelPermissions;
+  /**
+   * Resolve the permission level of a member
+   * @param client The client to use for the lookup
+   * @param member The member to resolve the permission level for
+   * @returns The resolved permission level
+   */
+  static readonly resolveMemberPermissionLevel = resolveMemberPermissionLevel;
+  /**
+   * Resolve all permissions required for a set of commands
+   * @param commands The commands to get the permissions for
+   * @param accessor The accessor to use (client or user permissions)
+   * @returns The array of permissions required for the commands
+   */
+  static readonly permissionsForCommands = permissionsForCommands;
 }
+
+export { PermissionUtils };

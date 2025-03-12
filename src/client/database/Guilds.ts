@@ -1,6 +1,6 @@
 import { Prisma } from '@prisma/client';
 import { prisma } from '.';
-import { AsyncTTLCacheManager, UnitConstants } from '@lib';
+import { AsyncTTLCacheManager, UnitConstants } from '@core';
 
 export type GuildWithEmbeds = Prisma.GuildGetPayload<{
   include: {

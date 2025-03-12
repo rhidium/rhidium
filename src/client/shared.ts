@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import './module-aliases';
 
-import { logger, init as initLang } from '@lib';
+import { logger, init as initLang } from '@core';
 import { appConfig } from './config';
 
 /**

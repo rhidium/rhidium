@@ -8,5 +8,5 @@ import moduleAlias from 'module-alias';
 
 moduleAlias.addAliases({
   '@client': `${__dirname}/`,
-  '@lib': `${__dirname}/../lib`,
+  '@core': `${__dirname}/../core`,
 });

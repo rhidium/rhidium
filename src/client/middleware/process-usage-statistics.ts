@@ -4,7 +4,7 @@ import {
   CommandMiddlewareFunctionWithResult,
   MessageContextCommand,
   UserContextCommand,
-} from '@lib';
+} from '@core';
 import { ClientExtensions } from '@client/extensions';
 
 export const processUsageStatisticsMiddleware: CommandMiddlewareFunctionWithResult =

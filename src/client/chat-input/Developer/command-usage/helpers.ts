@@ -6,7 +6,7 @@ import {
   ComponentCommandType,
   TimeUtils,
   UnitConstants,
-} from '@lib';
+} from '@core';
 import { CommandStatisticsPayload } from '@client/database/CommandStatistics';
 
 const unknown = Lang.t('general:unknown');
@@ -51,7 +51,7 @@ export const embedFromUsageStatistics = (
     : unknown;
 
   const runtimeTotal = stats.runtimeTotal
-    ? TimeUtils.msToHumanReadableTime(stats.runtimeTotal)
+    ? TimeUtils.msToHumanReadable(stats.runtimeTotal)
     : unknown;
   const firstUsedAt = stats.firstUsedAt
     ? TimeUtils.discordInfoTimestamp(stats.firstUsedAt.valueOf())
@@ -79,23 +79,23 @@ export const embedFromUsageStatistics = (
     (u) => u.valueOf() > Date.now() - UnitConstants.MS_IN_ONE_DAY * 365,
   );
 
-  const averagePerHour = TimeUtils.calculateAverageFromDateArr(
+  const averagePerHour = TimeUtils.occurrencesPerInterval(
     stats.usages,
     UnitConstants.MS_IN_ONE_HOUR,
   );
-  const averagePerDay = TimeUtils.calculateAverageFromDateArr(
+  const averagePerDay = TimeUtils.occurrencesPerInterval(
     stats.usages,
     UnitConstants.MS_IN_ONE_DAY,
   );
-  const averagePerWeek = TimeUtils.calculateAverageFromDateArr(
+  const averagePerWeek = TimeUtils.occurrencesPerInterval(
     stats.usages,
     UnitConstants.MS_IN_ONE_DAY * 7,
   );
-  const averagePerMonth = TimeUtils.calculateAverageFromDateArr(
+  const averagePerMonth = TimeUtils.occurrencesPerInterval(
     stats.usages,
     UnitConstants.MS_IN_ONE_DAY * 30,
   );
-  const averagePerYear = TimeUtils.calculateAverageFromDateArr(
+  const averagePerYear = TimeUtils.occurrencesPerInterval(
     stats.usages,
     UnitConstants.MS_IN_ONE_DAY * 365,
   );
@@ -190,7 +190,7 @@ export const compactEmbedFromUsageStatistics = (
         ? `${stat.runtimeMean.toFixed(2)}ms`
         : unknown;
       const totalRuntime = stat.runtimeTotal
-        ? `${TimeUtils.msToHumanReadableTime(stat.runtimeTotal)}`
+        ? `${TimeUtils.msToHumanReadable(stat.runtimeTotal)}`
         : unknown;
       return {
         name: `${index + 1 + indexOffset}. ${commandId} (${stringCommandTypeFromInteger(stat.type)})`,

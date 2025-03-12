@@ -6,7 +6,7 @@ import {
   InteractionUtils,
   TimeUtils,
   cooldownResourceId,
-} from '@lib';
+} from '@core';
 import { MessageFlags } from 'discord.js';
 
 export const persistentCooldownMiddleware: CommandMiddlewareFunction = async ({
@@ -53,10 +53,10 @@ export const persistentCooldownMiddleware: CommandMiddlewareFunction = async ({
       firstNonExpired.valueOf() + durationInMS,
     );
     const remaining = firstUsageExpires.valueOf() - now;
-    const expiresIn = TimeUtils.msToHumanReadableTime(remaining);
+    const expiresIn = TimeUtils.msToHumanReadable(remaining);
     const relativeOutput = expiresIn === '0 seconds' ? '1 second' : expiresIn;
     await InteractionUtils.replyDynamic(client, interaction, {
-      content: Lang.t('lib:commands.onCooldown', {
+      content: Lang.t('core:commands.onCooldown', {
         type: CommandCooldownType[cooldown.type],
         expiresIn: relativeOutput,
       }),

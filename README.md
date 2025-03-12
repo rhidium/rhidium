@@ -1,3 +1,5 @@
+- Initial bot should be "CMU / Community Manager Utilities / Common Utilities", moderation, timestamps, etc.
+
 <div align="center">
   <a href="https://rhidium.xyz"><img src="https://github.com/rhidium/core/assets/57721238/e6d25fa1-07cb-4284-a02a-f73fe7ef3878" width="100" alt="logo" /></a>
 
@@ -148,7 +150,7 @@ In any scope with a valid interaction context:
 
 ```ts
 import { ComponentType } = from 'discord.js';
-import { UnitConstants } from 'lib';
+import { UnitConstants } from '@core';
 
 // Fetching the message attached to the received interaction
 const interactionMessage = await interaction.fetchReply();

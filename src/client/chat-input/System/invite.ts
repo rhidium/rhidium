@@ -5,7 +5,7 @@ import {
   CommandCooldownType,
   PermissionUtils,
   UnitConstants,
-} from '@lib';
+} from '@core';
 
 const InviteCommand = new ChatInputCommand({
   data: new SlashCommandBuilder(),
@@ -16,7 +16,7 @@ const InviteCommand = new ChatInputCommand({
   },
   run: async (client, interaction) => {
     const commands = client.commandManager.apiCommands;
-    const allUniqueClientPermissions = PermissionUtils.uniqueCommandPermissions(
+    const allUniqueClientPermissions = PermissionUtils.permissionsForCommands(
       commands.toJSON(),
     );
     const inviteLink = client.generateInvite({
