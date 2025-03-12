@@ -6,7 +6,7 @@ const projectRoot = process.env.PWD ?? '~/';
 const javascriptExtensions = ['.js', '.mjs', '.cjs'];
 
 const relativeProjectPath = (filePath: string) =>
-  filePath.replace(projectRoot, '~');
+  filePath.replace(projectRoot, '.');
 
 const fileNameFromPath = (filePath: string) =>
   filePath.slice(filePath.lastIndexOf(path.sep) + 1, filePath.length);
@@ -130,7 +130,7 @@ class FileUtils {
    */
   static readonly getFiles = getFiles;
   /**
-   * Recursively get all directories in a directory, including subdirectories
+   * Get all directories in a directory, does not include nested/subdirectories
    * @param dirPath The target directory to search for directories in
    * @returns An array of directory paths found in the target directory
    */

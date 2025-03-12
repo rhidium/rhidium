@@ -1,5 +1,6 @@
 import './shared';
 
+import path from 'path';
 import { ClusterClient, getInfo } from 'discord-hybrid-sharding';
 import {
   ActivityType,
@@ -7,10 +8,8 @@ import {
   GatewayIntentBits,
   PresenceData,
 } from 'discord.js';
-import path from 'path';
 import {
   Client,
-  GlobalMiddlewareOptions,
   logger,
   CommandCooldownType,
   ClientOptions as RhidiumClientOptions,
@@ -20,11 +19,7 @@ import {
   appConfig,
   permConfig,
 } from '@core';
-
 import pkg from '../../package.json';
-import { processUsageStatisticsMiddleware } from './middleware/process-usage-statistics';
-import { persistentCooldownMiddleware } from './middleware/persistent-cooldown';
-import { clientExtensions } from './extensions';
 
 /**
  * This is our client/bot file - it's not the entry point of our application,
@@ -44,7 +39,7 @@ export const main = async () => {
   const clientOptions: ClientOptions &
     Partial<RhidiumClientOptions> &
     RequiredClientOptions<boolean> = {
-    globalMiddleware,
+    moduleDirectories: [path.resolve(__dirname, '../modules')],
     suppressVanity: false,
     // For anyone wondering, there's nothing wrong with storing
     // the token in a config file outside of the .env file,
@@ -52,7 +47,6 @@ export const main = async () => {
     // or included in build artifacts (like Docker images)
     token: appConfig.client.token,
     intents: [GatewayIntentBits.Guilds],
-    extensions: clientExtensions,
     applicationId: appConfig.client.id,
     errorChannelId: appConfig.client.error_channel_id ?? null,
     defaultLockMemberPermissions:
@@ -77,7 +71,6 @@ export const main = async () => {
       usages: appConfig.cooldown.default_cooldown_usages,
     },
     internalPermissions: clientPermissions!,
-    directories: clientDirectories!,
     logging: clientLoggingConfig!,
     colors: appConfig.colors,
     emojis: appConfig.emojis,
@@ -118,11 +111,6 @@ export const main = async () => {
   await client.login(appConfig.client.token);
 };
 
-export const globalMiddleware: GlobalMiddlewareOptions = {
-  postRunExecution: [processUsageStatisticsMiddleware],
-  preRunThrottle: [persistentCooldownMiddleware],
-};
-
 export const clientLoggingConfig: Client['extendedOptions']['logging'] = {
   directory: appConfig.logging?.directory,
   maxFiles: appConfig.logging?.max_files,
@@ -146,20 +134,6 @@ export const clientPermissions: Client['extendedOptions']['internalPermissions']
     developers: appConfig.permissions.developer_ids,
     permConfig: permConfig,
   };
-
-export const clientDirectories: Client['extendedOptions']['directories'] = {
-  listeners: [path.resolve(__dirname, './listeners')],
-  autoCompletes: [path.resolve(__dirname, './auto-completes')],
-  chatInputs: [path.resolve(__dirname, './chat-input')],
-  messageContextMenus: [path.resolve(__dirname, './message-context')],
-  userContextMenus: [path.resolve(__dirname, './user-context')],
-  componentCommands: [
-    path.resolve(__dirname, './buttons'),
-    path.resolve(__dirname, './modals'),
-    path.resolve(__dirname, './select-menus'),
-  ],
-  jobs: [path.resolve(__dirname, './jobs')],
-};
 
 export const clientDebugging: Client['extendedOptions']['debug'] = {
   enabled: appConfig.debug.debug_mode_enabled,

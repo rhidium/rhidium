@@ -16,7 +16,7 @@ import {
 } from 'discord.js';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import path from 'path';
-import { type Client } from '../client';
+import { GlobalMiddlewareOptions, type Client } from '../client';
 import {
   APICommandData,
   APICommandType,
@@ -41,7 +41,6 @@ import {
 import { AutoCompleteOption } from '../commands/auto-complete';
 import { EmbedConstants, UnitConstants } from '../constants';
 import { ClientEventListener } from '.';
-import { stripIndents } from 'common-tags';
 import { Job } from '../jobs';
 
 export type ExcludedCommandNames =
@@ -93,7 +92,23 @@ export interface CommandManagerCommandsOptions {
   componentCommands?: Directories;
   /** Absolute or relative path(s) to the folders/directories that hold your jobs */
   jobs?: Directories;
+  /** Global middleware configuration for the client/module */
+  middleware?: GlobalMiddlewareOptions;
 }
+
+export const isCommandManagerCommandsOptions = (
+  item: unknown,
+): item is CommandManagerCommandsOptions =>
+  typeof item === 'object' &&
+  item !== null &&
+  ('listeners' in item ||
+    'chatInputs' in item ||
+    'autoCompletes' in item ||
+    'userContextMenus' in item ||
+    'messageContextMenus' in item ||
+    'middleware' in item ||
+    'componentCommands' in item ||
+    'jobs' in item);
 
 export interface CommandManagerOptions {
   client: Client;
@@ -123,13 +138,37 @@ export class CommandManager {
       .concat(this.messageContextMenus);
   }
 
-  readonly directories: CommandManagerCommandsOptions = {};
+  /**
+   * Represents a concatenated list of all components
+   * across all modules (src/modules) that are used
+   */
+  readonly directories: Record<
+    keyof Omit<Required<CommandManagerCommandsOptions>, 'middleware'>,
+    string[]
+  > & {
+    middleware: Required<GlobalMiddlewareOptions>;
+  } = {
+    listeners: [],
+    chatInputs: [],
+    autoCompletes: [],
+    userContextMenus: [],
+    messageContextMenus: [],
+    middleware: {
+      postRunExecution: [],
+      preRunChecks: [],
+      preRunExecution: [],
+      preRunThrottle: [],
+      runExecutionReturnValues: [],
+    },
+    componentCommands: [],
+    jobs: [],
+  };
 
   constructor(options: CommandManagerOptions) {
     this.client = options.client;
   }
 
-  // Construct and prepare an instance of the REST module
+  // Construct and prepare an instance of the REST client
   private get rest() {
     if (!this.client.token) throw new Error('No token set for client');
     return new REST({ version: '10' }).setToken(this.client.token);
@@ -390,7 +429,6 @@ export class CommandManager {
           cmd = cmd.default;
 
         if (!isCommand(cmd)) {
-          console.log(cmd);
           this.client.logger.debug(
             `Skipping non-command: ${FileUtils.relativeProjectPath(cmdPath)}`,
           );
@@ -496,15 +534,7 @@ export class CommandManager {
     };
   }
 
-  initialize = ({
-    listeners,
-    chatInputs,
-    autoCompletes,
-    userContextMenus,
-    messageContextMenus,
-    componentCommands,
-    jobs,
-  }: CommandManagerCommandsOptions) => {
+  initialize = (moduleDirectories: Directories) => {
     const jobsCollection = new Collection<string, Job>();
     const listenersCollection = new Collection<string, ClientEventListener>();
     const autoCompletesCollection = new Collection<
@@ -525,59 +555,136 @@ export class CommandManager {
       ComponentCommandBase
     >();
 
-    if (listeners) {
-      this.directories.listeners = listeners;
-      const resolvedListeners = this.resolveListeners(
-        listeners,
-        listenersCollection,
-      );
-      this.listeners = resolvedListeners.collection;
+    const dirArr =
+      typeof moduleDirectories === 'string'
+        ? [moduleDirectories]
+        : moduleDirectories;
+
+    const invalidModuleError = (moduleDirectory: string) =>
+      `Failed to load module "${FileUtils.relativeProjectPath(moduleDirectory)}", are you sure the module is correctly exported?`;
+
+    for (const moduleDirectory of dirArr) {
+      const modules = FileUtils.getDirectories(moduleDirectory);
+      for (const mod of modules.filter(
+        (m) => !FileUtils.fileNameFromPath(m).startsWith('.'),
+      )) {
+        this.client.logger.debug(
+          `Loading module: ${FileUtils.relativeProjectPath(mod)}`,
+        );
+
+        let index;
+        try {
+          index = require(path.resolve(moduleDirectory, mod));
+        } catch (error) {
+          this.client.logger.error(invalidModuleError(mod));
+          continue;
+        }
+
+        if (!('default' in index)) {
+          this.client.logger.error(invalidModuleError(mod));
+          continue;
+        }
+
+        const options = index.default;
+
+        if (!isCommandManagerCommandsOptions(options)) {
+          this.client.logger.error(invalidModuleError(moduleDirectory));
+          continue;
+        }
+
+        const {
+          listeners,
+          chatInputs,
+          autoCompletes,
+          userContextMenus,
+          messageContextMenus,
+          componentCommands,
+          jobs,
+          middleware,
+        } = options;
+
+        if (listeners) {
+          this.directories.listeners = [
+            ...this.directories.listeners,
+            ...(typeof listeners === 'string' ? [listeners] : listeners),
+          ];
+          void this.resolveListeners(listeners, listenersCollection);
+        }
+        if (chatInputs) {
+          this.directories.chatInputs = [
+            ...this.directories.chatInputs,
+            ...(typeof chatInputs === 'string' ? [chatInputs] : chatInputs),
+          ];
+          void this.loadCommandCollection(chatInputs, chatInputsCollection);
+        }
+        if (autoCompletes) {
+          this.directories.autoCompletes = [
+            ...this.directories.autoCompletes,
+            ...(typeof autoCompletes === 'string'
+              ? [autoCompletes]
+              : autoCompletes),
+          ];
+          void this.resolveAutoCompletes(
+            autoCompletes,
+            autoCompletesCollection,
+          );
+        }
+        if (userContextMenus) {
+          this.directories.userContextMenus = [
+            ...this.directories.userContextMenus,
+            ...(typeof userContextMenus === 'string'
+              ? [userContextMenus]
+              : userContextMenus),
+          ];
+          void this.loadCommandCollection(
+            userContextMenus,
+            userContextMenusCollection,
+          );
+        }
+        if (messageContextMenus) {
+          this.directories.messageContextMenus = [
+            ...this.directories.messageContextMenus,
+            ...(typeof messageContextMenus === 'string'
+              ? [messageContextMenus]
+              : messageContextMenus),
+          ];
+          void this.loadCommandCollection(
+            messageContextMenus,
+            messageContextMenusCollection,
+          );
+        }
+        if (componentCommands) {
+          this.directories.componentCommands = [
+            ...this.directories.componentCommands,
+            ...(typeof componentCommands === 'string'
+              ? [componentCommands]
+              : componentCommands),
+          ];
+          void this.loadCommandCollection(
+            componentCommands,
+            componentCommandsCollection,
+          );
+        }
+        if (jobs) {
+          this.directories.jobs = [
+            ...this.directories.jobs,
+            ...(typeof jobs === 'string' ? [jobs] : jobs),
+          ];
+          void this.resolveJobs(jobs, jobsCollection);
+        }
+        if (middleware) {
+          this.client.globalMiddleware.use(middleware);
+        }
+      }
     }
-    if (chatInputs) {
-      this.directories.chatInputs = chatInputs;
-      const commands = this.loadCommandCollection(
-        chatInputs,
-        chatInputsCollection,
-      );
-      this.chatInput = commands.collection;
-    }
-    if (autoCompletes) {
-      this.directories.autoCompletes = autoCompletes;
-      const commands = this.resolveAutoCompletes(
-        autoCompletes,
-        autoCompletesCollection,
-      );
-      this.autoComplete = commands.collection;
-    }
-    if (userContextMenus) {
-      this.directories.userContextMenus = userContextMenus;
-      const commands = this.loadCommandCollection(
-        userContextMenus,
-        userContextMenusCollection,
-      );
-      this.userContextMenus = commands.collection;
-    }
-    if (messageContextMenus) {
-      this.directories.messageContextMenus = messageContextMenus;
-      const commands = this.loadCommandCollection(
-        messageContextMenus,
-        messageContextMenusCollection,
-      );
-      this.messageContextMenus = commands.collection;
-    }
-    if (componentCommands) {
-      this.directories.componentCommands = componentCommands;
-      const commands = this.loadCommandCollection(
-        componentCommands,
-        componentCommandsCollection,
-      );
-      this.componentCommands = commands.collection;
-    }
-    if (jobs) {
-      this.directories.jobs = jobs;
-      const loadedJobs = this.resolveJobs(jobs, jobsCollection);
-      this.jobs = loadedJobs.collection;
-    }
+
+    this.listeners = listenersCollection;
+    this.chatInput = chatInputsCollection;
+    this.autoComplete = autoCompletesCollection;
+    this.userContextMenus = userContextMenusCollection;
+    this.messageContextMenus = messageContextMenusCollection;
+    this.componentCommands = componentCommandsCollection;
+    this.jobs = jobsCollection;
 
     return {
       listenersCollection,
@@ -1061,48 +1168,79 @@ export class CommandManager {
   ) => {
     const { client } = this;
     const apiCommandData = await this.commandAPIData();
-    const allFields = commands.toJSON().map((e) => {
-      const apiCmd = apiCommandData?.find((f) => f.name === e.data.name);
-      const isSubCmdGroupOnlyCmd = !apiCmd?.options.find(
-        (e) =>
-          e.type !== ApplicationCommandOptionType.SubcommandGroup &&
-          e.type !== ApplicationCommandOptionType.Subcommand,
-      );
-      const optionsOutput =
-        apiCmd && apiCmd.options.length > 0
-          ? ` +${apiCmd.options.length} option${apiCmd.options.length === 1 ? '' : 's'}`
-          : null;
-      const aliasOutputStandalone =
-        e.aliases.length > 0
-          ? ` +${e.aliases.length} alias${e.aliases.length === 1 ? '' : 'es'}`
+    const allFields = commands
+      .toJSON()
+      .filter((e) => apiCommandData?.find((f) => f.name === e.data.name))
+      .map((e) => {
+        const apiCmd = apiCommandData?.find((f) => f.name === e.data.name);
+        const isSubCmdGroupOnlyCmd =
+          apiCmd?.options.length &&
+          !apiCmd?.options.find(
+            (e) =>
+              e.type !== ApplicationCommandOptionType.SubcommandGroup &&
+              e.type !== ApplicationCommandOptionType.Subcommand,
+          );
+        const optionsOutput =
+          apiCmd && apiCmd.options.length > 0
+            ? ` +${apiCmd.options.length} option${apiCmd.options.length === 1 ? '' : 's'}`
+            : null;
+        const aliasOutputStandalone =
+          e.aliases.length > 0
+            ? ` +${e.aliases.length} alias${e.aliases.length === 1 ? '' : 'es'}`
+            : '';
+        const aliasOutput = aliasOutputStandalone
+          ? optionsOutput === null
+            ? aliasOutputStandalone
+            : `, ${aliasOutputStandalone}`
           : '';
-      const aliasOutput = aliasOutputStandalone
-        ? optionsOutput === null
-          ? aliasOutputStandalone
-          : `, ${aliasOutputStandalone}`
-        : '';
-      const nameOutput = apiCmd
-        ? `</${apiCmd.name}:${apiCmd.id}>`
-        : `/${e.data.name}`;
-      const nameWithOptionsOutput = apiCmd
-        ? `${nameOutput}${isSubCmdGroupOnlyCmd ? '' : (optionsOutput ?? '')}${aliasOutput}`
-        : e.data.name;
-      const subCmdOnlyOutput = isSubCmdGroupOnlyCmd
-        ? apiCmd?.options.map((f) => {
-            return stripIndents`
-            **${nameOutput} ${f.name}** - ${f.description}
-          `;
-          })
-        : null;
-      let description =
-        e instanceof ChatInputCommand ? e.data.description : 'n/a';
-      if (subCmdOnlyOutput) description += `\n${subCmdOnlyOutput.join('\n')}`;
-      return {
-        name: `**${nameWithOptionsOutput}**`,
-        value: description,
-        inline: false,
-      };
-    });
+        const nameOutput = apiCmd
+          ? `</${apiCmd.name}:${apiCmd.id}>`
+          : `/${e.data.name}`;
+        const suffix = optionsOutput ?? '' + aliasOutput;
+        const nameWithOptionsOutput = apiCmd
+          ? `${apiCmd ? nameOutput : `${nameOutput}`}${isSubCmdGroupOnlyCmd ? ` - ${apiCmd.description}` : suffix.length ? `${suffix}` : ''}`
+          : e.data.name;
+        const subCmdOnlyOutput = isSubCmdGroupOnlyCmd
+          ? // https://discord.com/developers/docs/reference#message-formatting
+            apiCmd?.options.map((f) => {
+              const apiCmdOption = apiCmd.options.find(
+                (e) => e.name === f.name,
+              );
+              return apiCmdOption?.type ===
+                ApplicationCommandOptionType.Subcommand
+                ? `</${apiCmd.name} ${f.name}:${apiCmd.id}> - ${f.description}`
+                : apiCmdOption?.type ===
+                    ApplicationCommandOptionType.SubcommandGroup
+                  ? (apiCmdOption.options
+                      ?.filter(
+                        (g) =>
+                          g.type === ApplicationCommandOptionType.Subcommand,
+                      )
+                      .map(
+                        (g) =>
+                          `</${apiCmd.name} ${f.name} ${g.name}:${apiCmd.id}> - ${g.description}`,
+                      )
+                      .join('\n') ?? `</${apiCmd.name} ${f.name}:${apiCmd.id}>`)
+                  : `${nameOutput} ${f.name} - ${f.description}`;
+            })
+          : null;
+        let description =
+          'description' in e.data
+            ? isSubCmdGroupOnlyCmd
+              ? ''
+              : e.data.description
+            : e instanceof UserContextCommand
+              ? "No description available for this command, as it's a user context menu command."
+              : e instanceof MessageContextCommand
+                ? "No description available for this command, as it's a message context menu command."
+                : 'n/a';
+        if (subCmdOnlyOutput) description += `\n${subCmdOnlyOutput.join('\n')}`;
+        return {
+          name: `${nameWithOptionsOutput}`,
+          value: description,
+          inline: false,
+        };
+      });
     const chunkSize = EmbedConstants.MAX_FIELDS_LENGTH;
     const embeds = [];
     for (let i = 0; i < allFields.length; i += chunkSize) {

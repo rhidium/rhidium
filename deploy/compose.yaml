@@ -5,7 +5,7 @@ services:
       context: ../
       dockerfile: ./deploy/Dockerfile
       args:
-        - CI=true # Skips husky in build stage
+        - CI=true
     restart: unless-stopped
     depends_on:
       - database

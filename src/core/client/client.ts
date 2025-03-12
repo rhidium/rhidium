@@ -34,7 +34,6 @@ import {
 import { i18n } from 'i18next';
 import {
   CommandManager,
-  CommandManagerCommandsOptions,
   ClientPermissionOptions,
   ClientPermissions,
 } from '../managers';
@@ -105,7 +104,6 @@ export interface ClientOptions {
   developmentServerId?: string | undefined;
   logging?: Omit<LoggerOptions & FileLoggerOptions, 'client'>;
   pkg?: Record<string, unknown>;
-  extensions?: Record<string, unknown>;
   globalMiddleware?: GlobalMiddlewareOptions;
 }
 
@@ -114,7 +112,8 @@ export interface RequiredClientOptions<Ready extends boolean = boolean> {
   token: If<Ready, string, string | null>;
   /** The bot' application id */
   applicationId: string;
-  directories: CommandManagerCommandsOptions;
+  /** The directories to use for the client */
+  moduleDirectories: Directories;
   /** Customize colors for the client */
   colors: UserColors;
   /** Customize emojis for the client */
@@ -138,7 +137,7 @@ export class Client<
   readonly colors: UserColors;
   readonly embeds: Embeds;
   readonly clientEmojis: IEmojis;
-  directories: CommandManagerCommandsOptions;
+  readonly moduleDirectories: Directories;
   readonly extendedOptions: DiscordClientOptions &
     Partial<ClientOptions> &
     RequiredClientOptions<Ready>;
@@ -154,7 +153,6 @@ export class Client<
   I18N: i18n;
   locales: Locale[];
   pkg: Record<string, unknown> = pkg;
-  extensions: Record<string, unknown> = {};
   globalMiddleware: GlobalMiddleware;
 
   constructor(
@@ -165,7 +163,7 @@ export class Client<
   ) {
     super(options);
     this.extendedOptions = options;
-    this.directories = options.directories;
+    this.moduleDirectories = options.moduleDirectories;
     const { debug } = options;
     this.debug = {
       enabled: debug?.enabled ?? false,
@@ -183,7 +181,6 @@ export class Client<
       client: this,
       combinedLogging: options.logging?.combinedLogging ?? true,
     });
-    this.extensions = options.extensions ?? {};
     this.colors = {
       debug: options.colors.debug,
       error: options.colors.error,
@@ -255,7 +252,7 @@ export class Client<
   initialize(): this {
     this.printVanity();
     this.registerEssentialListeners();
-    this.commandManager.initialize(this.directories);
+    this.commandManager.initialize(this.moduleDirectories);
     return this;
   }
 
