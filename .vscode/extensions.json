@@ -1,7 +1,12 @@
 {
   "recommendations": [
-    "esbenp.prettier-vscode",
-    "dbaeumer.vscode-eslint",
-    "streetsidesoftware.code-spell-checker"
+    "dbaeumer.vscode-eslint", // ESLint integration
+    "esbenp.prettier-vscode", // Prettier code formatter
+    "streetsidesoftware.code-spell-checker", // Spell checker for code
+    "redhat.vscode-yaml", // YAML support for configuration files
+    "eamodio.gitlens", // GitLens for enhanced Git support
+    "GraphQL.vscode-graphql", // GraphQL support (if relevant)
+    "prisma.prisma", // Prisma ORM support (if relevant)
+    "ms-azuretools.vscode-docker" // Docker support (for Docker-based development)
   ]
 }

@@ -1,12 +1,20 @@
 {
   "name": "rhidium",
+  "license": "ISC",
   "version": "2.2.0",
   "description": "Quickly and easily create powerful Discord bots using a powerful, opinionated, all-in-one framework.",
   "main": "dist/src/client/index.js",
-  "engines": {
-    "node": ">=16.6.0"
-  },
   "packageManager": "pnpm@9.15.4",
+  "engines": {
+    "node": ">=16.6.0",
+    "npm": ">=7.0.0",
+    "vscode": "^1.22.0"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  },
   "scripts": {
     "build": "tsc",
     "prebuild": "rimraf dist",
@@ -33,56 +41,14 @@
     "setup:config": "pnpm add -D @rhidium/json-editor",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
-    "db:migrate": "prisma migrate dev"
+    "db:migrate": "prisma migrate dev",
+    "prepare": "node .husky/install.mjs"
   },
-  "keywords": [
-    "discord",
-    "template",
-    "bot-template",
-    "node",
-    "discordapp",
-    "typescript",
-    "rhidium",
-    "framework",
-    "discord.js"
-  ],
-  "author": {
-    "name": "Richard Hillebrand",
-    "email": "me@mirasaki.dev",
-    "url": "https://mirasaki.dev"
-  },
-  "license": "ISC",
-  "devDependencies": {
-    "@types/common-tags": "^1.8.4",
-    "@types/module-alias": "^2.0.4",
-    "@types/node": "^22.7.5",
-    "gts": "^6.0.2",
-    "prisma": "^6.4.1",
-    "rimraf": "^6.0.1",
-    "ts-json-schema-generator": "^2.3.0",
-    "ts-node-dev": "^2.0.0",
-    "tsconfig-paths": "^4.2.0",
-    "typedoc": "^0.27.9",
-    "typescript": "^5.6.3"
-  },
-  "config": {
-    "commitizen": {
-      "path": "./node_modules/cz-conventional-changelog"
+  "pnpm": {
+    "overrides": {
+      "undici": ">=6.21.1"
     }
   },
-  "lint-staged": {
-    "src/**/*.{js,jsx,ts,tsx,json}": [
-      "eslint --fix"
-    ]
-  },
-  "repository": {
-    "type": "git",
-    "url": "git@github.com:rhidium/rhidium.git"
-  },
-  "bugs": {
-    "url": "https://github.com/rhidium/rhidium/issues"
-  },
-  "homepage": "https://github.com/rhidium/rhidium#readme",
   "dependencies": {
     "@prisma/client": "6.4.1",
     "colors": "^1.4.0",
@@ -98,9 +64,47 @@
     "winston": "^3.17.0",
     "winston-daily-rotate-file": "^5.0.0"
   },
-  "pnpm": {
-    "overrides": {
-      "undici": ">=6.21.1"
-    }
-  }
+  "devDependencies": {
+    "@commitlint/cli": "^19.7.1",
+    "@commitlint/config-conventional": "^19.7.1",
+    "@types/common-tags": "^1.8.4",
+    "@types/module-alias": "^2.0.4",
+    "@types/node": "^22.7.5",
+    "commitizen": "^4.3.1",
+    "cz-conventional-changelog": "^3.3.0",
+    "gts": "^6.0.2",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.5.0",
+    "prisma": "^6.4.1",
+    "rimraf": "^6.0.1",
+    "ts-json-schema-generator": "^2.3.0",
+    "ts-node-dev": "^2.0.0",
+    "tsconfig-paths": "^4.2.0",
+    "typedoc": "^0.27.9",
+    "typescript": "^5.6.3"
+  },
+  "author": {
+    "name": "Richard Hillebrand",
+    "email": "me@mirasaki.dev",
+    "url": "https://mirasaki.dev"
+  },
+  "keywords": [
+    "discord",
+    "template",
+    "bot-template",
+    "node",
+    "discordapp",
+    "typescript",
+    "rhidium",
+    "framework",
+    "discord.js"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:rhidium/rhidium.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rhidium/rhidium/issues"
+  },
+  "homepage": "https://github.com/rhidium/rhidium#readme"
 }
