@@ -1,6 +1,6 @@
 {
   "name": "rhidium",
-  "version": "0.0.1",
+  "version": "2.2.0",
   "description": "Quickly and easily create powerful Discord bots using a powerful, opinionated, all-in-one framework.",
   "main": "dist/src/client/index.js",
   "engines": {
