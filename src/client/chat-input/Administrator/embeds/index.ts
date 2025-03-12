@@ -10,8 +10,13 @@ import {
   manageEmbedFieldsController,
 } from './controllers';
 import { EmbedConfigurationConstants } from './enums';
-import { Lang, ChatInputCommand, InteractionUtils, PermLevel } from '@core';
-import { guildSettingsFromCache } from '@client/database';
+import {
+  Lang,
+  ChatInputCommand,
+  InteractionUtils,
+  PermLevel,
+  guildFromCache,
+} from '@core';
 
 const ConfigureEmbedsCommand = new ChatInputCommand({
   permLevel: PermLevel.Administrator,
@@ -37,7 +42,7 @@ const ConfigureEmbedsCommand = new ChatInputCommand({
 
     await ConfigureEmbedsCommand.deferReplyInternal(interaction);
 
-    const guildSettings = await guildSettingsFromCache(interaction.guild.id);
+    const guildSettings = await guildFromCache(interaction.guild.id);
     if (!guildSettings) {
       await ConfigureEmbedsCommand.reply(
         interaction,

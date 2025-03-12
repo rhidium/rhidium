@@ -1,8 +1,7 @@
 import { ConfigureEmbedData, EmbedWithFields } from './types';
 import { EmbedBuilder } from 'discord.js';
 import { AvailableEmbedConfiguration } from './enums';
-import { EmbedConstants, StringUtils } from '@core';
-import { appConfig } from '@client/config';
+import { appConfig, EmbedConstants, StringUtils } from '@core';
 
 export const fieldIdentificationLength = 6;
 export const maxFieldNameLength =
@@ -12,8 +11,8 @@ export const settingsKeyFromEmbedOption = (
   embedOption: AvailableEmbedConfiguration,
 ) =>
   embedOption === AvailableEmbedConfiguration.MEMBER_JOIN
-    ? 'memberJoinEmbed'
-    : 'memberLeaveEmbed';
+    ? 'MemberJoinEmbed'
+    : 'MemberLeaveEmbed';
 
 export const configureEmbedInputToEmbedData = (options: {
   [k: string]: string | undefined | null;

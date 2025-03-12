@@ -11,36 +11,37 @@ datasource db {
 }
 
 model User {
-  id      String   @id @unique
-  members Member[]
+  id      String   @id @unique                                    // The Discord id of the user
+  Members Member[]                                                // A user can be a member of multiple guilds
 }
 
-model Member {
-  id      String @id @unique @default(cuid())
-  userId  String
-  user    User   @relation(fields: [userId], references: [id])
-  guildId String
-  guild   Guild  @relation(fields: [guildId], references: [id])
+model Member {                                                    // Note: Structure reflects the Discord API
+  id  String @id @unique                                          // The id of the Discord user
+  User    User   @relation(fields: [id], references: [id])        // The Discord user for the guild member
+  GuildId String                                                  // The id of the guild this member belongs to
+  Guild   Guild  @relation(fields: [GuildId], references: [id])   // A member belongs to a single guild
 }
 
 model Guild {
-  id      String   @id @unique
-  Members Member[]
+  id      String   @id @unique                                    // The Discord id of the guild (server)
+  Members Member[]                                                // A guild can have multiple members
 
-  adminRoleId       String?
-  adminLogChannelId String?
-  modRoleId         String?
-  modLogChannelId   String?
+  // Role configuration
+  autoRoleIds       String[]                                      // List of role ids that are automatically assigned to new members
+  adminRoleId       String?                                       // The id of the admin role
+  adminLogChannelId String?                                       // The id of the admin log channel
+  modRoleId         String?                                       // The id of the moderator role
+  modLogChannelId   String?                                       // The id of the mod log channel
 
-  autoRoleIds String[]
+  // Embed configuration for the guildMemberAdd event
+  MemberJoinChannelId String?
+  MemberJoinEmbed     Embed?  @relation("MemberJoinEmbed", fields: [MemberJoinEmbedId], references: [id])
+  MemberJoinEmbedId   Int?
 
-  memberJoinChannelId String?
-  memberJoinEmbed     Embed?  @relation("MemberJoinEmbed", fields: [memberJoinEmbedId], references: [id])
-  memberJoinEmbedId   Int?
-
-  memberLeaveChannelId String?
-  memberLeaveEmbed     Embed?  @relation("MemberLeaveEmbed", fields: [memberLeaveEmbedId], references: [id])
-  memberLeaveEmbedId   Int?
+  // Embed configuration for the guildMemberRemove event
+  MemberLeaveChannelId String?
+  MemberLeaveEmbed     Embed?  @relation("MemberLeaveEmbed", fields: [MemberLeaveEmbedId], references: [id])
+  MemberLeaveEmbedId   Int?
 }
 
 model CommandCooldown {
@@ -50,8 +51,32 @@ model CommandCooldown {
   usages     DateTime[]
 }
 
-// Configurable Messages for users
-// Check out the join/leave feed for an example
+model CommandStatistics {
+  id        Int    @id @unique @default(autoincrement())
+  type      Int
+  commandId String @unique
+
+  // Track usage information
+  usages      DateTime[] @default([])
+  lastUsedAt  DateTime?
+  firstUsedAt DateTime?
+
+  // Track error information
+  errorCount  Int       @default(0)
+  lastError   String?
+  lastErrorAt DateTime?
+
+  // Track runtime information
+  runtimeCount        Int
+  runtimeTotal        Float?
+  runtimeMax          Float?
+  runtimeMin          Float?
+  runtimeMean         Float?
+  runtimeMedian       Float?
+  runtimeVariance     Float?
+  runtimeStdDeviation Float?
+}
+
 model Embed {
   id            Int          @id @default(autoincrement())
   messageText   String?
@@ -68,37 +93,17 @@ model Embed {
   footerIconURL String?
   fields        EmbedField[]
 
-  memberJoinEmbed  Guild[] @relation("MemberJoinEmbed")
-  memberLeaveEmbed Guild[] @relation("MemberLeaveEmbed")
+  // Embeds can be user-customized through relations
+  MemberJoinEmbed  Guild[] @relation("MemberJoinEmbed")
+  MemberLeaveEmbed Guild[] @relation("MemberLeaveEmbed")
 }
 
 model EmbedField {
   id      Int     @id @unique @default(autoincrement())
+  Embed   Embed?  @relation(fields: [EmbedId], references: [id])
+  EmbedId Int?
+
   name    String
   value   String
   inline  Boolean
-  Embed   Embed?  @relation(fields: [embedId], references: [id])
-  embedId Int?
-}
-
-model CommandStatistics {
-  id        Int    @id @unique @default(autoincrement())
-  type      Int
-  commandId String @unique
-
-  usages      DateTime[] @default([])
-  lastUsedAt  DateTime?
-  firstUsedAt DateTime?
-
-  errorCount  Int       @default(0)
-  lastError   String?
-  lastErrorAt DateTime?
-
-  runtimeTotal        Float?
-  runtimeMax          Float?
-  runtimeMin          Float?
-  runtimeMean         Float?
-  runtimeMedian       Float?
-  runtimeVariance     Float?
-  runtimeStdDeviation Float?
 }

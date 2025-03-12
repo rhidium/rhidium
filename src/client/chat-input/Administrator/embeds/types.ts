@@ -1,7 +1,6 @@
-import { GuildWithEmbeds } from '@client/database';
 import { Prisma } from '@prisma/client';
 import { ChatInputCommandInteraction } from 'discord.js';
-import { GuildCommandController } from '@core';
+import { GuildCommandController, PopulatedGuild } from '@core';
 
 /**
  * Nothing is required in this data structure, all fields are optional
@@ -29,10 +28,10 @@ export type EmbedWithFields = Prisma.EmbedGetPayload<{
 
 export type EmbedController = GuildCommandController<
   ChatInputCommandInteraction,
-  [GuildWithEmbeds]
+  [PopulatedGuild]
 >;
 
 export type EmbedFieldController = GuildCommandController<
   ChatInputCommandInteraction,
-  [GuildWithEmbeds, EmbedWithFields | null]
+  [PopulatedGuild, EmbedWithFields | null]
 >;

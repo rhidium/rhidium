@@ -1,13 +1,16 @@
 import { embedFromEmbedModel } from '@client/chat-input/Administrator/embeds/helpers';
-import { guildSettingsFromCache } from '@client/database';
-import {
-  buildDiscordPlaceholders,
-  replacePlaceholders,
-  replacePlaceholdersAcrossEmbed,
-} from '@client/placeholders';
 import { LoggingServices } from '@client/services';
 import { EmbedBuilder, Events, PermissionFlagsBits } from 'discord.js';
-import { Lang, ClientEventListener, PermissionUtils, TimeUtils } from '@core';
+import {
+  Lang,
+  ClientEventListener,
+  PermissionUtils,
+  TimeUtils,
+  guildFromCache,
+  buildPlaceholders,
+  replacePlaceholdersAcrossEmbed,
+  replacePlaceholders,
+} from '@core';
 
 const requiredPermissions = [
   PermissionFlagsBits.SendMessages,
@@ -20,11 +23,11 @@ export default new ClientEventListener({
     const { logger } = client;
     const { guild } = member;
 
-    const guildSettings = await guildSettingsFromCache(guild.id);
-    if (!guildSettings || !guildSettings.memberLeaveChannelId) return;
+    const guildSettings = await guildFromCache(guild.id);
+    if (!guildSettings || !guildSettings.MemberLeaveChannelId) return;
 
     const channel = guild.channels.cache.get(
-      guildSettings.memberLeaveChannelId,
+      guildSettings.MemberLeaveChannelId,
     );
     if (!channel) {
       void LoggingServices.adminLog(
@@ -75,7 +78,7 @@ export default new ClientEventListener({
     const joinedAtOutput = member.joinedTimestamp
       ? TimeUtils.discordInfoTimestamp(member.joinedTimestamp)
       : 'Unknown';
-    const { memberLeaveEmbed } = guildSettings;
+    const { MemberLeaveEmbed } = guildSettings;
     const baseEmbed = new EmbedBuilder()
       .setColor(client.colors.primary)
       .setAuthor({
@@ -108,17 +111,12 @@ export default new ClientEventListener({
         },
       );
 
-    const rawEmbed = embedFromEmbedModel(memberLeaveEmbed, baseEmbed);
-    const placeholders = buildDiscordPlaceholders(
-      channel,
-      guild,
-      member,
-      member.user,
-    );
+    const rawEmbed = embedFromEmbedModel(MemberLeaveEmbed, baseEmbed);
+    const placeholders = buildPlaceholders(channel, guild, member, member.user);
     const embed = replacePlaceholdersAcrossEmbed(rawEmbed, placeholders);
-    const resolvedMessage = guildSettings.memberJoinEmbed?.messageText
+    const resolvedMessage = guildSettings.MemberJoinEmbed?.messageText
       ? replacePlaceholders(
-          guildSettings.memberJoinEmbed.messageText,
+          guildSettings.MemberJoinEmbed.messageText,
           placeholders,
         )
       : '';

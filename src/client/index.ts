@@ -5,8 +5,7 @@ import { ClusterManager } from 'discord-hybrid-sharding';
 import { existsSync } from 'fs';
 import path from 'path';
 import { main } from './client';
-import { Lang } from '@core';
-import { appConfig } from './config';
+import { appConfig, Lang } from '@core';
 
 // Make sure we're not using ts-node-dev when clustering
 if (process.env.TS_NODE_DEV === 'true' && appConfig.cluster.enabled) {

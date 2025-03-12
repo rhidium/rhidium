@@ -6,8 +6,8 @@ import {
   ComponentCommandType,
   TimeUtils,
   UnitConstants,
+  CommandStatisticsPayload,
 } from '@core';
-import { CommandStatisticsPayload } from '@client/database/CommandStatistics';
 
 const unknown = Lang.t('general:unknown');
 const never = Lang.t('general:never');

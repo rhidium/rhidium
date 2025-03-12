@@ -46,7 +46,7 @@ import { Constants } from '../constants';
 
 export type ClientWithCluster<Ready extends boolean = boolean> =
   Client<Ready> & {
-    cluster: ClusterClient<Client>;
+    cluster: ClusterClient<Client<Ready>>;
   };
 
 export interface ClientInitializationOptions {

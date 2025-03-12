@@ -13,11 +13,11 @@ import {
   Embeds,
   PermLevel,
   TimeUtils,
+  InteractionConstants,
 } from '@core';
-import EvalConstants from '../enums/eval';
 
 const EvalAcceptCommand = new ButtonCommand({
-  customId: EvalConstants.ACCEPT_CODE_EVALUATION,
+  customId: InteractionConstants.EVAL_ACCEPT_CODE_EVALUATION,
   permLevel: PermLevel['Bot Administrator'],
   run: async (client, interaction) => {
     const evalEmbed = interaction.message.embeds[0];
@@ -143,7 +143,7 @@ export default EvalAcceptCommand;
 export const evalAcceptedRow =
   new ActionRowBuilder<ButtonBuilder>().addComponents(
     new ButtonBuilder()
-      .setCustomId(EvalConstants.ACCEPT_CODE_EVALUATION)
+      .setCustomId(InteractionConstants.EVAL_ACCEPT_CODE_EVALUATION)
       .setLabel(Lang.t('commands:eval.evaluated'))
       .setDisabled(true)
       .setStyle(ButtonStyle.Success),

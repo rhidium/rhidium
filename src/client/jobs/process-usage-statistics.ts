@@ -1,13 +1,13 @@
-import { prisma } from '@client/database';
-import { dbCommandByName } from '@client/database/CommandStatistics';
 import { ClientExtensions } from '@client/extensions';
 import { Prisma } from '@prisma/client';
 import {
   ClientWithCluster,
   ClusterUtils,
   ComponentCommandType,
+  dbCommandByName,
   Job,
   NumberUtils,
+  prisma,
   QueueCallbackFunction,
   QueueManager,
   UnitConstants,
@@ -23,6 +23,7 @@ export type CommandUsageStatistics = {
   lastError: string | null;
   lastErrorAt: Date | null;
   runtimeDurations: number[];
+  runtimeCount: number;
 };
 
 export const processUsageStatistics: QueueCallbackFunction<
@@ -82,6 +83,7 @@ export const processUsageStatistics: QueueCallbackFunction<
       data.runtimeMean ?? averageRuntime,
       ...stat.runtimeDurations,
     ]);
+    data.runtimeCount += stat.runtimeCount;
 
     if (dataToSave.find((d) => d.commandId === stat.commandId)) continue;
     else dataToSave.push(data);
@@ -173,6 +175,7 @@ export const clusterProcessUsageStatistics = async (
         lastError: e.lastError,
         lastErrorAt: e.lastErrorAt ? new Date(e.lastErrorAt) : null,
         runtimeDurations: e.runtimeDurations,
+        runtimeCount: e.runtimeCount,
       })),
     );
   });

@@ -5,7 +5,7 @@ import { createGenerator } from 'ts-json-schema-generator';
  * @type {import('ts-json-schema-generator').Config}
  */
 const generatorOptions = {
-  path: './src/client/config/types.ts',
+  path: './src/core/config/types.ts',
   tsconfig: './tsconfig.json',
   type: 'UserConfigOptions',
   skipTypeCheck: true,

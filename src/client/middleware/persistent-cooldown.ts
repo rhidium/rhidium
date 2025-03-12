@@ -1,4 +1,3 @@
-import { cooldownFromCache, prisma, updateCooldown } from '@client/database';
 import {
   Lang,
   CommandCooldownType,
@@ -6,6 +5,9 @@ import {
   InteractionUtils,
   TimeUtils,
   cooldownResourceId,
+  cooldownFromCache,
+  prisma,
+  updateCooldown,
 } from '@core';
 import { MessageFlags } from 'discord.js';
 

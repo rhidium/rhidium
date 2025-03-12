@@ -5,11 +5,14 @@
 export * as MClient from './client';
 export * as Commands from './commands/index.namespaces';
 export * as ComponentActions from './component-actions';
+export * as Config from './config';
 export * as Constants from './constants';
 export * as DataStructures from './data-structures';
+export * as Database from './database';
 export * as Language from './i18n';
 export * as Jobs from './jobs';
 export * as Logger from './logger';
 export * as Managers from './managers';
 export * as Middleware from './middleware';
+export * as Placeholders from './placeholders';
 export * as Utils from './utils';

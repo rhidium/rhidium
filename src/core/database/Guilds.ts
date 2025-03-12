@@ -1,44 +1,41 @@
 import { Prisma } from '@prisma/client';
 import { prisma } from '.';
-import { AsyncTTLCacheManager, UnitConstants } from '@core';
+import { AsyncTTLCacheManager } from '../data-structures';
+import { UnitConstants } from '../constants';
 
-export type GuildWithEmbeds = Prisma.GuildGetPayload<{
+export type PopulatedGuild = Prisma.GuildGetPayload<{
   include: {
-    memberJoinEmbed: {
+    MemberJoinEmbed: {
       include: { fields: true };
     };
-    memberLeaveEmbed: {
+    MemberLeaveEmbed: {
       include: { fields: true };
     };
   };
 }>;
 
-// Note: Unfortunately, we can't use a guildIncludes constant here
-// to avoid code repetition, not 100% sure why
-
-export const guildSettingsFromDb = async (
-  guildId: string,
-): Promise<GuildWithEmbeds> => {
+export const guildFromDb = async (guildId: string): Promise<PopulatedGuild> => {
   const guild = await prisma.guild.findUnique({
     where: { id: guildId },
     include: {
-      memberJoinEmbed: {
+      MemberJoinEmbed: {
         include: { fields: true },
       },
-      memberLeaveEmbed: {
+      MemberLeaveEmbed: {
         include: { fields: true },
       },
     },
   });
+
   return (
     guild ??
     (await prisma.guild.create({
       data: { id: guildId },
       include: {
-        memberJoinEmbed: {
+        MemberJoinEmbed: {
           include: { fields: true },
         },
-        memberLeaveEmbed: {
+        MemberLeaveEmbed: {
           include: { fields: true },
         },
       },
@@ -46,31 +43,30 @@ export const guildSettingsFromDb = async (
   );
 };
 
-export const guildTTLCache = new AsyncTTLCacheManager<GuildWithEmbeds>({
-  fetchFunction: guildSettingsFromDb,
+export const guildTTLCache = new AsyncTTLCacheManager<PopulatedGuild>({
+  fetchFunction: guildFromDb,
   capacity: 500,
   ttl: UnitConstants.MS_IN_ONE_DAY,
 });
 
-export const guildSettingsFromCache = async (guildId: string) => {
+export const guildFromCache = async (guildId: string) => {
   return guildTTLCache.getWithFetch(guildId);
 };
 
-/** Convenience method  */
-export const updateGuildSettings = async (
-  guildSettings: GuildWithEmbeds,
+export const updateGuild = async (
+  guildSettings: PopulatedGuild,
   updateArgs: Omit<Prisma.GuildUpdateArgs, 'where'>,
-): Promise<GuildWithEmbeds> => {
+): Promise<PopulatedGuild> => {
   const updatedGuild = await prisma.guild.update({
     ...updateArgs,
     where: {
       id: guildSettings.id,
     },
     include: {
-      memberJoinEmbed: {
+      MemberJoinEmbed: {
         include: { fields: true },
       },
-      memberLeaveEmbed: {
+      MemberLeaveEmbed: {
         include: { fields: true },
       },
     },

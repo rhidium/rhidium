@@ -17,10 +17,10 @@ import {
   RequiredClientOptions,
   Lang,
   locales,
+  appConfig,
+  permConfig,
 } from '@core';
 
-import { permConfig } from './permissions';
-import { appConfig } from './config';
 import pkg from '../../package.json';
 import { processUsageStatisticsMiddleware } from './middleware/process-usage-statistics';
 import { persistentCooldownMiddleware } from './middleware/persistent-cooldown';

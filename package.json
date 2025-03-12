@@ -2,13 +2,14 @@
   "name": "rhidium",
   "version": "0.0.1",
   "description": "Quickly and easily create powerful Discord bots using a powerful, opinionated, all-in-one framework.",
-  "main": "dist/index.js",
+  "main": "dist/src/client/index.js",
   "engines": {
     "node": ">=16.6.0"
   },
   "packageManager": "pnpm@9.15.4",
   "scripts": {
     "build": "tsc",
+    "prebuild": "rimraf dist",
     "clean": "gts clean; rimraf docs",
     "dev": "npm run start:dev",
     "docs": "npx typedoc",
@@ -25,7 +26,7 @@
     "commit": "cz",
     "setup:linux": "pnpm install && cp .env.example .env && cp config/config.example.json config/config.json",
     "setup:windows": "pnpm install && copy .env.example .env && copy config/config.example.json config/config.json",
-    "generate-schema": "npx ts-json-schema-generator --path 'src/client/config/*.ts' --type 'UserConfigOptions' --tsconfig tsconfig.json",
+    "generate-schema": "npx ts-json-schema-generator --path 'src/core/config/*.ts' --type 'UserConfigOptions' --tsconfig tsconfig.json",
     "update-schema": "node scripts/create-config-schema.mjs",
     "preconfig-editor": "npm run update-schema",
     "config-editor": "node scripts/config-editor.mjs",

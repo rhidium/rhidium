@@ -1,11 +1,9 @@
 import { ApplicationCommandType } from 'discord.js';
 import { prisma } from '.';
 import { Prisma } from '@prisma/client';
-import {
-  AsyncTTLCacheManager,
-  ComponentCommandType,
-  UnitConstants,
-} from '@core';
+import { AsyncTTLCacheManager } from '../data-structures';
+import { UnitConstants } from '../constants';
+import { ComponentCommandType } from '../commands';
 
 export type CommandStatisticsPayload = Prisma.CommandStatisticsGetPayload<
   Record<string, never>
@@ -29,6 +27,6 @@ export const dbCommandByName = async (
 ) =>
   prisma.commandStatistics.upsert({
     where: { commandId: name, type },
-    create: { commandId: name, type },
+    create: { commandId: name, type, runtimeCount: 0 },
     update: {},
   });

@@ -1,8 +1,5 @@
 generator client {
   provider = "prisma-client-js"
-  // Note: You will need to declare a binary target for the Prisma Client
-  // when you deploy to Docker, Vercel, AWS Lambda, Google Cloud Functions, Azure Functions,
-  // or similar
   // binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
@@ -12,38 +9,34 @@ datasource db {
 }
 
 model User {
-  id      String @id @default(auto()) @map("_id") @db.ObjectId
-  userId  String @unique
-  members Member[]
+  id      String @id @map("_id") @db.ObjectId
+  Members Member[]
 }
 
 model Member {
-  id      String @id @default(auto()) @map("_id") @db.ObjectId
-  userId  String
-  user    User   @relation(fields: [userId], references: [userId])
-  guildId String @db.ObjectId
-  guild   Guild  @relation(fields: [guildId], references: [id])
+  id      String @id @map("_id") @db.ObjectId
+  User    User   @relation(fields: [id], references: [id])
+  GuildId String @db.ObjectId
+  Guild   Guild  @relation(fields: [GuildId], references: [id])
 }
 
 model Guild {
-  id      String @id @default(auto()) @map("_id") @db.ObjectId
-  guildId String @unique
+  id      String @id @map("_id") @db.ObjectId
   Members   Member[]
 
+  autoRoleIds String[]
   adminRoleId       String?
   adminLogChannelId String?
   modRoleId         String?
   modLogChannelId   String?
 
-  autoRoleIds String[]
+  MemberJoinChannelId String?
+  MemberJoinEmbed     Embed?  @relation("MemberJoinEmbed", fields: [MemberJoinEmbedId], references: [id])
+  MemberJoinEmbedId   String? @db.ObjectId
 
-  memberJoinChannelId String?
-  memberJoinEmbed     Embed?  @relation("MemberJoinEmbed", fields: [memberJoinEmbedId], references: [id])
-  memberJoinEmbedId   String? @db.ObjectId
-
-  memberLeaveChannelId String?
-  memberLeaveEmbed     Embed?  @relation("MemberLeaveEmbed", fields: [memberLeaveEmbedId], references: [id])
-  memberLeaveEmbedId   String? @db.ObjectId
+  MemberLeaveChannelId String?
+  MemberLeaveEmbed     Embed?  @relation("MemberLeaveEmbed", fields: [MemberLeaveEmbedId], references: [id])
+  MemberLeaveEmbedId   String? @db.ObjectId
 }
 
 model CommandCooldown {
@@ -51,37 +44,6 @@ model CommandCooldown {
   cooldownId String     @unique
   duration   Int
   usages     DateTime[]
-}
-
-// Configurable Messages for users
-// Check out the join/leave feed for an example
-model Embed {
-  id            String       @id @default(auto()) @map("_id") @db.ObjectId
-  messageText   String?
-  color         Int?
-  authorName    String?
-  authorIconURL String?
-  authorURL     String?
-  title         String?
-  description   String?
-  url           String?
-  imageURL      String?
-  thumbnailURL  String?
-  footerText    String?
-  footerIconURL String?
-  fields        EmbedField[]
-
-  memberJoinEmbed  Guild[] @relation("MemberJoinEmbed")
-  memberLeaveEmbed Guild[] @relation("MemberLeaveEmbed")
-}
-
-model EmbedField {
-  id      String  @id @default(auto()) @map("_id") @db.ObjectId
-  name    String
-  value   String
-  inline  Boolean
-  Embed   Embed?  @relation(fields: [embedId], references: [id])
-  embedId String? @db.ObjectId
 }
 
 model CommandStatistics {
@@ -104,4 +66,34 @@ model CommandStatistics {
   runtimeMedian       Float?
   runtimeVariance     Float?
   runtimeStdDeviation Float?
+}
+
+model Embed {
+  id            String       @id @default(auto()) @map("_id") @db.ObjectId
+  messageText   String?
+  color         Int?
+  authorName    String?
+  authorIconURL String?
+  authorURL     String?
+  title         String?
+  description   String?
+  url           String?
+  imageURL      String?
+  thumbnailURL  String?
+  footerText    String?
+  footerIconURL String?
+  fields        EmbedField[]
+
+  MemberJoinEmbed  Guild[] @relation("MemberJoinEmbed")
+  MemberLeaveEmbed Guild[] @relation("MemberLeaveEmbed")
+}
+
+model EmbedField {
+  id      String  @id @default(auto()) @map("_id") @db.ObjectId
+  Embed   Embed?  @relation(fields: [EmbedId], references: [id])
+  EmbedId String? @db.ObjectId
+
+  name    String
+  value   String
+  inline  Boolean
 }

@@ -1,6 +1,6 @@
 import { Middleware, MiddlewareContext } from '.';
 
-export class MiddlewareManager<Context extends MiddlewareContext> {
+class MiddlewareManager<Context extends MiddlewareContext> {
   private previousResult: unknown;
   async runMiddleware<C extends Context>(
     context: C,
@@ -25,3 +25,5 @@ export class MiddlewareManager<Context extends MiddlewareContext> {
     return true;
   }
 }
+
+export { MiddlewareManager };

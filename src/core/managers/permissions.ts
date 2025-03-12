@@ -1,4 +1,78 @@
-import { GuildMember, Snowflake } from 'discord.js';
+import { GuildMember, PermissionFlagsBits, Snowflake } from 'discord.js';
+import { guildFromCache } from '../database';
+
+export const permConfig: ClientPermissionLevel[] = [
+  {
+    name: 'User',
+    level: 0,
+    hasLevel: () => true,
+  },
+
+  {
+    name: 'Moderator',
+    level: 1,
+    hasLevel: async (_config, member) => {
+      const guildSettings = await guildFromCache(member.guild.id);
+      if (!guildSettings) return false;
+      if (!guildSettings.modRoleId) {
+        return (
+          member.permissions.has(PermissionFlagsBits.KickMembers) &&
+          member.permissions.has(PermissionFlagsBits.BanMembers) &&
+          member.permissions.has(PermissionFlagsBits.ManageMessages)
+        );
+      }
+      return member.roles.cache.some(
+        (role) => guildSettings.modRoleId === role.id,
+      );
+    },
+  },
+
+  {
+    name: 'Administrator',
+    level: 2,
+    hasLevel: async (_config, member) => {
+      const guildSettings = await guildFromCache(member.guild.id);
+      if (!guildSettings) return false;
+      if (!guildSettings.adminRoleId) {
+        return member.permissions.has(PermissionFlagsBits.Administrator);
+      }
+      return member.roles.cache.some(
+        (role) => guildSettings.adminRoleId === role.id,
+      );
+    },
+  },
+
+  {
+    name: 'Server Owner',
+    level: 3,
+    hasLevel: (_config, member) => {
+      if (member.guild?.ownerId) {
+        return member.guild.ownerId === member.id;
+      }
+      return false;
+    },
+  },
+
+  {
+    name: 'Bot Administrator',
+    level: 4,
+    hasLevel(config, member) {
+      return config.systemAdministrators.includes(member.id);
+    },
+  },
+
+  {
+    name: 'Developer',
+    level: 5,
+    hasLevel: (config, member) => config.developers.includes(member.id),
+  },
+
+  {
+    name: 'Bot Owner',
+    level: 6,
+    hasLevel: (config, member) => config.ownerId === member.id,
+  },
+];
 
 export enum PermLevel {
   User = 0,

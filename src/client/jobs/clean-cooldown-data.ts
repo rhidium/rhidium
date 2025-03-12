@@ -1,5 +1,4 @@
-import { cooldownTTLCache, prisma } from '@client/database';
-import { Job } from '@core';
+import { cooldownTTLCache, Job, prisma } from '@core';
 
 const CleanCooldownData = new Job({
   id: 'clean-cooldown-data',

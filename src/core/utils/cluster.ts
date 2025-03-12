@@ -157,6 +157,7 @@ class ClusterUtils {
 export {
   ClusterUtils,
   type FetchResourceOptions,
+  FindResourceAccessor,
   type ResourceTypeMap,
   type AccessorReturnType,
 };

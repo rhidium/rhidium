@@ -42,6 +42,7 @@ export const processUsageStatisticsMiddleware: CommandMiddlewareFunctionWithResu
       lastError: error?.message ?? null,
       lastErrorAt: error ? new Date() : null,
       runtimeDurations: [runTimeMs],
+      runtimeCount: 1,
     };
     if (!usageStatistics) {
       usageStatisticsQueue.add([createStatisticsData]);
@@ -58,6 +59,7 @@ export const processUsageStatisticsMiddleware: CommandMiddlewareFunctionWithResu
         }
         cmdEntry.lastUsed = new Date();
         cmdEntry.runtimeDurations.push(runTimeMs);
+        cmdEntry.runtimeCount++;
       } else usageStatistics.push(createStatisticsData);
     }
 

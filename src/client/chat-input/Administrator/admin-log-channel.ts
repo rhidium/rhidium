@@ -1,7 +1,13 @@
-import { guildSettingsFromCache, updateGuildSettings } from '@client/database';
-import { LoggingServices } from '@client/services';
 import { ChannelType, SlashCommandBuilder } from 'discord.js';
-import { Lang, ChatInputCommand, InteractionUtils, PermLevel } from '@core';
+import {
+  Lang,
+  ChatInputCommand,
+  InteractionUtils,
+  PermLevel,
+  guildFromCache,
+  updateGuild,
+} from '@core';
+import { LoggingServices } from '@client/services';
 
 const AdminLogChannelCommand = new ChatInputCommand({
   permLevel: PermLevel.Administrator,
@@ -35,7 +41,7 @@ const AdminLogChannelCommand = new ChatInputCommand({
 
     await AdminLogChannelCommand.deferReplyInternal(interaction);
 
-    const guildSettings = await guildSettingsFromCache(interaction.guildId);
+    const guildSettings = await guildFromCache(interaction.guildId);
     if (!guildSettings) {
       await AdminLogChannelCommand.reply(
         interaction,
@@ -46,7 +52,7 @@ const AdminLogChannelCommand = new ChatInputCommand({
 
     if (disable) {
       guildSettings.adminLogChannelId = null;
-      await updateGuildSettings(guildSettings, {
+      await updateGuild(guildSettings, {
         data: { adminLogChannelId: null },
       });
       await AdminLogChannelCommand.reply(
@@ -83,7 +89,7 @@ const AdminLogChannelCommand = new ChatInputCommand({
     }
 
     guildSettings.adminLogChannelId = channel.id;
-    await updateGuildSettings(guildSettings, {
+    await updateGuild(guildSettings, {
       data: { adminLogChannelId: channel.id },
     });
     await AdminLogChannelCommand.reply(

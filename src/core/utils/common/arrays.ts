@@ -51,9 +51,8 @@ class ArrayUtils {
   static readonly chunk = chunk;
   /**
    * Join an array of strings with a limit
-   * @param items The array of strings to join
-   * @param maxItems The maximum number of items to include
-   * @param emptyOutput The output when the array is empty
+   * @param arr The array of strings to join
+   * @param options The options to use
    * @returns The joined string
    */
   static readonly join = join;

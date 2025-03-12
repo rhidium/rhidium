@@ -13,16 +13,14 @@ import {
 import CommandStatisticOption from '@client/auto-completes/command-statistic';
 import {
   ArrayUtils,
+  COMMAND_STATISTICS_ROOT_ID,
   ChatInputCommand,
   InteractionUtils,
   PermLevel,
-  isAutoCompleteResponseType,
-} from '@core';
-import {
-  COMMAND_STATISTICS_ROOT_ID,
   commandStatisticsTTLCache,
-} from '@client/database/CommandStatistics';
-import { prisma } from '@client/database';
+  isAutoCompleteResponseType,
+  prisma,
+} from '@core';
 
 export const compactEntriesPerPage = 10;
 

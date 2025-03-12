@@ -1,6 +1,7 @@
-import { AsyncTTLCacheManager, UnitConstants } from '@core';
 import { prisma } from '.';
 import { CommandCooldown, Prisma } from '@prisma/client';
+import { AsyncTTLCacheManager } from '../data-structures';
+import { UnitConstants } from '../constants';
 
 const cooldownFromDb = async (cooldownId: string) =>
   await prisma.commandCooldown.findUnique({

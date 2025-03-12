@@ -1,7 +1,13 @@
-import { guildSettingsFromCache, updateGuildSettings } from '@client/database';
 import { LoggingServices } from '@client/services';
 import { ChannelType, SlashCommandBuilder } from 'discord.js';
-import { Lang, ChatInputCommand, InteractionUtils, PermLevel } from '@core';
+import {
+  Lang,
+  ChatInputCommand,
+  InteractionUtils,
+  PermLevel,
+  guildFromCache,
+  updateGuild,
+} from '@core';
 
 const MemberJoinChannelCommand = new ChatInputCommand({
   permLevel: PermLevel.Administrator,
@@ -35,7 +41,7 @@ const MemberJoinChannelCommand = new ChatInputCommand({
 
     await MemberJoinChannelCommand.deferReplyInternal(interaction);
 
-    const guildSettings = await guildSettingsFromCache(interaction.guildId);
+    const guildSettings = await guildFromCache(interaction.guildId);
     if (!guildSettings) {
       await MemberJoinChannelCommand.reply(
         interaction,
@@ -45,9 +51,9 @@ const MemberJoinChannelCommand = new ChatInputCommand({
     }
 
     if (disable) {
-      guildSettings.memberJoinChannelId = null;
-      await updateGuildSettings(guildSettings, {
-        data: { memberJoinChannelId: null },
+      guildSettings.MemberJoinChannelId = null;
+      await updateGuild(guildSettings, {
+        data: { MemberJoinChannelId: null },
       });
       await MemberJoinChannelCommand.reply(
         interaction,
@@ -72,8 +78,8 @@ const MemberJoinChannelCommand = new ChatInputCommand({
           fields: [
             {
               name: Lang.t('commands:member-join-channel.title'),
-              value: guildSettings.memberJoinChannelId
-                ? `<#${guildSettings.memberJoinChannelId}>`
+              value: guildSettings.MemberJoinChannelId
+                ? `<#${guildSettings.MemberJoinChannelId}>`
                 : Lang.t('general:notSet'),
             },
           ],
@@ -82,9 +88,9 @@ const MemberJoinChannelCommand = new ChatInputCommand({
       return;
     }
 
-    guildSettings.memberJoinChannelId = channel.id;
-    await updateGuildSettings(guildSettings, {
-      data: { memberJoinChannelId: channel.id },
+    guildSettings.MemberJoinChannelId = channel.id;
+    await updateGuild(guildSettings, {
+      data: { MemberJoinChannelId: channel.id },
     });
     await MemberJoinChannelCommand.reply(
       interaction,

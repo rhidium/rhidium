@@ -1,10 +1,10 @@
 import { stringCommandTypeFromInteger } from '@client/chat-input/Developer/command-usage/helpers';
 import {
+  AutoCompleteOption,
   COMMAND_STATISTICS_ROOT_ID,
   CommandStatisticsPayload,
   commandStatisticsTTLCache,
-} from '@client/database/CommandStatistics';
-import { AutoCompleteOption } from '@core';
+} from '@core';
 
 const CommandStatisticOption = new AutoCompleteOption<CommandStatisticsPayload>(
   {

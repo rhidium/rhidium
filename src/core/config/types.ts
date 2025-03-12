@@ -1,5 +1,6 @@
 import type { PresenceStatusData, Snowflake } from 'discord.js';
-import type { CommandCooldownType, IColors, IEmojis, UserColors } from '@core';
+import type { IColors, IEmojis, UserColors } from '../client';
+import type { CommandCooldownType } from '../commands';
 
 /**
  * Represents essential options to configure clustering & sharding
@@ -57,8 +58,9 @@ export interface IClientAPI {
 export type NodeEnvValues = 'production' | 'development' | 'staging';
 
 export interface UserConfigOptions extends OptionalUserConfig {
-  /** JSON schema used for validation and type-ahead/Intellisense, you should never change this */
+  /** JSON schema used for validation and type-ahead/Intellisense, you should never (have) change this */
   readonly $schema: string;
+  /** API configuration */
   api: IClientAPI;
   /** Client internal permission level configuration */
   permissions: IPermissions;

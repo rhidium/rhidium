@@ -1,21 +1,4 @@
-export type MiddlewareContext = object;
-
-export type MiddlewareRunFunction<Context extends MiddlewareContext> = (
-  context: RuntimeContext<Context>,
-) => Promise<unknown> | unknown;
-
-export type MiddlewareHookCallback<Context extends MiddlewareContext> = (
-  context: Context,
-) => Promise<unknown> | unknown;
-
-export type MiddlewareHookCallbackWithError<Context extends MiddlewareContext> =
-  (error: Error, context: Context) => Promise<unknown> | unknown;
-
-export type CreateMiddleware<Context extends MiddlewareContext> =
-  | MiddlewareRunFunction<Context>
-  | MiddlewareOptions<Context>;
-
-export const createMiddleware = <Context extends MiddlewareContext>(
+const createMiddleware = <Context extends MiddlewareContext>(
   e: CreateMiddleware<Context>,
 ) =>
   typeof e === 'function'
@@ -24,13 +7,32 @@ export const createMiddleware = <Context extends MiddlewareContext>(
       ? e
       : new Middleware(e);
 
-export type MiddlewareOptions<Context extends MiddlewareContext> = {
+type MiddlewareContext = object;
+
+type MiddlewareRunFunction<Context extends MiddlewareContext> = (
+  context: RuntimeContext<Context>,
+) => Promise<unknown> | unknown;
+
+type MiddlewareHookCallback<Context extends MiddlewareContext> = (
+  context: Context,
+) => Promise<unknown> | unknown;
+
+type MiddlewareHookCallbackWithError<Context extends MiddlewareContext> = (
+  error: Error,
+  context: Context,
+) => Promise<unknown> | unknown;
+
+type CreateMiddleware<Context extends MiddlewareContext> =
+  | MiddlewareRunFunction<Context>
+  | MiddlewareOptions<Context>;
+
+type MiddlewareOptions<Context extends MiddlewareContext> = {
   disabled?: boolean;
   execute: MiddlewareRunFunction<Context>;
   hooks?: Partial<MiddlewareHooks<Context>>;
 };
 
-export interface MiddlewareHooks<Context extends MiddlewareContext> {
+type MiddlewareHooks<Context extends MiddlewareContext> = {
   /**
    * Called before the middleware is executed
    */
@@ -43,9 +45,9 @@ export interface MiddlewareHooks<Context extends MiddlewareContext> {
    * Called when the middleware errors
    */
   onError: MiddlewareHookCallbackWithError<Context> | null;
-}
+};
 
-export type RuntimeContext<Context extends MiddlewareContext> = {
+type RuntimeContext<Context extends MiddlewareContext> = {
   /**
    * The return value of the previous middleware execute function
    */
@@ -65,7 +67,7 @@ export type RuntimeContext<Context extends MiddlewareContext> = {
   next: () => void;
 } & Context;
 
-export class Middleware<Context extends MiddlewareContext> {
+class Middleware<Context extends MiddlewareContext> {
   /** Is this middleware disabled? */
   disabled: boolean;
   /** The function to execute when this middleware is called */
@@ -201,3 +203,16 @@ export class Middleware<Context extends MiddlewareContext> {
     this.lastExecutedResult = null;
   };
 }
+
+export {
+  Middleware,
+  createMiddleware,
+  type MiddlewareContext,
+  type MiddlewareRunFunction,
+  type MiddlewareHookCallback,
+  type MiddlewareHookCallbackWithError,
+  type CreateMiddleware,
+  type MiddlewareOptions,
+  type MiddlewareHooks,
+  type RuntimeContext,
+};

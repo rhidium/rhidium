@@ -9,30 +9,30 @@ import {
   createMiddleware,
 } from '.';
 
-export type RunResult = {
+type RunResult = {
   data: Awaited<unknown> | unknown;
   success: boolean;
   error: Error | undefined;
 };
 
-export type CommandMiddlewareFunction = MiddlewareRunFunction<
+type CommandMiddlewareFunction = MiddlewareRunFunction<
   CommandMiddlewareContext<BaseInteraction>
 >;
 
-export type CommandMiddlewareFunctionWithResult = MiddlewareRunFunction<
+type CommandMiddlewareFunctionWithResult = MiddlewareRunFunction<
   CommandMiddlewareContext<BaseInteraction, RunResult>
 >;
 
-export type ChatInputMiddlewareFunction = MiddlewareRunFunction<
+type ChatInputMiddlewareFunction = MiddlewareRunFunction<
   CommandMiddlewareContext<ChatInputCommandInteraction>
 >;
 
-export type CommandMiddlewareMetaContext = {
+type CommandMiddlewareMetaContext = {
   invokedAt: Date;
   startRunTs: [number, number];
 };
 
-export type CommandMiddlewareContext<
+type CommandMiddlewareContext<
   I extends BaseInteraction,
   CreateContext extends MiddlewareContext = MiddlewareContext,
 > = MiddlewareContext &
@@ -47,7 +47,7 @@ export type CommandMiddlewareContext<
      */
   };
 
-export type RunExecutionReturnValuesOptions<
+type RunExecutionReturnValuesOptions<
   I extends BaseInteraction,
   Context extends CommandMiddlewareContext<I>,
 > = {
@@ -55,7 +55,7 @@ export type RunExecutionReturnValuesOptions<
   middleware: CreateMiddleware<Context>[];
 };
 
-export type RunExecutionReturnValues<
+type RunExecutionReturnValues<
   I extends BaseInteraction,
   Context extends CommandMiddlewareContext<I>,
 > = {
@@ -63,18 +63,18 @@ export type RunExecutionReturnValues<
   middleware: Middleware<Context>[];
 };
 
-export interface CommandMiddlewareOptions<
+type CommandMiddlewareOptions<
   I extends BaseInteraction,
   Context extends CommandMiddlewareContext<I>,
-> {
+> = {
   preRunChecks?: CreateMiddleware<Context>[];
   preRunThrottle?: CreateMiddleware<Context>[];
   preRunExecution?: CreateMiddleware<Context>[];
   postRunExecution?: CreateMiddleware<Context & RunResult>[];
   runExecutionReturnValues?: RunExecutionReturnValuesOptions<I, Context>[];
-}
+};
 
-export class CommandMiddleware<
+class CommandMiddleware<
   I extends BaseInteraction,
   Context extends CommandMiddlewareContext<I>,
 > extends MiddlewareManager<Context> {
@@ -123,3 +123,16 @@ export class CommandMiddleware<
     return this;
   };
 }
+
+export {
+  CommandMiddleware,
+  type RunResult,
+  type CommandMiddlewareFunction,
+  type CommandMiddlewareFunctionWithResult,
+  type ChatInputMiddlewareFunction,
+  type CommandMiddlewareMetaContext,
+  type CommandMiddlewareContext,
+  type RunExecutionReturnValuesOptions,
+  type RunExecutionReturnValues,
+  type CommandMiddlewareOptions,
+};

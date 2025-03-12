@@ -1,8 +1,7 @@
 import 'dotenv/config';
 import './module-aliases';
 
-import { logger, init as initLang } from '@core';
-import { appConfig } from './config';
+import { logger, init as initLang, appConfig } from '@core';
 
 /**
  * This file is used to initialize any shared code -

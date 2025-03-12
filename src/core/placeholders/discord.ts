@@ -1,4 +1,3 @@
-import { ArrayUtils, InteractionUtils, TimeUtils } from '@core';
 import {
   APIInteractionGuildMember,
   ChannelType,
@@ -13,6 +12,7 @@ import {
   User,
 } from 'discord.js';
 import { PlaceholderString } from '.';
+import { ArrayUtils, InteractionUtils, TimeUtils } from '../utils';
 
 // [TRANSLATE] - Some unfortunate soul will have to translate this
 
@@ -287,7 +287,7 @@ export const groupedDiscordPlaceholders = Object.fromEntries(
   ),
 );
 
-export const buildDiscordPlaceholders = (
+export const buildPlaceholders = (
   channel: GuildBasedChannel | null,
   guild: Guild,
   member: GuildMember | APIInteractionGuildMember | PartialGuildMember,

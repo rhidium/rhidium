@@ -5,11 +5,16 @@ import {
   Colors,
   EmbedBuilder,
 } from 'discord.js';
-import { Lang, ButtonCommand, Embeds, PermLevel } from '@core';
-import EvalConstants from '../enums/eval';
+import {
+  Lang,
+  ButtonCommand,
+  Embeds,
+  PermLevel,
+  InteractionConstants,
+} from '@core';
 
 const EvalDeclineCommand = new ButtonCommand({
-  customId: EvalConstants.CANCEL_CODE_EVALUATION,
+  customId: InteractionConstants.EVAL_CANCEL_CODE_EVALUATION,
   permLevel: PermLevel['Bot Administrator'],
   run: async (client, interaction) => {
     await EvalDeclineCommand.reply(
@@ -62,7 +67,7 @@ export default EvalDeclineCommand;
 export const evalDeclinedRow =
   new ActionRowBuilder<ButtonBuilder>().addComponents(
     new ButtonBuilder()
-      .setCustomId(EvalConstants.CANCEL_CODE_EVALUATION)
+      .setCustomId(InteractionConstants.EVAL_CANCEL_CODE_EVALUATION)
       .setLabel(Lang.t('general:cancelled'))
       .setDisabled(true)
       .setStyle(ButtonStyle.Secondary),

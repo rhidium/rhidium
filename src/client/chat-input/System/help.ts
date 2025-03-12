@@ -4,8 +4,7 @@ import {
   ButtonStyle,
   SlashCommandBuilder,
 } from 'discord.js';
-import { Lang, ChatInputCommand, Client, StringUtils } from '@core';
-import { appConfig } from '@client/config';
+import { Lang, ChatInputCommand, Client, StringUtils, appConfig } from '@core';
 
 /** Note: Not localized for obvious reasons */
 export const helpDescription = async (client: Client) => {

@@ -4,8 +4,8 @@ import {
   ChatInputCommand,
   CommandCooldownType,
   UnitConstants,
+  appConfig,
 } from '@core';
-import { appConfig } from '@client/config';
 
 const SupportCommand = new ChatInputCommand({
   data: new SlashCommandBuilder().setDescription('Receive support for the bot'),

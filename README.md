@@ -1,5 +1,3 @@
-- Initial bot should be "CMU / Community Manager Utilities / Common Utilities", moderation, timestamps, etc.
-
 <div align="center">
   <a href="https://rhidium.xyz"><img src="https://github.com/rhidium/core/assets/57721238/e6d25fa1-07cb-4284-a02a-f73fe7ef3878" width="100" alt="logo" /></a>
 

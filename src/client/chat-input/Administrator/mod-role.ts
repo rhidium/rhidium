@@ -1,7 +1,13 @@
-import { guildSettingsFromCache, updateGuildSettings } from '@client/database';
 import { LoggingServices } from '@client/services';
 import { SlashCommandBuilder } from 'discord.js';
-import { Lang, ChatInputCommand, InteractionUtils, PermLevel } from '@core';
+import {
+  Lang,
+  ChatInputCommand,
+  InteractionUtils,
+  PermLevel,
+  guildFromCache,
+  updateGuild,
+} from '@core';
 
 const ModeratorRoleCommand = new ChatInputCommand({
   permLevel: PermLevel.Administrator,
@@ -38,7 +44,7 @@ const ModeratorRoleCommand = new ChatInputCommand({
 
     await ModeratorRoleCommand.deferReplyInternal(interaction);
 
-    const guildSettings = await guildSettingsFromCache(interaction.guildId);
+    const guildSettings = await guildFromCache(interaction.guildId);
     if (!guildSettings) {
       await ModeratorRoleCommand.reply(
         interaction,
@@ -49,7 +55,7 @@ const ModeratorRoleCommand = new ChatInputCommand({
 
     if (remove) {
       guildSettings.modRoleId = null;
-      await updateGuildSettings(guildSettings, {
+      await updateGuild(guildSettings, {
         data: { modRoleId: null },
       });
       await ModeratorRoleCommand.reply(
@@ -86,7 +92,7 @@ const ModeratorRoleCommand = new ChatInputCommand({
     }
 
     guildSettings.modRoleId = role.id;
-    await updateGuildSettings(guildSettings, {
+    await updateGuild(guildSettings, {
       data: { modRoleId: role.id },
     });
     await ModeratorRoleCommand.reply(

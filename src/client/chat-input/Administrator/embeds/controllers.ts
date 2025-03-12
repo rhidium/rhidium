@@ -22,18 +22,17 @@ import { Prisma } from '@prisma/client';
 import { EmbedConfigurationConstants } from './enums';
 import { LoggingServices } from '@client/services';
 import {
-  buildDiscordPlaceholders,
-  replacePlaceholders,
-  replacePlaceholdersAcrossEmbed,
-} from '@client/placeholders';
-import {
   Lang,
   EmbedConstants,
   InteractionUtils,
   StringUtils,
   UnitConstants,
+  guildTTLCache,
+  prisma,
+  buildPlaceholders,
+  replacePlaceholdersAcrossEmbed,
+  replacePlaceholders,
 } from '@core';
-import { guildTTLCache, prisma } from '@client/database';
 
 const jsonCodeBlockOffset = 12;
 
@@ -74,7 +73,7 @@ export const configureEmbedController: EmbedController = async (
     embedFromSetting,
   );
 
-  const placeholders = buildDiscordPlaceholders(
+  const placeholders = buildPlaceholders(
     interaction.channel,
     interaction.guild,
     interaction.member,
@@ -380,7 +379,7 @@ export const manageEmbedFieldsController: EmbedFieldController = async (
       });
 
       const rawEmbed = embedFromEmbedModel(updatedSetting);
-      const placeholders = buildDiscordPlaceholders(
+      const placeholders = buildPlaceholders(
         interaction.channel,
         interaction.guild,
         interaction.member,
@@ -472,7 +471,7 @@ export const manageEmbedFieldsController: EmbedFieldController = async (
       });
 
       const rawEmbed = embedFromEmbedModel(updatedSetting);
-      const placeholders = buildDiscordPlaceholders(
+      const placeholders = buildPlaceholders(
         interaction.channel,
         interaction.guild,
         interaction.member,
@@ -543,7 +542,7 @@ export const manageEmbedFieldsController: EmbedFieldController = async (
           });
 
           const rawEmbed = embedFromEmbedModel(updatedSetting);
-          const placeholders = buildDiscordPlaceholders(
+          const placeholders = buildPlaceholders(
             interaction.channel,
             interaction.guild,
             interaction.member,

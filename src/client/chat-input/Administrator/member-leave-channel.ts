@@ -1,7 +1,13 @@
-import { guildSettingsFromCache, updateGuildSettings } from '@client/database';
 import { LoggingServices } from '@client/services';
 import { ChannelType, SlashCommandBuilder } from 'discord.js';
-import { Lang, ChatInputCommand, InteractionUtils, PermLevel } from '@core';
+import {
+  Lang,
+  ChatInputCommand,
+  InteractionUtils,
+  PermLevel,
+  guildFromCache,
+  updateGuild,
+} from '@core';
 
 const MemberLeaveChannelCommand = new ChatInputCommand({
   permLevel: PermLevel.Administrator,
@@ -35,7 +41,7 @@ const MemberLeaveChannelCommand = new ChatInputCommand({
 
     await MemberLeaveChannelCommand.deferReplyInternal(interaction);
 
-    const guildSettings = await guildSettingsFromCache(interaction.guildId);
+    const guildSettings = await guildFromCache(interaction.guildId);
     if (!guildSettings) {
       await MemberLeaveChannelCommand.reply(
         interaction,
@@ -45,9 +51,9 @@ const MemberLeaveChannelCommand = new ChatInputCommand({
     }
 
     if (disable) {
-      guildSettings.memberLeaveChannelId = null;
-      await updateGuildSettings(guildSettings, {
-        data: { memberLeaveChannelId: null },
+      guildSettings.MemberLeaveChannelId = null;
+      await updateGuild(guildSettings, {
+        data: { MemberLeaveChannelId: null },
       });
       await MemberLeaveChannelCommand.reply(
         interaction,
@@ -72,8 +78,8 @@ const MemberLeaveChannelCommand = new ChatInputCommand({
           fields: [
             {
               name: Lang.t('commands:member-leave-channel.title'),
-              value: guildSettings.memberLeaveChannelId
-                ? `<#${guildSettings.memberLeaveChannelId}>`
+              value: guildSettings.MemberLeaveChannelId
+                ? `<#${guildSettings.MemberLeaveChannelId}>`
                 : Lang.t('general:notSet'),
             },
           ],
@@ -82,9 +88,9 @@ const MemberLeaveChannelCommand = new ChatInputCommand({
       return;
     }
 
-    guildSettings.memberLeaveChannelId = channel.id;
-    await updateGuildSettings(guildSettings, {
-      data: { memberLeaveChannelId: channel.id },
+    guildSettings.MemberLeaveChannelId = channel.id;
+    await updateGuild(guildSettings, {
+      data: { MemberLeaveChannelId: channel.id },
     });
     await MemberLeaveChannelCommand.reply(
       interaction,

@@ -1,6 +1,6 @@
-import { logger } from '@core';
 import { existsSync, readFileSync } from 'fs';
 import type { UserConfigOptions } from './types';
+import { logger } from '../logger';
 
 const configFileExists = existsSync('./config/config.json');
 

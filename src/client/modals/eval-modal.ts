@@ -1,13 +1,12 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
-import { ModalCommand, PermLevel } from '@core';
-import EvalConstants from '../enums/eval';
+import { InteractionConstants, ModalCommand, PermLevel } from '@core';
 
 const CodeModalCommand = new ModalCommand({
-  customId: EvalConstants.CODE_MODAL_ID,
+  customId: InteractionConstants.EVAL_CODE_MODAL_ID,
   permLevel: PermLevel['Bot Administrator'],
   run: async (client, interaction) => {
     const input = interaction.fields.getTextInputValue(
-      EvalConstants.CODE_MODAL_INPUT_ID,
+      InteractionConstants.EVAL_CODE_MODAL_INPUT_ID,
     );
     if (!input || input.length === 0) {
       await CodeModalCommand.reply(
@@ -32,11 +31,11 @@ const CodeModalCommand = new ModalCommand({
 export const evalControlRow =
   new ActionRowBuilder<ButtonBuilder>().addComponents(
     new ButtonBuilder()
-      .setCustomId(EvalConstants.ACCEPT_CODE_EVALUATION)
+      .setCustomId(InteractionConstants.EVAL_ACCEPT_CODE_EVALUATION)
       .setLabel('Accept')
       .setStyle(ButtonStyle.Success),
     new ButtonBuilder()
-      .setCustomId(EvalConstants.CANCEL_CODE_EVALUATION)
+      .setCustomId(InteractionConstants.EVAL_CANCEL_CODE_EVALUATION)
       .setLabel('Cancel')
       .setStyle(ButtonStyle.Secondary),
   );

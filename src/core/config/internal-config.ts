@@ -1,8 +1,8 @@
 import { Colors, resolveColor } from 'discord.js';
 import { AppConfig, NodeEnvValues, UserConfigOptions } from './types';
 import { validateConfig } from './validate';
-import { resolveColorConfig } from '@core';
 import { userConfig as _userConfig } from './user-config';
+import { resolveColorConfig } from '../client';
 
 /**
  * Resolve our active NODE_ENV, which can be overwritten through cli arguments

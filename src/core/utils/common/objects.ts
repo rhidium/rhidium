@@ -3,25 +3,25 @@ import { diff as deepObjectDiff } from 'deep-object-diff';
 const diff = deepObjectDiff;
 
 const diffAsChanges = (
-  obj1: GenericObject,
-  obj2: GenericObject,
+  originalObj: GenericObject,
+  updatedObj: GenericObject,
 ): ObjectChange[] => {
   const changes: ObjectChange[] = [];
-  const diffState = diff(obj1, obj2);
+  const diffState = diff(originalObj, updatedObj);
 
   Object.entries(diffState).forEach(([key, value]) => {
-    const obj1Val = obj1[key];
+    const originalVal = originalObj[key];
     if (typeof value === 'object') {
-      if (typeof obj1Val !== 'object') {
+      if (typeof originalVal !== 'object') {
         changes.push({
           key,
-          oldValue: `type ${typeof obj1Val}`,
+          oldValue: `type ${typeof originalVal}`,
           newValue: `type ${typeof value}`,
         });
       } else {
         const inner = diffAsChanges(
-          obj1Val as GenericObject,
-          obj2[key] as GenericObject,
+          originalVal as GenericObject,
+          updatedObj[key] as GenericObject,
         );
         inner.forEach((change) => {
           change.key = `${key}.${change.key}`;
@@ -29,11 +29,11 @@ const diffAsChanges = (
         changes.push(...inner);
       }
     } else {
-      const isSame = obj1Val === value;
+      const isSame = originalVal === value;
       if (!isSame) {
         changes.push({
           key,
-          oldValue: obj1Val,
+          oldValue: originalVal,
           newValue: value,
         });
       }
@@ -59,15 +59,15 @@ type ObjectChange = {
 class ObjectUtils {
   /**
    * Deeply compare two objects and return the differences
-   * @param obj1 The first/initial object
-   * @param obj2 The second object to compare against
+   * @param originalObj The first/initial object
+   * @param updatedObj The second object to compare against
    * @returns The differences between the two objects
    */
   static readonly diff = diff;
   /**
    * Deeply compare two objects and return the differences as changes
-   * @param obj1 The first/initial object
-   * @param obj2 The second object to compare against
+   * @param originalObj The first/initial object
+   * @param updatedObj The second object to compare against
    * @returns The differences between the two objects as changes
    */
   static readonly diffAsChanges = diffAsChanges;
