@@ -31,6 +31,7 @@
     "test": "mocha dist/test/**/*.js",
     "test:dev": "ts-mocha test/**/*.spec.ts -w --watch-files '**/*.ts'",
     "typecheck": "tsc --noEmit",
+    "typecheck:watch": "tsc --noEmit --watch",
     "commit": "cz",
     "setup:linux": "pnpm install && cp .env.example .env && cp config/config.example.json config/config.json",
     "setup:windows": "pnpm install && copy .env.example .env && copy config/config.example.json config/config.json",
@@ -39,10 +40,19 @@
     "preconfig-editor": "npm run update-schema",
     "config-editor": "node scripts/config-editor.mjs",
     "setup:config": "pnpm add -D @rhidium/json-editor",
+    "db:format": "prisma format",
     "db:generate": "prisma generate",
+    "db:migrate:deploy": "prisma migrate deploy",
+    "db:migrate:dev": "prisma migrate dev",
+    "db:migrate:reset": "prisma migrate reset",
     "db:push": "prisma db push",
+    "db:seed": "prisma db seed",
     "db:migrate": "prisma migrate dev",
-    "prepare": "node .husky/install.mjs"
+    "prepare": "node .husky/install.mjs",
+    "checks": "gts check && turbo run typecheck && turbo run test",
+    "ci:cs": "pnpm changeset",
+    "ci:publish": "pnpm publish -r",
+    "ci:version": "pnpm changeset version"
   },
   "pnpm": {
     "overrides": {
@@ -65,6 +75,7 @@
     "winston-daily-rotate-file": "^5.0.0"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.28.1",
     "@commitlint/cli": "^19.7.1",
     "@commitlint/config-conventional": "^19.7.1",
     "@types/common-tags": "^1.8.4",

@@ -1,0 +1,62 @@
+services:
+  client:
+    container_name: rhidium-client
+    build:
+      context: ../
+      dockerfile: ./deploy/Dockerfile
+      args:
+        - CI=true # Skips husky in build stage
+    restart: unless-stopped
+    depends_on:
+      - database
+    env_file: ../.env
+    environment:
+      CI: true
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@database:5432/${POSTGRES_DB}
+    volumes:
+      - ../data:/app/data:rw
+      - ../logs:/app/logs:rw
+      - ../docs:/app/docs:rw
+      - ../config:/app/config:r
+    ports:
+      - 9000:9000
+    networks:
+      - app-network
+
+  database:
+    container_name: rhidium-database
+    image: postgres
+    restart: unless-stopped
+    shm_size: 128mb
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    networks:
+      - app-network
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+
+  # Web interface for database management
+  # adminer:
+  # container_name: rhidium-adminer
+  # image: adminer
+  # restart: always
+  # ports:
+  # - 8080:8080
+
+networks:
+  app-network:
+    name: rhidium-network
+    driver: bridge
+
+volumes:
+  pg-data:
+    name: rhidium-pg-data
+    driver: local

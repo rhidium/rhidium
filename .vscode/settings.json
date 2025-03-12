@@ -27,13 +27,13 @@
   "json.schemas": [
     {
       "url": "https://cdn.jsdelivr.net/npm/tsup/schema.json",
-      "fileMatch": [
-        "tsup.config.json"
-      ]
+      "fileMatch": ["tsup.config.json"]
     }
   ],
   "cSpell.enabled": true,
   "cSpell.words": [
+    "addgroup",
+    "adduser",
     "adminer",
     "autoincrement",
     "Blurple",
@@ -48,6 +48,7 @@
     "healthcheck",
     "Hillebrand",
     "isready",
+    "lintstagedrc",
     "Mirasaki",
     "repliable",
     "Rhidium",
