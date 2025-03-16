@@ -1,5 +1,5 @@
-import { CacheManager } from '../../cache';
 import { UnitConstants } from '../../constants';
+import { CacheManager } from '../../data-structures';
 
 export type CommandThrottleData = {
   id: string;

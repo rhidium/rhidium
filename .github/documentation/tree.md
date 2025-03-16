@@ -24,7 +24,6 @@
 
 - **`client`**:
 - **`commands`**:
-- **`component-actions`**:
 - **`constants`**:
 - **`data-structures`**:
 - **`i18n`**:

@@ -4,6 +4,13 @@ import { guildWrapper } from './guild';
 import { memberWrapper } from './member';
 import { userWrapper } from './user';
 
+export {
+  type CacheType,
+  type CacheManagerType,
+  type ModelOperation,
+  modelOperations,
+} from './wrapper';
+
 export class Database {
   private static _instance: Database;
 

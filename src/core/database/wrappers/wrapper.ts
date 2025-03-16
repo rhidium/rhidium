@@ -1,6 +1,5 @@
 import _debug from 'debug';
 import { GetBatchResult } from '@prisma/client/runtime/library';
-import { CacheManager } from '../../cache';
 import { UnitConstants } from '../../constants';
 import { Model } from '../models';
 import { PopulatedPrisma } from '../populated';
@@ -11,6 +10,11 @@ import {
   ModelUpdateArgs,
   ThenArg,
 } from '../types';
+import { CacheManager, PerformanceTracker } from '../../data-structures';
+
+// [DEV] IDs for debugging
+// [DEV] !this.useCache || !cacheResult does NOT make sense
+// [DEV] The result of the operation.
 
 const debug = _debug('@repo/database:wrapper');
 
@@ -21,6 +25,32 @@ const defaultCache = CacheManager.fromStore<ThenArg<ModelGetPayload[Model]>>({
   updateAgeOnHas: false,
 });
 
+const modelOperations = [
+  'aggregate',
+  'count',
+  'clearCache',
+  'create',
+  'createMany',
+  'createManyAndReturn',
+  'delete',
+  'deleteMany',
+  'deleteManyAndReturn',
+  'findById',
+  'findFirst',
+  'findFirstOrThrow',
+  'findManyById',
+  'findMany',
+  'findUnique',
+  'findUniqueOrThrow',
+  'groupBy',
+  'updateById',
+  'update',
+  'updateMany',
+  'updateManyAndReturn',
+  'upsert',
+] as const;
+
+type ModelOperation = (typeof modelOperations)[number];
 type CacheType<T extends Model> = ThenArg<ModelGetPayload[T]>;
 type CacheManagerType<T extends Model> = CacheManager<CacheType<T>>;
 
@@ -47,7 +77,13 @@ type DatabaseWrapperOptions<T extends Model> = {
    * The prefix to use for cache keys.
    */
   readonly cachePrefix?: string;
+  /**
+   * A function to run before each operation starts.
+   */
   readonly beforeEach?: () => Promise<void>;
+  /**
+   * A function to run after each operation finishes.
+   */
   readonly afterEach?: () => Promise<void>;
 };
 
@@ -59,6 +95,23 @@ class DatabaseWrapper<T extends Model> implements DatabaseWrapperOptions<T> {
   public readonly cachePrefix: string;
   public readonly beforeEach?: () => Promise<void>;
   public readonly afterEach?: () => Promise<void>;
+
+  public readonly trackers = Object.fromEntries(
+    modelOperations.map((operation) => [
+      operation,
+      new PerformanceTracker<unknown>(() => {}, {
+        name: operation,
+        onEnd: ({ name, duration, metrics }) => {
+          this.debug(
+            'Operation "%s" completed in %dms, metrics: %o',
+            name,
+            duration,
+            metrics,
+          );
+        },
+      }),
+    ]),
+  ) as Record<ModelOperation, PerformanceTracker<unknown>>;
 
   constructor(
     public readonly model: T,
@@ -107,12 +160,16 @@ class DatabaseWrapper<T extends Model> implements DatabaseWrapperOptions<T> {
     });
   }
 
-  private readonly withHooks = async <T>(fn: () => T | Promise<T>) => {
+  private readonly withHooks = async <T>(
+    name: ModelOperation,
+    fn: () => T | Promise<T>,
+  ) => {
     if (this.beforeEach) {
       await this.beforeEach();
     }
 
-    const result = await fn();
+    const tracker = this.trackers[name];
+    const result = await tracker.run(fn, name);
 
     if (this.afterEach) {
       await this.afterEach();
@@ -134,7 +191,9 @@ class DatabaseWrapper<T extends Model> implements DatabaseWrapperOptions<T> {
 
     this.debug('Clearing cache for model');
 
-    return this.withHooks(() => this.cache.clearByPrefix(this.cachePrefix));
+    return this.withHooks('clearCache', () =>
+      this.cache.clearByPrefix(this.cachePrefix),
+    );
   };
 
   private readonly clearMutationCache = async () => {
@@ -247,7 +306,9 @@ class DatabaseWrapper<T extends Model> implements DatabaseWrapperOptions<T> {
   ) => {
     this.debug('Aggregating data based on query: %o', query);
 
-    return this.withHooks(() => PopulatedPrisma.aggregate(this.model, query));
+    return this.withHooks('aggregate', () =>
+      PopulatedPrisma.aggregate(this.model, query),
+    );
   };
 
   /**
@@ -261,7 +322,9 @@ class DatabaseWrapper<T extends Model> implements DatabaseWrapperOptions<T> {
   ) => {
     this.debug('Counting records based on query: %o', query);
 
-    return this.withHooks(() => PopulatedPrisma.count(this.model, query));
+    return this.withHooks('count', () =>
+      PopulatedPrisma.count(this.model, query),
+    );
   };
 
   /**
@@ -297,7 +360,7 @@ class DatabaseWrapper<T extends Model> implements DatabaseWrapperOptions<T> {
         return record;
       });
 
-    return this.withHooks(async () => {
+    return this.withHooks('create', async () => {
       if (!this.useCache || !cacheResult) {
         this.debug('Skipping cache for create operation');
 
@@ -322,7 +385,7 @@ class DatabaseWrapper<T extends Model> implements DatabaseWrapperOptions<T> {
   ): Promise<ThenArg<GetBatchResult>> => {
     this.debug('Creating multiple new records with query: %o', query);
 
-    return this.withHooks(() =>
+    return this.withHooks('createMany', () =>
       PopulatedPrisma.createMany(this.model, query),
     ).then(async (data) => {
       if (this.useCache) {
@@ -349,7 +412,7 @@ class DatabaseWrapper<T extends Model> implements DatabaseWrapperOptions<T> {
       query,
     );
 
-    return this.withHooks(async () => {
+    return this.withHooks('createManyAndReturn', async () => {
       const data = await PopulatedPrisma.createManyAndReturn(
         this.model,
         query,
@@ -399,7 +462,7 @@ class DatabaseWrapper<T extends Model> implements DatabaseWrapperOptions<T> {
 
     const fn = () => PopulatedPrisma.delete(this.model, query);
 
-    return this.withHooks(async () => {
+    return this.withHooks('delete', async () => {
       if (!this.useCache) {
         this.debug('Skipping cache for delete operation');
 
@@ -431,7 +494,7 @@ class DatabaseWrapper<T extends Model> implements DatabaseWrapperOptions<T> {
   ) => {
     this.debug('Deleting multiple records based on query: %o', query);
 
-    return this.withHooks(() =>
+    return this.withHooks('deleteMany', () =>
       PopulatedPrisma.deleteMany(this.model, query).then(async (data) => {
         if (this.useCache) {
           void this.clearCache();
@@ -459,7 +522,7 @@ class DatabaseWrapper<T extends Model> implements DatabaseWrapperOptions<T> {
 
     const fn = () => PopulatedPrisma.deleteMany(this.model, query?.where);
 
-    return this.withHooks(async () => {
+    return this.withHooks('deleteManyAndReturn', async () => {
       const data = await PopulatedPrisma.findMany(this.model, query);
 
       if (this.useCache) {
@@ -499,7 +562,7 @@ class DatabaseWrapper<T extends Model> implements DatabaseWrapperOptions<T> {
         id,
       } as unknown as ModelFindUniqueArgs[T]['where']);
 
-    return this.withHooks(async () => {
+    return this.withHooks('findById', async () => {
       if (!this.useCache || !cacheResult) {
         this.debug('Skipping cache for findById operation');
 
@@ -531,7 +594,7 @@ class DatabaseWrapper<T extends Model> implements DatabaseWrapperOptions<T> {
 
     const fn = () => PopulatedPrisma.findFirst(this.model, query);
 
-    return this.withHooks(() => {
+    return this.withHooks('findFirst', () => {
       if (!this.useCache || !cacheResult) {
         this.debug('Skipping cache for findFirst operation');
 
@@ -565,7 +628,7 @@ class DatabaseWrapper<T extends Model> implements DatabaseWrapperOptions<T> {
 
     const fn = () => PopulatedPrisma.findFirstOrThrow(this.model, query);
 
-    return this.withHooks(() => {
+    return this.withHooks('findFirstOrThrow', () => {
       if (!this.useCache || !cacheResult) {
         this.debug('Skipping cache for findFirstOrThrow operation');
 
@@ -594,7 +657,7 @@ class DatabaseWrapper<T extends Model> implements DatabaseWrapperOptions<T> {
   ) => {
     this.debug('Finding multiple records by IDs: %o', ids);
 
-    return this.withHooks(async () => {
+    return this.withHooks('findManyById', async () => {
       if (!this.useCache || !cacheResult) {
         this.debug('Skipping cache for findManyById operation');
 
@@ -639,7 +702,7 @@ class DatabaseWrapper<T extends Model> implements DatabaseWrapperOptions<T> {
 
     const fn = () => PopulatedPrisma.findMany(this.model, query);
 
-    return this.withHooks(async () => {
+    return this.withHooks('findMany', async () => {
       if (!this.useCache || !cacheResult) {
         this.debug('Skipping cache for findMany operation');
 
@@ -681,7 +744,7 @@ class DatabaseWrapper<T extends Model> implements DatabaseWrapperOptions<T> {
 
     const fn = () => PopulatedPrisma.findUnique(this.model, query);
 
-    return this.withHooks(() => {
+    return this.withHooks('findUnique', () => {
       if (!this.useCache || !cacheResult) {
         this.debug('Skipping cache for findUnique operation');
 
@@ -713,7 +776,7 @@ class DatabaseWrapper<T extends Model> implements DatabaseWrapperOptions<T> {
 
     const fn = () => PopulatedPrisma.findUniqueOrThrow(this.model, query);
 
-    return this.withHooks(() => {
+    return this.withHooks('findUniqueOrThrow', () => {
       if (!this.useCache || !cacheResult) {
         this.debug('Skipping cache for findUniqueOrThrow operation');
 
@@ -742,7 +805,9 @@ class DatabaseWrapper<T extends Model> implements DatabaseWrapperOptions<T> {
   ) => {
     this.debug('Grouping records based on query: %o', query);
 
-    return this.withHooks(() => PopulatedPrisma.groupBy(this.model, query));
+    return this.withHooks('groupBy', () =>
+      PopulatedPrisma.groupBy(this.model, query),
+    );
   };
 
   //
@@ -768,7 +833,7 @@ class DatabaseWrapper<T extends Model> implements DatabaseWrapperOptions<T> {
         ...query,
       } as unknown as Omit<ModelUpdateArgs[T], 'select' | 'include'>);
 
-    return this.withHooks(async () => {
+    return this.withHooks('updateById', async () => {
       if (!this.useCache) {
         this.debug('Skipping cache for updateById operation');
 
@@ -802,7 +867,7 @@ class DatabaseWrapper<T extends Model> implements DatabaseWrapperOptions<T> {
 
     const fn = () => PopulatedPrisma.update(this.model, query);
 
-    return this.withHooks(async () => {
+    return this.withHooks('update', async () => {
       if (!this.useCache || !cacheResult) {
         this.debug('Skipping cache for update operation');
 
@@ -843,7 +908,7 @@ class DatabaseWrapper<T extends Model> implements DatabaseWrapperOptions<T> {
   ) => {
     this.debug('Updating multiple records based on query: %o', query);
 
-    return this.withHooks(() =>
+    return this.withHooks('updateMany', () =>
       PopulatedPrisma.updateMany(this.model, query).then((data) => {
         if (this.useCache) {
           void this.clearCache();
@@ -869,7 +934,7 @@ class DatabaseWrapper<T extends Model> implements DatabaseWrapperOptions<T> {
       query,
     );
 
-    return this.withHooks(async () => {
+    return this.withHooks('updateManyAndReturn', async () => {
       const data = await PopulatedPrisma.updateMany(this.model, query).then(
         () => {
           return PopulatedPrisma.findMany(this.model, query);
@@ -908,7 +973,7 @@ class DatabaseWrapper<T extends Model> implements DatabaseWrapperOptions<T> {
         ? PopulatedPrisma.findUnique(this.model, query.where)
         : PopulatedPrisma.upsert(this.model, query);
 
-    return this.withHooks(async () => {
+    return this.withHooks('upsert', async () => {
       let data = await fn();
 
       if (data === null) {
@@ -930,4 +995,11 @@ class DatabaseWrapper<T extends Model> implements DatabaseWrapperOptions<T> {
   };
 }
 
-export { DatabaseWrapper };
+export {
+  DatabaseWrapper,
+  modelOperations,
+  type ModelOperation,
+  type CacheType,
+  type CacheManagerType,
+  type DatabaseWrapperOptions,
+};

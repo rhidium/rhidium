@@ -8,131 +8,58 @@ import {
   ActionRowComponentData,
   ActionRowData,
   AnyComponentBuilder,
-  BaseInteraction,
   BaseMessageOptions,
   BaseSelectMenuBuilder,
   ButtonBuilder,
-  ButtonInteraction,
   ButtonStyle,
   ChannelSelectMenuBuilder,
   ChannelType,
-  ChatInputCommandInteraction,
   ComponentType,
-  DiscordAPIError,
-  DiscordjsError,
+  InteractionEditReplyOptions,
   InteractionReplyOptions,
+  InteractionType,
   JSONEncodable,
   MentionableSelectMenuBuilder,
   MessageFlags,
-  RepliableInteraction,
+  BaseInteraction,
   RoleSelectMenuBuilder,
-  SlashCommandBooleanOption,
   StringSelectMenuBuilder,
   TextInputBuilder,
   UserSelectMenuBuilder,
+  RepliableInteraction,
 } from 'discord.js';
-import {
-  DiscordConstants,
-  InteractionConstants,
-  UnitConstants,
-} from '../constants';
+import { UnitConstants } from '../constants';
 import { Client } from '../client';
 import { AvailableGuildInteraction } from '../commands/controllers'; // [DEV] Looks like scope should be moved
 
-const replyFn = <I extends BaseInteraction>(
-  client: Client,
-  interaction: I,
-  options?: InteractionReplyDynamicOptions,
-) => {
-  const { logger } = client;
-  if (!interaction.isRepliable()) {
-    const noop = async (content: InteractionReplyOptions) =>
-      new Promise<null>(() => {
-        logger.warn(
-          `Interaction ${interaction.id} is not repliable, and cannot be replied to - returning no-operation`,
-        );
-        logger.warn(
-          'This is very likely a bug in your code, and you should analyze the content below to determine the issue:',
-        );
-        logger.startLog('Non-repliable Interaction Content');
-        console.table(content);
-        logger.endLog('Non-repliable Interaction Content');
-      });
-    return noop;
-  }
+const isAcknowledged = <T extends BaseInteraction>(interaction: T) =>
+  interaction.isRepliable() && (interaction.replied || interaction.deferred);
 
-  // Bind interaction to applicable reply function
-  if (options?.preferFollowUp) return interaction.followUp.bind(interaction);
-  else if (interaction.replied || interaction.deferred)
-    return interaction.editReply.bind(interaction);
-  else {
-    // Fail-safe - no reply after DiscordConstants.MS_UNTIL_INTERACTION_EXPIRES
-    // but interaction wasn't deferred or replied to
-    if (
-      interaction.createdTimestamp <
-      Date.now().valueOf() - DiscordConstants.MS_UNTIL_INTERACTION_EXPIRES
-    ) {
-      return async (content: InteractionReplyOptions) =>
-        new Promise<null>(() => {
-          logger.error(
-            `Interaction ${interaction.id} was not replied to, and has expired - returning no-operation`,
-          );
-          logger.warn(
-            'This is very likely a bug in your code, and you should analyze the content below to determine the issue:',
-          );
-          logger.startLog('Expired Interaction Content');
-          console.table(content);
-          logger.endLog('Expired Interaction Content');
-        });
+const replyEphemeral = <I extends BaseInteraction>(
+  interaction: I,
+  content:
+    | string
+    | (Omit<InteractionReplyOptions & InteractionEditReplyOptions, 'flags'> &
+        InteractionReplyDynamicOptions),
+) => {
+  if (!interaction.isRepliable()) return;
+
+  if (InteractionUtils.isAcknowledged(interaction)) {
+    if (typeof content !== 'string' && content.preferFollowUp) {
+      if (interaction.type === InteractionType.MessageComponent) {
+        return interaction.update(content);
+      }
+
+      return interaction.followUp(content);
     }
-    return interaction.reply.bind(interaction);
-  }
-};
 
-const replyDynamic = async <I extends BaseInteraction>(
-  client: Client,
-  interaction: I,
-  content: InteractionReplyOptions,
-  options?: InteractionReplyDynamicOptions,
-) => {
-  const { logger } = client;
-  const logReplyErr = (err: unknown, ctx: InteractionReplyOptions) => {
-    const msg =
-      err instanceof DiscordjsError || err instanceof DiscordAPIError
-        ? err.message
-        : `${err}`;
-    logger.error(`Failed to reply to interaction ${interaction.id} - ${msg}`);
-    logger.warn(
-      'Above error encountered while attempting to reply to interaction with following content:',
-    );
-    logger.startLog('Interaction Content');
-    console.dir(ctx, { depth: Infinity });
-    logger.endLog('Interaction Content');
-  };
-
-  try {
-    return await InteractionUtils.replyFn(
-      client,
-      interaction,
-      options,
-      // @ts-expect-error - Bind returns the type of any overload
-    )(content);
-  } catch (err) {
-    logReplyErr(err, content);
-    const errCtx = {
-      content: client.I18N.t('core:commands.errorWhileReplyingToInteraction'),
-      flags: [MessageFlags.Ephemeral] as const,
-    };
-    await InteractionUtils.replyFn(
-      client,
-      interaction,
-      options,
-      // @ts-expect-error - Bind returns the type of any overload
-    )(errCtx).catch((err: unknown) => {
-      logReplyErr(err, errCtx);
-    });
-    return null;
+    return interaction.editReply(content);
   }
+
+  return interaction.reply({
+    ...(typeof content === 'string' ? { content } : content),
+    flags: [MessageFlags.Ephemeral],
+  });
 };
 
 const resolveRowsFromComponents = (
@@ -191,47 +118,30 @@ const channelTypeToString = (type: ChannelType): string => {
   }
 };
 
-const requireGuild = <I extends BaseInteraction>(
+const requireAvailableGuild = <I extends BaseInteraction>(
   client: Client,
-  interaction: BaseInteraction,
+  interaction: I,
 ): interaction is AvailableGuildInteraction<I> => {
   if (!interaction.inGuild()) {
-    void InteractionUtils.replyDynamic(client, interaction, {
+    void InteractionUtils.replyEphemeral(interaction, {
       content: client.I18N.t('core:commands.notAvailableInDMs'),
-      flags: [MessageFlags.Ephemeral],
     });
     return false;
   }
 
   if (!interaction.inCachedGuild()) {
-    void InteractionUtils.replyDynamic(client, interaction, {
+    void InteractionUtils.replyEphemeral(interaction, {
       content: client.I18N.t('core:commands.missingCachedServer'),
-      flags: [MessageFlags.Ephemeral],
     });
     return false;
   }
 
-  return true;
-};
-
-const requireAvailableGuild = <I extends BaseInteraction>(
-  client: Client,
-  interaction: I,
-): interaction is AvailableGuildInteraction<I> => {
-  if (!InteractionUtils.requireGuild(client, interaction)) return false;
   if (!interaction.guild.available) {
-    void InteractionUtils.replyDynamic(client, interaction, {
+    void InteractionUtils.replyEphemeral(interaction, {
       content: client.I18N.t('core:commands.serverUnavailable'),
-      flags: [MessageFlags.Ephemeral],
     });
     return false;
   }
-
-  interaction.channel;
-  interaction.member;
-  interaction.guild;
-  interaction.guildId;
-  interaction.guildLocale;
 
   return true;
 };
@@ -306,9 +216,8 @@ const paginator = async (
   });
 
   if (!initialReply) {
-    void InteractionUtils.replyDynamic(client, interaction, {
+    void InteractionUtils.replyEphemeral(interaction, {
       content: client.I18N.t('core:commands.missingInitialReply'),
-      flags: [MessageFlags.Ephemeral],
       ...options,
     });
     return;
@@ -322,9 +231,8 @@ const paginator = async (
 
   collector.on('collect', async (button) => {
     if (button.user.id !== interaction.user.id) {
-      void InteractionUtils.replyDynamic(client, interaction, {
-        content: client.I18N.t('core:commands.isNotUserPaginator'),
-        flags: [MessageFlags.Ephemeral],
+      void InteractionUtils.replyEphemeral(interaction, {
+        content: client.I18N.t('core:commands.isNotComponentUser'),
         ...options,
       });
       return;
@@ -385,204 +293,28 @@ const disableComponents = (
     return component;
   });
 
-const slashConfirmationOptionName = 'confirmation';
-const addSlashConfirmationOption = (i: SlashCommandBooleanOption) =>
-  i
-    .setName(slashConfirmationOptionName)
-    .setDescription('Are you sure you want to perform this action?')
-    .setRequired(false);
-
-const slashConfirmationOptionHandler = (
-  client: Client,
-  interaction: ChatInputCommandInteraction,
-): boolean => {
-  const value = interaction.options.getBoolean(slashConfirmationOptionName);
-  if (!value) {
-    void InteractionUtils.replyDynamic(client, interaction, {
-      content: client.I18N.t('core:commands.confirmationRequired'),
-      flags: [MessageFlags.Ephemeral],
-    });
-    return false;
-  }
-  return true;
-};
-
-const confirmationButtonRow = (client: Client) =>
-  new ActionRowBuilder<ButtonBuilder>().addComponents(
-    new ButtonBuilder()
-      .setCustomId(InteractionConstants.CONFIRMATION_BUTTON_CONFIRM_ID)
-      .setLabel(client.I18N.t('core:commands.confirmationButtonLabel'))
-      .setEmoji(client.clientEmojis.success)
-      .setStyle(ButtonStyle.Success),
-    new ButtonBuilder()
-      .setCustomId(InteractionConstants.CONFIRMATION_BUTTON_CANCEL_ID)
-      .setLabel(client.I18N.t('core:commands.cancelButtonLabel'))
-      .setEmoji(client.clientEmojis.error)
-      .setStyle(ButtonStyle.Secondary),
-  );
-
-const promptConfirmation = async ({
-  client,
-  interaction,
-  content,
-  options,
-  onConfirm,
-  onCancel,
-  shouldReplyOnConfirm = false,
-  shouldReplyOnCancel = true,
-  removeComponents = true,
-  disableComponents = true,
-  removeEmbeds = true,
-  removeFiles = true,
-}: PromptConfirmationOptions): Promise<
-  RepliableInteraction | false | 'expired'
-> => {
-  if (!content) content = {};
-  if (!content.components) content.components = [];
-  if (!content.embeds) content.embeds = [];
-  if (!content.files) content.files = [];
-
-  const newEmbeds = removeEmbeds ? [] : content.embeds;
-  const newFiles = removeFiles ? [] : content.files;
-  const confirmationRow = confirmationButtonRow(client);
-  const components = content.components.length
-    ? [...content.components, confirmationRow]
-    : [confirmationRow];
-
-  const message = await InteractionUtils.replyDynamic(client, interaction, {
-    content: client.I18N.t('core:commands.promptConfirmation'),
-    ...content,
-    ...options,
-    components,
-    withResponse: true,
-  });
-
-  if (!message) {
-    void InteractionUtils.replyDynamic(client, interaction, {
-      content: client.I18N.t('core:commands.missingInitialReply'),
-      flags: [MessageFlags.Ephemeral],
-    });
-    return false;
-  }
-
-  const collector = message.createMessageComponentCollector({
-    componentType: ComponentType.Button,
-    time: UnitConstants.MS_IN_ONE_MINUTE,
-  });
-
-  return await new Promise<RepliableInteraction | false | 'expired'>(
-    (resolve) => {
-      collector.on('collect', async (button) => {
-        if (button.user.id !== interaction.user.id) {
-          void InteractionUtils.replyDynamic(client, interaction, {
-            content: client.I18N.t('core:commands.isNotComponentUser'),
-            flags: [MessageFlags.Ephemeral],
-          });
-          return;
-        }
-
-        if (
-          button.customId ===
-          InteractionConstants.CONFIRMATION_BUTTON_CONFIRM_ID
-        ) {
-          if (shouldReplyOnConfirm) await button.deferUpdate();
-          if (typeof onConfirm === 'function') await onConfirm(button);
-          if (disableComponents) InteractionUtils.disableComponents(components);
-          if (shouldReplyOnConfirm)
-            await InteractionUtils.replyDynamic(client, button, {
-              content: client.I18N.t('core:commands.confirmationAccepted'),
-              embeds: newEmbeds,
-              files: newFiles,
-              components: removeComponents ? [] : components,
-            });
-          resolve(button);
-        }
-
-        if (
-          button.customId === InteractionConstants.CONFIRMATION_BUTTON_CANCEL_ID
-        ) {
-          if (shouldReplyOnCancel) await button.deferUpdate();
-          if (typeof onCancel === 'function') await onCancel(button);
-          if (disableComponents) InteractionUtils.disableComponents(components);
-          if (shouldReplyOnCancel)
-            await InteractionUtils.replyDynamic(client, button, {
-              content: client.I18N.t('core:commands.confirmationCancelled'),
-              embeds: newEmbeds,
-              files: newFiles,
-              components: removeComponents ? [] : components,
-            });
-          resolve(false);
-        }
-      });
-
-      collector.on('end', async (collected) => {
-        if (collected.size) return;
-        InteractionUtils.disableComponents(components);
-        await InteractionUtils.replyDynamic(client, interaction, {
-          content: client.I18N.t('core:commands.confirmationExpired'),
-          embeds: newEmbeds,
-          files: newFiles,
-          components: components,
-        });
-        resolve('expired');
-      });
-    },
-  );
-};
-
 interface InteractionReplyDynamicOptions {
+  /**
+   * Whether to prefer follow-up messages over other types of replies.
+   * If set to true, and the interaction is a message component interaction,
+   * the interaction will be updated instead of replied to.
+   */
   preferFollowUp?: boolean;
 }
 
-type PromptConfirmationOptions = {
-  client: Client;
-  interaction: RepliableInteraction;
-  content?: InteractionReplyOptions;
-  options?: InteractionReplyDynamicOptions;
-  onConfirm?: (interaction: ButtonInteraction) => void | Promise<void>;
-  onCancel?: (interaction: ButtonInteraction) => void | Promise<void>;
-  shouldReplyOnConfirm?: boolean;
-  shouldReplyOnCancel?: boolean;
-  removeComponents?: boolean;
-  disableComponents?: boolean;
-  removeEmbeds?: boolean;
-  removeFiles?: boolean;
-};
-
 class InteractionUtils {
   /**
-   * Resolves the applicable reply function for the given interaction
-   *
-   * Note: This is function should never be assigned to a variable, as it's purpose is
-   * dynamically resolving the reply function for the given interaction. If you
-   * assign this to a variable, it will always resolve to the same function.
-   *
-   * Example:
-   * ```ts
-   * InteractionUtils.replyFn(interaction)(content);
-   * ```
-   * @param client The client instance
-   * @param interaction The interaction to resolve the reply function for
-   * @param options The options to pass to the reply function
-   * @returns The applicable reply function for the given interaction and options
+   * Check if an interaction has been acknowledged
+   * @param interaction The interaction to check
+   * @returns Whether the interaction has been acknowledged
    */
-  static readonly replyFn = replyFn;
+  static readonly isAcknowledged = isAcknowledged;
   /**
-   * Reply to an interaction - dynamically resolves the reply function,
-   * and calls it with the given content, util to avoid having to
-   * directly invoke the replyFn method, as explained in it's declaration
-   *
-   * Note: It definitely needs the client, as it needs to be able to
-   * log critical errors if they are encountered while replying
-   * to interactions - it's worth all the client not null checks
-   *
-   * @param client The client instance
+   * (try to) Reply to an interaction with an ephemeral message
    * @param interaction The interaction to reply to
    * @param content The content to reply with
-   * @param options The options to pass to the reply function
-   * @returns Reply method return value - use `withResponse` if appropriate
    */
-  static readonly replyDynamic = replyDynamic;
+  static readonly replyEphemeral = replyEphemeral;
   /**
    * Resolves the (discord.js) rows from an array of components
    * @param components The components to resolve rows from
@@ -595,13 +327,6 @@ class InteractionUtils {
    * @returns The human-readable string
    */
   static readonly channelTypeToString = channelTypeToString;
-  /**
-   * Require that an interaction is in a guild
-   * @param client The client instance
-   * @param interaction The interaction to check
-   * @returns Whether the interaction is in a guild
-   */
-  static readonly requireGuild = requireGuild;
   /**
    * Require that an interaction is in an available/cached guild
    * @param client The client instance
@@ -625,40 +350,6 @@ class InteractionUtils {
    * @returns The disabled components
    */
   static readonly disableComponents = disableComponents;
-  /**
-   * The name of the confirmation option for slash commands
-   */
-  static readonly slashConfirmationOptionName = slashConfirmationOptionName;
-  /**
-   * Add a confirmation option to a slash command
-   * @param i The boolean option to add the confirmation option to
-   * @returns The boolean option with the confirmation option
-   */
-  static readonly addSlashConfirmationOption = addSlashConfirmationOption;
-  /**
-   * Handle the confirmation option interaction for slash commands
-   * @param client The client instance
-   * @param interaction The interaction to check
-   * @returns Whether the interaction has the confirmation option
-   */
-  static readonly slashConfirmationOptionHandler =
-    slashConfirmationOptionHandler;
-  /**
-   * Get the confirmation button row for prompts
-   * @param client The client instance
-   * @returns The confirmation button row
-   */
-  static readonly confirmationButtonRow = confirmationButtonRow;
-  /**
-   * Prompt a user for confirmation with a button row
-   * @param options The options for the prompt
-   * @returns The interaction, false if cancelled, or 'expired'
-   */
-  static readonly promptConfirmation = promptConfirmation;
 }
 
-export {
-  InteractionUtils,
-  type InteractionReplyDynamicOptions,
-  type PromptConfirmationOptions,
-};
+export { InteractionUtils, type InteractionReplyDynamicOptions };

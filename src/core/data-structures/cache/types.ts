@@ -60,20 +60,8 @@ export type WithCacheDetails = {
 export type WithCacheDataFn<K, T, O = undefined> = O extends undefined
   ? (key: K) => T | null | undefined | Promise<T | null | undefined>
   : (key: K) => T | O | null | undefined | Promise<T | O | null | undefined>;
-export type WithCacheValidator<T, O> = (item: T | O) => item is T;
-export type WithCacheTransformer<T, O> = (
-  item: T | O,
-  details: WithCacheDetails,
-) => O extends undefined ? T : T | O;
 
 export type WithCacheReturnType<T extends NonNullable<unknown>> = [
   T | null | undefined,
   WithCacheDetails,
 ];
-export type WithCacheOptions<K, T, O = undefined> = {
-  key: K;
-  dataFunction: WithCacheDataFn<K, T, O>;
-  validationFunction?: WithCacheValidator<T | null | undefined, O>;
-  transformFunction?: WithCacheTransformer<T | null | undefined, O>;
-  ttl?: number;
-};

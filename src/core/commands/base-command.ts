@@ -7,7 +7,6 @@ import {
   EmbedBuilder,
   GuildMember,
   InteractionReplyOptions,
-  MessageFlags,
   PermissionResolvable,
   PermissionsBitField,
 } from 'discord.js';
@@ -444,9 +443,7 @@ export class BaseCommand<I extends BaseInteraction = BaseInteraction> {
       !interaction.replied &&
       !interaction.deferred
     )
-      await interaction.deferReply({
-        flags: this.isEphemeral ? [MessageFlags.Ephemeral] : [],
-      });
+      await interaction.deferReply({});
   };
 
   /**
@@ -459,30 +456,29 @@ export class BaseCommand<I extends BaseInteraction = BaseInteraction> {
     content: InteractionReplyOptions | EmbedBuilder | string,
     options: InteractionReplyDynamicOptions = {},
   ) => {
-    if (!this.client)
+    if (!this.client) {
       throw new Error(
         `Command ${this.data.name} has no client, but is trying to reply to an interaction`,
       );
+    }
+
     const resolvedContent =
       content instanceof EmbedBuilder
         ? { embeds: [content] }
         : typeof content === 'string'
           ? { content }
           : content;
-    resolvedContent.ephemeral = this.isEphemeral;
-    return InteractionUtils.replyDynamic(
-      this.client,
-      interaction,
-      resolvedContent,
-      options,
-    );
+
+    return InteractionUtils.replyEphemeral(interaction, {
+      ...resolvedContent,
+      ...options,
+    });
   };
 
   matchEnabledConstraints = (interaction: I, client: Client): boolean => {
     if (this.disabled) {
-      void InteractionUtils.replyDynamic(client, interaction, {
+      void InteractionUtils.replyEphemeral(interaction, {
         content: client.I18N.t('core:commands.commandDisabledTitle'),
-        flags: [MessageFlags.Ephemeral],
       });
       return false;
     }
@@ -514,9 +510,8 @@ export class BaseCommand<I extends BaseInteraction = BaseInteraction> {
 
     // Restrict DM usage if applicable
     if (!interaction.inGuild() && this.guildOnly) {
-      void InteractionUtils.replyDynamic(client, interaction, {
+      void InteractionUtils.replyEphemeral(interaction, {
         content: client.I18N.t('core:commands.notAvailableInDMs'),
-        flags: [MessageFlags.Ephemeral],
       });
       return false;
     }
@@ -536,7 +531,7 @@ export class BaseCommand<I extends BaseInteraction = BaseInteraction> {
     // we can't determine if the command should execute
     // so we shouldn't allow it
     if (!channel) {
-      void InteractionUtils.replyDynamic(client, interaction, {
+      void InteractionUtils.replyEphemeral(interaction, {
         content: client.I18N.t('core:commands.noChannelForPermissionCheck'),
       });
       return false;
@@ -555,9 +550,8 @@ export class BaseCommand<I extends BaseInteraction = BaseInteraction> {
       const msg = isClient
         ? client.I18N.t('core:commands.clientMissingPermissions')
         : client.I18N.t('core:commands.userMissingPermissions');
-      void InteractionUtils.replyDynamic(client, interaction, {
+      void InteractionUtils.replyEphemeral(interaction, {
         content: msg,
-        flags: [MessageFlags.Ephemeral],
         embeds: [
           new EmbedBuilder()
             // Note: Internally, for errors, we should use red
@@ -586,14 +580,13 @@ export class BaseCommand<I extends BaseInteraction = BaseInteraction> {
       this.isUserComponent &&
       !this.hasAccessToUserComponent(interaction)
     ) {
-      void InteractionUtils.replyDynamic(client, interaction, {
+      void InteractionUtils.replyEphemeral(interaction, {
         embeds: [
           client.embeds.error({
             title: client.I18N.t('core:invalidUser'),
             description: client.I18N.t('core:commands.isNotComponentUser'),
           }),
         ],
-        flags: [MessageFlags.Ephemeral],
       });
       return false;
     }
@@ -610,9 +603,8 @@ export class BaseCommand<I extends BaseInteraction = BaseInteraction> {
       interaction.guild,
     );
     if (permLevel < this.permLevel) {
-      void InteractionUtils.replyDynamic(client, interaction, {
+      void InteractionUtils.replyEphemeral(interaction, {
         content: client.I18N.t('core:commands.permLevelTooLow'),
-        flags: [MessageFlags.Ephemeral],
       });
       return false;
     }
@@ -628,9 +620,8 @@ export class BaseCommand<I extends BaseInteraction = BaseInteraction> {
     // determine if the command should execute, so
     // we shouldn't allow it
     if (!channel) {
-      void InteractionUtils.replyDynamic(client, interaction, {
+      void InteractionUtils.replyEphemeral(interaction, {
         content: client.I18N.t('core:commands.noChannelForNSFWCheck'),
-        flags: [MessageFlags.Ephemeral],
       });
       return false;
     }
@@ -638,27 +629,24 @@ export class BaseCommand<I extends BaseInteraction = BaseInteraction> {
     // In DM's, there's no option to make chats NSFW
     // They'll always open without warning, so deny
     if (channel.isDMBased()) {
-      void InteractionUtils.replyDynamic(client, interaction, {
+      void InteractionUtils.replyEphemeral(interaction, {
         content: client.I18N.t('core:commands.noNSFWInDM'),
-        flags: [MessageFlags.Ephemeral],
       });
       return false;
     }
 
     // Threads can NOT be marked as NSFW
     if (channel.isThread()) {
-      void InteractionUtils.replyDynamic(client, interaction, {
+      void InteractionUtils.replyEphemeral(interaction, {
         content: client.I18N.t('core:commands.noNSFWInThread'),
-        flags: [MessageFlags.Ephemeral],
       });
       return false;
     }
 
     // If the channel is not NSFW, deny execution
     if (!channel.nsfw) {
-      void InteractionUtils.replyDynamic(client, interaction, {
+      void InteractionUtils.replyEphemeral(interaction, {
         content: client.I18N.t('core:commands.noNSFWInSFWChannel'),
-        flags: [MessageFlags.Ephemeral],
       });
       return false;
     }
@@ -698,14 +686,13 @@ export class BaseCommand<I extends BaseInteraction = BaseInteraction> {
       // Make sure we have a client member reference
       const me = interaction.guild.members.me;
       if (!me) {
-        void InteractionUtils.replyDynamic(client, interaction, {
+        void InteractionUtils.replyEphemeral(interaction, {
           content: `${client.I18N.t('core:commands.clientMissingPermissions')}\n\n${this.clientPerms
             .map(
               (e) =>
                 `${this.client?.clientEmojis.error ?? defaultEmojis} \`${e}\``,
             )
             .join(', ')}`,
-          flags: [MessageFlags.Ephemeral],
         });
         return false;
       }
@@ -918,38 +905,37 @@ export class BaseCommand<I extends BaseInteraction = BaseInteraction> {
     const { cooldown } = this;
     const resourceId = cooldownResourceId(cooldown.type, interaction);
     const throttleId = `${this.sourceHash}@${resourceId}`;
-    const durationInMS = cooldown.duration;
+    const durationInMs = cooldown.duration;
     const throttleEntry = (await throttleFromCache(throttleId)) ?? {
       id: throttleId,
       throttleId,
-      duration: durationInMS,
+      duration: durationInMs,
       usages: [],
     };
     const nonExpiredUsages = throttleEntry.usages.filter(
-      (e) => e.valueOf() + durationInMS > now,
+      (e) => e.valueOf() + durationInMs > now,
     );
     const activeUsages = nonExpiredUsages.length;
 
     const firstNonExpired = nonExpiredUsages[0];
     if (firstNonExpired && activeUsages >= cooldown.usages) {
       const firstUsageExpires = new Date(
-        firstNonExpired.valueOf() + durationInMS,
+        firstNonExpired.valueOf() + durationInMs,
       );
       const remaining = firstUsageExpires.valueOf() - now;
       const expiresIn = TimeUtils.msToHumanReadable(remaining);
       const relativeOutput = expiresIn === '0 seconds' ? '1 second' : expiresIn;
-      void InteractionUtils.replyDynamic(client, interaction, {
+      void InteractionUtils.replyEphemeral(interaction, {
         content: client.I18N.t('core:commands.onCooldown', {
           type: CommandCooldownType[cooldown.type],
           expiresIn: relativeOutput,
         }),
-        flags: [MessageFlags.Ephemeral],
       });
       return true;
     }
 
     throttleEntry.usages.push(new Date(now));
-    await setThrottleInCache(throttleEntry, durationInMS);
+    await setThrottleInCache(throttleEntry, durationInMs);
 
     return false;
   };

@@ -9,9 +9,6 @@ import {
   CacheManagerMetadata,
   ResolvedCreateCacheOptions,
   SetCacheArguments,
-  WithCacheDetails,
-  WithCacheOptions,
-  WithCacheReturnType,
 } from './types';
 
 export class CacheManager<T extends NonNullable<unknown>>
@@ -257,69 +254,12 @@ export class CacheManager<T extends NonNullable<unknown>>
    * @param allowNull Whether to allow null values
    * @returns Whether the item is valid (cache) data
    */
-  isData(item: T | null | undefined, allowNull: true): item is T | null;
   isData(item: T | null | undefined, allowNull: false): item is T;
-  isData(item: T | null | undefined, allowNull: boolean): item is T | null {
+  isData(item: T | null | undefined, allowNull?: boolean): item is T | null {
     if (allowNull) {
       return item !== undefined;
     }
     return item !== null && item !== undefined;
-  }
-
-  /**
-   * Cache the return value of a function, with optional transformation and validation
-   * @param options The options for the cache operation
-   * @returns The cached value and details
-   */
-  async withCache(
-    options: WithCacheOptions<string, T, undefined>,
-  ): Promise<WithCacheReturnType<T>> {
-    const {
-      key,
-      dataFunction,
-      transformFunction,
-      validationFunction,
-      ttl = this.cacheOptions.ttl,
-    } = options;
-    const resolveReturnValue = (
-      item: T | null | undefined,
-      details: WithCacheDetails,
-    ): WithCacheReturnType<T> => {
-      if (!transformFunction) return [item, details];
-      return [transformFunction(item, details), details] as const;
-    };
-
-    const item = await this.get(key);
-    if (item) {
-      const details: WithCacheDetails = {
-        source: 'cache',
-        cached: false,
-        cachedFor: await this.ttl(key),
-      };
-      return resolveReturnValue(item, details);
-    }
-
-    const result = dataFunction(key);
-    const resolvedResult = result instanceof Promise ? await result : result;
-
-    if (
-      !validationFunction ||
-      !validationFunction(resolvedResult) ||
-      typeof resolvedResult === 'undefined'
-    ) {
-      return resolveReturnValue(resolvedResult, {
-        source: 'no-cache',
-        cached: false,
-        cachedFor: null,
-      });
-    }
-
-    await this.set(key, resolvedResult, ttl);
-    return resolveReturnValue(resolvedResult, {
-      source: 'no-cache',
-      cached: true,
-      cachedFor: ttl ?? null,
-    });
   }
 
   /**

@@ -22,7 +22,17 @@ enum Model {
   CommandStatistics = 'CommandStatistics',
 }
 
-// [DEV] IDs for debugging
+const seenModels = new Set<string>();
+
+// Ensure lowercased models don't overlap,
+// as we use the lc model name as subcmds
+for (const model of Object.values(Model)) {
+  const lowercased = model.toLowerCase();
+  if (seenModels.has(lowercased)) {
+    throw new Error(`Duplicate lowercased model detected: ${model}`);
+  }
+  seenModels.add(lowercased);
+}
 
 type ModelUnion = User | Member | Guild | CommandCooldown | CommandStatistics;
 

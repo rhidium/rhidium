@@ -4,7 +4,6 @@ import {
   AutocompleteInteraction,
   ChatInputCommandInteraction,
   DiscordAPIError,
-  MessageFlags,
   SlashCommandStringOption,
 } from 'discord.js';
 import { Client } from '../../client';
@@ -206,7 +205,7 @@ export class AutoCompleteOption<T = undefined> {
     );
     if (!resolvedValue && handleMissingWhenRequired === true) {
       if (interaction.isChatInputCommand())
-        await InteractionUtils.replyDynamic(this.client, interaction, {
+        await InteractionUtils.replyEphemeral(interaction, {
           embeds: [
             this.client.embeds.error({
               title: this.client.I18N.t(
@@ -218,7 +217,6 @@ export class AutoCompleteOption<T = undefined> {
               ),
             }),
           ],
-          flags: [MessageFlags.Ephemeral],
         });
       else
         await interaction.respond([

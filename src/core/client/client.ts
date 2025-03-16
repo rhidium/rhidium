@@ -6,7 +6,6 @@ import {
   Events,
   If,
   Locale,
-  MessageFlags,
   version as discordJsVersion,
 } from 'discord.js';
 import { ClusterClient } from 'discord-hybrid-sharding';
@@ -350,7 +349,7 @@ export class Client<
       // Make sure we have a command
       if (!command) {
         if (this.extendedOptions.refuseUnknownCommandInteractions) {
-          await InteractionUtils.replyDynamic(readyClient, interaction, {
+          await InteractionUtils.replyEphemeral(interaction, {
             embeds: [
               this.embeds.error({
                 title: this.I18N.t('core:commands.unknownCommandTitle'),
@@ -373,7 +372,7 @@ export class Client<
 
       // Make sure the command is enabled
       if (command.disabled) {
-        await InteractionUtils.replyDynamic(readyClient, interaction, {
+        await InteractionUtils.replyEphemeral(interaction, {
           embeds: [
             this.embeds.error({
               title: this.I18N.t('core:commands.commandDisabledTitle'),
@@ -382,7 +381,6 @@ export class Client<
               ),
             }),
           ],
-          flags: [MessageFlags.Ephemeral],
         });
         return;
       }

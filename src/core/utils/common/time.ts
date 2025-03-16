@@ -54,39 +54,8 @@ const msToHumanReadable = (ms: number, maxParts = 2) => {
   } else return lastPart ?? 'Just now';
 };
 
-const humanTimeInputToMS = (input: string): number => {
-  const parts = input.split(/, and|,|, /);
-  let ms = 0;
-  for (const part of parts) {
-    const [amount, unit] = part.split(' ');
-    if (typeof amount !== 'string' || typeof unit !== 'string') continue;
-    const resolvedAmount = Number(amount);
-    switch (unit) {
-      case 'day':
-      case 'days':
-      case 'd':
-        ms += resolvedAmount * UnitConstants.MS_IN_ONE_DAY;
-        break;
-      case 'hour':
-      case 'hours':
-      case 'h':
-        ms += resolvedAmount * UnitConstants.MS_IN_ONE_HOUR;
-        break;
-      case 'minute':
-      case 'minutes':
-      case 'm':
-        ms += resolvedAmount * UnitConstants.MS_IN_ONE_MINUTE;
-        break;
-      case 'second':
-      case 'seconds':
-      case 's':
-      default:
-        ms += resolvedAmount * UnitConstants.MS_IN_ONE_SECOND;
-        break;
-    }
-  }
-  return ms;
-};
+const hrTimeToMs = (hrTime: [number, number]): number =>
+  hrTime[0] * 1e3 + hrTime[1] / 1e6;
 
 const bigIntDurationToHumanReadable = (start: bigint): string => {
   const end = process.hrtime.bigint();
@@ -207,18 +176,11 @@ class TimeUtils {
    */
   static readonly msToHumanReadable = msToHumanReadable;
   /**
-   * Resolves human input (user prompts) to milliseconds
-   *
-   * Supported formats (please note that spaces are ignored):
-   * - Full: `1 day, 2 hours, 15 minutes, and 30 seconds`
-   * - Short: `1d, 2h, 15m, 30s`
-   * - Mixed: `1 day,2h,15m,30s`
-   *
-   * [DEV] Needs tests and improvements for unsupported input
-   * @param input The human input string
+   * Converts a hrTime tuple to milliseconds
+   * @param hrTime The hrTime tuple
    * @returns The time in milliseconds
    */
-  static readonly humanTimeInputToMS = humanTimeInputToMS;
+  static readonly hrTimeToMs = hrTimeToMs;
   /**
    * Displays the duration of a bigInt since a given `start` time
    * @param start The start time as a bigInt

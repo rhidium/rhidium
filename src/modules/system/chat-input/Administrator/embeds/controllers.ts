@@ -31,6 +31,7 @@ import {
   replacePlaceholdersAcrossEmbed,
   replacePlaceholders,
   Database,
+  InputUtils,
 } from '@core';
 
 const jsonCodeBlockOffset = 12;
@@ -289,8 +290,9 @@ export const configureEmbedController: EmbedController = async (
     allowedMentions: { parse: [] },
   });
 
-  const newEmbedData = msg.embeds[0];
+  const newEmbedData = 'embeds' in msg ? msg.embeds[0] : null;
   if (!newEmbedData) return;
+
   const jsonOutput = escapeCodeBlock(
     JSON.stringify(updatedEmbed, null, 2),
   ).slice(0, EmbedConstants.FIELD_VALUE_MAX_LENGTH - jsonCodeBlockOffset);
@@ -553,7 +555,7 @@ export const manageEmbedFieldsController: EmbedFieldController = async (
         return;
       }
 
-      await InteractionUtils.promptConfirmation({
+      await InputUtils.Confirmation.promptConfirmation({
         client,
         interaction,
         async onConfirm(i) {
@@ -590,7 +592,7 @@ export const manageEmbedFieldsController: EmbedFieldController = async (
             : null;
           const messageSuffix = resolvedMessage ? `\n\n${resolvedMessage}` : '';
 
-          await InteractionUtils.replyDynamic(client, i, {
+          await InteractionUtils.replyEphemeral(i, {
             content: `${Lang.t('commands:embeds.fieldsResetSuccess')}${messageSuffix}`,
             embeds: [embed],
           });

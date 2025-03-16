@@ -7,7 +7,6 @@ import {
   cooldownResourceId,
   Database,
 } from '@core';
-import { MessageFlags } from 'discord.js';
 
 export const persistentCooldownMiddleware: CommandMiddlewareFunction = async ({
   client,
@@ -32,7 +31,7 @@ export const persistentCooldownMiddleware: CommandMiddlewareFunction = async ({
   const { cooldown } = command;
   const resourceId = cooldownResourceId(cooldown.type, interaction);
   const cooldownId = `${command.sourceHash}@${resourceId}`;
-  const durationInMS = cooldown.duration;
+  const durationInMs = cooldown.duration;
 
   // Not cached because we have an expired-usage cleaning job
   const cooldownEntry =
@@ -40,32 +39,27 @@ export const persistentCooldownMiddleware: CommandMiddlewareFunction = async ({
     (await Database.CommandCooldown.create({
       cooldownId,
       usages: [],
-      duration: durationInMS,
+      duration: durationInMs,
     }));
-
-  // [DEV] Cache keys legit don't include query LMAOOO
-  // [DEV] !this.useCache || !cacheResult does NOT make sense
-  // [DEV] The result of the operation.
 
   // Is on cooldown
   const nonExpiredUsages = cooldownEntry.usages.filter(
-    (e) => e.valueOf() + durationInMS > now,
+    (e) => e.valueOf() + durationInMs > now,
   );
   const activeUsages = nonExpiredUsages.length;
   if (nonExpiredUsages.length >= 1 && activeUsages >= cooldown.usages) {
     const firstNonExpired = nonExpiredUsages[0] as Date;
     const firstUsageExpires = new Date(
-      firstNonExpired.valueOf() + durationInMS,
+      firstNonExpired.valueOf() + durationInMs,
     );
     const remaining = firstUsageExpires.valueOf() - now;
     const expiresIn = TimeUtils.msToHumanReadable(remaining);
     const relativeOutput = expiresIn === '0 seconds' ? '1 second' : expiresIn;
-    await InteractionUtils.replyDynamic(client, interaction, {
+    await InteractionUtils.replyEphemeral(interaction, {
       content: Lang.t('core:commands.onCooldown', {
         type: CommandCooldownType[cooldown.type],
         expiresIn: relativeOutput,
       }),
-      flags: [MessageFlags.Ephemeral],
     });
     // Don't go next =)
     // Doesn't continue to next middleware, command is not executed

@@ -7,7 +7,7 @@ import {
   ModelFieldRefs,
   ThenArg,
 } from '../types';
-import { resolvePopulatedModelArgs, toPrismaModelName } from './args';
+import { toPrismaModelName } from './args';
 
 export const aggregatePopulatedModel = async <T extends Model>(
   model: T,
@@ -29,7 +29,6 @@ export const countPopulatedModel = async <T extends Model>(
 
   // @ts-expect-error - Incompatible type signatures
   const count = prismaClient[prismaModel].count({
-    ...resolvePopulatedModelArgs(model),
     ...query,
   });
 

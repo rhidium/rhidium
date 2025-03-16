@@ -27,19 +27,17 @@ import {
   UserContextCommand,
   isCommand,
 } from '../commands';
-import { CommandCooldownType, resolveCooldownType } from '../commands/cooldown';
-import { PermLevel, resolvePermLevel } from '.';
+import { CommandCooldownType } from '../commands/cooldown';
+import { PermLevel } from '.';
 import {
   Directories,
   FileUtils,
   GenericObject,
   ObjectUtils,
-  PermissionUtils,
   StringUtils,
-  TimeUtils,
 } from '../utils';
 import { AutoCompleteOption } from '../commands/auto-complete';
-import { EmbedConstants, UnitConstants } from '../constants';
+import { UnitConstants } from '../constants';
 import { ClientEventListener } from '.';
 import { Job } from '../jobs';
 
@@ -116,6 +114,7 @@ export interface CommandManagerOptions {
 
 export class CommandManager {
   readonly client: Client;
+
   listeners = new Collection<string, ClientEventListener>();
   chatInput = new Collection<string, ChatInputCommand>();
   userContextMenus = new Collection<string, UserContextCommand>();
@@ -123,6 +122,7 @@ export class CommandManager {
   componentCommands = new Collection<string, ComponentCommandBase>();
   autoComplete = new Collection<string, AutoCompleteOption>();
   jobs = new Collection<string, Job>();
+
   get commandSize() {
     return (
       this.chatInput.size +
@@ -131,6 +131,7 @@ export class CommandManager {
       this.componentCommands.size
     );
   }
+
   get apiCommands() {
     return new Collection<string, APICommandType>()
       .concat(this.chatInput)
@@ -143,7 +144,7 @@ export class CommandManager {
    * across all modules (src/modules) that are used
    */
   readonly directories: Record<
-    keyof Omit<Required<CommandManagerCommandsOptions>, 'middleware'>,
+    keyof Omit<CommandManagerCommandsOptions, 'middleware'>,
     string[]
   > & {
     middleware: Required<GlobalMiddlewareOptions>;
@@ -174,17 +175,15 @@ export class CommandManager {
     return new REST({ version: '10' }).setToken(this.client.token);
   }
 
-  globalCommandFilter = (command: APICommandType) =>
-    command.disabled !== true && command.global === true;
-  developmentCommandFilter = (command: APICommandType) =>
-    command.disabled !== true && command.global === false;
-
   mapDataCallback = (command: APICommandType) => command.data;
 
   /** Returns an array of concatenated global data ready to send of to Discord's API */
   get globalCommandData() {
     return this.apiCommands
-      .filter(this.globalCommandFilter)
+      .filter(
+        (command: APICommandType) =>
+          command.disabled !== true && command.global === true,
+      )
       .map(this.mapDataCallback);
   }
 
@@ -194,7 +193,10 @@ export class CommandManager {
    */
   get developmentCommandData() {
     return this.apiCommands
-      .filter(this.developmentCommandFilter)
+      .filter(
+        (command: APICommandType) =>
+          command.disabled !== true && command.global === false,
+      )
       .map(this.mapDataCallback);
   }
 
@@ -1066,7 +1068,7 @@ export class CommandManager {
     return aliasCommands;
   }
 
-  isAppropriateCommandFilter = (
+  filterByPermLevel = (
     cmd: CommandType,
     member: GuildMember | APIInteractionGuildMember | null,
     memberPermLevel: PermLevel,
@@ -1075,200 +1077,6 @@ export class CommandManager {
     if (!member) return cmd.permLevel === PermLevel.User;
     if (cmd.permLevel === PermLevel.User) return true;
     return memberPermLevel >= cmd.permLevel;
-  };
-
-  commandEmbed = (cmd: CommandType) => {
-    const { cooldown } = cmd;
-    const { client } = this;
-    const description =
-      cmd instanceof ChatInputCommand ? cmd.data.description : 'n/a';
-    const cooldownUsagesOutput =
-      cooldown.usages === 1 ? '1 use' : `${cooldown.usages} uses`;
-    const cooldownOutput = cooldown.enabled
-      ? [
-          `**${cooldownUsagesOutput}** in **${TimeUtils.msToHumanReadable(cooldown.duration)}**`,
-          `(type \`${resolveCooldownType(cooldown.type)}\`)`,
-        ].join(' ')
-      : 'n/a';
-
-    const embed = client.embeds.info({
-      title: `Command: ${cmd.data.name}`,
-      description: `\`\`\`${description}\`\`\``,
-      fields: [
-        {
-          name: '⏱️ Cooldown',
-          value: cooldownOutput,
-          inline: false,
-        },
-
-        {
-          name: '🏷️ Aliases',
-          value: `\`${
-            cmd.aliases.length > 0 ? cmd.aliases.join('`, `') : 'None'
-          }\``,
-          inline: true,
-        },
-        {
-          name: '#️⃣ Category',
-          value: cmd.category ? StringUtils.titleCase(cmd.category) : 'None',
-          inline: true,
-        },
-        {
-          name: '🛡️ Permission Level',
-          value: `${resolvePermLevel(cmd.permLevel)}`,
-          inline: true,
-        },
-
-        {
-          name: '🔞 NSFW',
-          value: cmd.nsfw
-            ? `${client.clientEmojis.success} Yes`
-            : `${client.clientEmojis.error} No`,
-          inline: true,
-        },
-        {
-          name: '💬 DM',
-          value: !cmd.guildOnly
-            ? `${client.clientEmojis.success} Yes`
-            : `${client.clientEmojis.error} No`,
-          inline: true,
-        },
-        {
-          name: '🔒 Ephemeral',
-          value: cmd.isEphemeral
-            ? `${client.clientEmojis.success} Yes`
-            : `${client.clientEmojis.error} No`,
-          inline: true,
-        },
-      ],
-    });
-
-    if (cmd.clientPerms.length > 0) {
-      embed.addFields({
-        name: '🔑 Client Permissions (me)',
-        value: PermissionUtils.displayPermissions(cmd.clientPerms, '\n'),
-        inline: true,
-      });
-    }
-
-    if (cmd.userPerms.length > 0) {
-      embed.addFields({
-        name: '🔑 User Permissions (you)',
-        value: PermissionUtils.displayPermissions(cmd.userPerms, '\n'),
-        inline: true,
-      });
-    }
-
-    return embed;
-  };
-
-  categoryEmbeds = async (
-    category: string,
-    commands: Collection<string, CommandType>,
-  ) => {
-    const { client } = this;
-    const apiCommandData = await this.commandAPIData();
-    const allFields = commands
-      .toJSON()
-      .filter((e) => apiCommandData?.find((f) => f.name === e.data.name))
-      .map((e) => {
-        const apiCmd = apiCommandData?.find((f) => f.name === e.data.name);
-        const isSubCmdGroupOnlyCmd =
-          apiCmd?.options.length &&
-          !apiCmd?.options.find(
-            (e) =>
-              e.type !== ApplicationCommandOptionType.SubcommandGroup &&
-              e.type !== ApplicationCommandOptionType.Subcommand,
-          );
-        const optionsOutput =
-          apiCmd && apiCmd.options.length > 0
-            ? ` +${apiCmd.options.length} option${apiCmd.options.length === 1 ? '' : 's'}`
-            : null;
-        const aliasOutputStandalone =
-          e.aliases.length > 0
-            ? ` +${e.aliases.length} alias${e.aliases.length === 1 ? '' : 'es'}`
-            : '';
-        const aliasOutput = aliasOutputStandalone
-          ? optionsOutput === null
-            ? aliasOutputStandalone
-            : `, ${aliasOutputStandalone}`
-          : '';
-        const nameOutput = apiCmd
-          ? `</${apiCmd.name}:${apiCmd.id}>`
-          : `/${e.data.name}`;
-        const suffix = optionsOutput ?? '' + aliasOutput;
-        const nameWithOptionsOutput = apiCmd
-          ? `${apiCmd ? nameOutput : `${nameOutput}`}${isSubCmdGroupOnlyCmd ? ` - ${apiCmd.description}` : suffix.length ? `${suffix}` : ''}`
-          : e.data.name;
-        const subCmdOnlyOutput = isSubCmdGroupOnlyCmd
-          ? // https://discord.com/developers/docs/reference#message-formatting
-            apiCmd?.options.map((f) => {
-              const apiCmdOption = apiCmd.options.find(
-                (e) => e.name === f.name,
-              );
-              return apiCmdOption?.type ===
-                ApplicationCommandOptionType.Subcommand
-                ? `</${apiCmd.name} ${f.name}:${apiCmd.id}> - ${f.description}`
-                : apiCmdOption?.type ===
-                    ApplicationCommandOptionType.SubcommandGroup
-                  ? (apiCmdOption.options
-                      ?.filter(
-                        (g) =>
-                          g.type === ApplicationCommandOptionType.Subcommand,
-                      )
-                      .map(
-                        (g) =>
-                          `</${apiCmd.name} ${f.name} ${g.name}:${apiCmd.id}> - ${g.description}`,
-                      )
-                      .join('\n') ?? `</${apiCmd.name} ${f.name}:${apiCmd.id}>`)
-                  : `${nameOutput} ${f.name} - ${f.description}`;
-            })
-          : null;
-        let description =
-          'description' in e.data
-            ? isSubCmdGroupOnlyCmd
-              ? ''
-              : e.data.description
-            : e instanceof UserContextCommand
-              ? "No description available for this command, as it's a user context menu command."
-              : e instanceof MessageContextCommand
-                ? "No description available for this command, as it's a message context menu command."
-                : 'n/a';
-        if (subCmdOnlyOutput) description += `\n${subCmdOnlyOutput.join('\n')}`;
-        return {
-          name: `${nameWithOptionsOutput}`,
-          value: description,
-          inline: false,
-        };
-      });
-    const chunkSize = EmbedConstants.MAX_FIELDS_LENGTH;
-    const embeds = [];
-    for (let i = 0; i < allFields.length; i += chunkSize) {
-      const fields = allFields.slice(i, i + chunkSize);
-      const embed = client.embeds.info({
-        title: `Category: ${StringUtils.titleCase(category)}`,
-        description: `Commands in this category: ${commands.size}`,
-        fields,
-      });
-      embeds.push(embed);
-    }
-
-    return embeds;
-  };
-
-  mapCommandsByCategory = (
-    commands: Collection<string, CommandType>,
-  ): Collection<string, Collection<string, CommandType>> => {
-    const categories = new Collection<
-      string,
-      Collection<string, CommandType>
-    >();
-    commands.forEach((cmd) => {
-      const category = cmd.category ?? 'Un-categorized';
-      if (!categories.has(category)) categories.set(category, new Collection());
-      categories.get(category)?.set(cmd.data.name, cmd);
-    });
-    return categories;
   };
 
   /**
@@ -1292,11 +1100,16 @@ export class CommandManager {
    * Note: Doesn't use this#apiCommands, as APICommandType doesn't
    * include ComponentCommands
    */
-  commandById = (id: string) =>
-    this.chatInput.find((e) => e.data.name === id) ??
-    this.userContextMenus.find((e) => e.data.name === id) ??
-    this.messageContextMenus.find((e) => e.data.name === id) ??
-    this.componentCommands.find((e) => e.customId === id);
+  commandById = (id: string | BaseInteraction) => {
+    const resolvedId = typeof id === 'string' ? id : this.resolveCommandId(id);
+
+    return (
+      this.chatInput.find((e) => e.data.name === resolvedId) ??
+      this.userContextMenus.find((e) => e.data.name === resolvedId) ??
+      this.messageContextMenus.find((e) => e.data.name === resolvedId) ??
+      this.componentCommands.find((e) => e.customId === resolvedId)
+    );
+  };
 
   resolveCommandId = (interaction: BaseInteraction): string =>
     interaction.isChatInputCommand() || interaction.isContextMenuCommand()

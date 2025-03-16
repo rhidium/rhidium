@@ -26,29 +26,17 @@ const CommandOption = new AutoCompleteOption<APICommandType>({
     const commands = client.commandManager.chatInput.filter(
       (c) =>
         c.data.name.indexOf(query) >= 0 &&
-        client.commandManager.isAppropriateCommandFilter(
-          c,
-          member,
-          memberPermLevel,
-        ),
+        client.commandManager.filterByPermLevel(c, member, memberPermLevel),
     );
     const userCtxCommands = client.commandManager.userContextMenus.filter(
       (c) =>
         c.data.name.indexOf(query) >= 0 &&
-        client.commandManager.isAppropriateCommandFilter(
-          c,
-          member,
-          memberPermLevel,
-        ),
+        client.commandManager.filterByPermLevel(c, member, memberPermLevel),
     );
     const messageCtxCommands = client.commandManager.messageContextMenus.filter(
       (c) =>
         c.data.name.indexOf(query) >= 0 &&
-        client.commandManager.isAppropriateCommandFilter(
-          c,
-          member,
-          memberPermLevel,
-        ),
+        client.commandManager.filterByPermLevel(c, member, memberPermLevel),
     );
 
     const categories = [...new Set(commands.map((c) => c.category))].filter(

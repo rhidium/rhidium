@@ -1,7 +1,5 @@
-export * from './cache';
 export * from './client';
 export * from './commands';
-export * from './component-actions';
 export * from './config';
 export * from './constants';
 export * from './data-structures';

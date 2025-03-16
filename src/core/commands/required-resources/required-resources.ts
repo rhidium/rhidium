@@ -1,4 +1,4 @@
-import { BaseInteraction, MessageFlags, Snowflake } from 'discord.js';
+import { BaseInteraction, Snowflake } from 'discord.js';
 import { Client } from '../../client';
 import { InteractionUtils } from '../../utils';
 
@@ -36,9 +36,8 @@ export class RequiredResources<I extends BaseInteraction>
       this.guilds.some((id) => id === interaction.guildId);
     if (!match) {
       if (handleInteraction) {
-        await InteractionUtils.replyDynamic(client, interaction, {
+        await InteractionUtils.replyEphemeral(interaction, {
           content: client.I18N.t('core:commands.notAvailableInCurrentServer'),
-          flags: [MessageFlags.Ephemeral],
         });
       }
       return false;
@@ -56,9 +55,8 @@ export class RequiredResources<I extends BaseInteraction>
       this.channels.some((id) => id === interaction.channelId);
     if (!match) {
       if (handleInteraction) {
-        await InteractionUtils.replyDynamic(client, interaction, {
+        await InteractionUtils.replyEphemeral(interaction, {
           content: client.I18N.t('core:commands.notAvailableInCurrentChannel'),
-          flags: [MessageFlags.Ephemeral],
         });
       }
       return false;
@@ -77,9 +75,8 @@ export class RequiredResources<I extends BaseInteraction>
       // the roles are required - and the member does NOT have the roles
       // in this DM channel
       if (handleInteraction) {
-        await InteractionUtils.replyDynamic(client, interaction, {
+        await InteractionUtils.replyEphemeral(interaction, {
           content: client.I18N.t('core:commands.notAvailableInDMs'),
-          flags: [MessageFlags.Ephemeral],
         });
       }
       return false;
@@ -88,9 +85,8 @@ export class RequiredResources<I extends BaseInteraction>
       // Return false early if this is an uncached guild
       // Never matches until we **can** check if this matches
       if (handleInteraction) {
-        await InteractionUtils.replyDynamic(client, interaction, {
+        await InteractionUtils.replyEphemeral(interaction, {
           content: client.I18N.t('core:commands.requiredRolesMissingServer'),
-          flags: [MessageFlags.Ephemeral],
         });
       }
       return false;
@@ -101,9 +97,8 @@ export class RequiredResources<I extends BaseInteraction>
     );
     if (!match) {
       if (handleInteraction) {
-        await InteractionUtils.replyDynamic(client, interaction, {
+        await InteractionUtils.replyEphemeral(interaction, {
           content: client.I18N.t('core:commands.requiredRolesMissing'),
-          flags: [MessageFlags.Ephemeral],
         });
       }
       return false;
@@ -121,9 +116,8 @@ export class RequiredResources<I extends BaseInteraction>
       this.users.length === 0 || this.users.some((id) => id === interaction.id);
     if (!match) {
       if (handleInteraction) {
-        await InteractionUtils.replyDynamic(client, interaction, {
+        await InteractionUtils.replyEphemeral(interaction, {
           content: client.I18N.t('core:commands.requiredUsersMissing'),
-          flags: [MessageFlags.Ephemeral],
         });
       }
       return false;
@@ -143,9 +137,8 @@ export class RequiredResources<I extends BaseInteraction>
 
     if (!match) {
       if (handleInteraction) {
-        await InteractionUtils.replyDynamic(client, interaction, {
+        await InteractionUtils.replyEphemeral(interaction, {
           content: client.I18N.t('core:commands.requiredCategoryMissing'),
-          flags: [MessageFlags.Ephemeral],
         });
       }
       return false;

@@ -76,10 +76,15 @@ const displayPermissions = (perms: bigint[], joinStr = ', ') => {
   const permOutput = new PermissionsBitField(perms)
     .toArray()
     .filter((_e, ind) => typeof perms[ind] !== 'undefined')
-    .map(
-      (e, ind) =>
-        `${permissionEmojis[perms[ind].toString()]} ${StringUtils.splitOnUppercase(e)}`,
-    )
+    .map((e, ind) => {
+      const perm = perms[ind];
+
+      if (!perm) {
+        return '';
+      }
+
+      return `${permissionEmojis[perm.toString()]} ${StringUtils.splitOnUppercase(e)}`;
+    })
     .join(joinStr);
   return permOutput;
 };
