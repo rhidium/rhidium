@@ -13,6 +13,9 @@ importers:
       '@prisma/client':
         specifier: 6.4.1
         version: 6.4.1(prisma@6.4.1(typescript@5.8.2))(typescript@5.8.2)
+      cache-manager:
+        specifier: ^6.4.1
+        version: 6.4.1
       colors:
         specifier: ^1.4.0
         version: 1.4.0
@@ -22,6 +25,9 @@ importers:
       cron:
         specifier: ^4.1.0
         version: 4.1.0
+      debug:
+        specifier: ^4.4.0
+        version: 4.4.0
       deep-object-diff:
         specifier: ^1.1.9
         version: 1.1.9
@@ -37,6 +43,12 @@ importers:
       i18next:
         specifier: ^24.2.2
         version: 24.2.2(typescript@5.8.2)
+      keyv:
+        specifier: ^5.3.1
+        version: 5.3.1
+      lru-cache:
+        specifier: ^11.0.2
+        version: 11.0.2
       module-alias:
         specifier: ^2.2.3
         version: 2.2.3
@@ -62,6 +74,9 @@ importers:
       '@types/common-tags':
         specifier: ^1.8.4
         version: 1.8.4
+      '@types/debug':
+        specifier: ^4.1.12
+        version: 4.1.12
       '@types/module-alias':
         specifier: ^2.0.4
         version: 2.0.4
@@ -734,6 +749,12 @@ packages:
         integrity: sha512-3Belt6tdc8bPgAtbcmdtNJlirVoTmEb5e2gC94PnkwEW9jI6CAHUeoG85tjWP5WquqfavoMtMwiG4P926ZKKuQ==,
       }
 
+  '@keyv/serialize@1.0.3':
+    resolution:
+      {
+        integrity: sha512-qnEovoOp5Np2JDGonIDL6Ayihw0RhnRh6vxPuHo4RDn1UOzwEo4AeIfpL6UGIrsceWrCMiVPgwRjbHu4vYFc3g==,
+      }
+
   '@manypkg/find-root@1.1.0':
     resolution:
       {
@@ -901,6 +922,12 @@ packages:
         integrity: sha512-7uz5EHdzz2TqoMfV7ee61Egf5y6NkcO4FB/1iCCQnbeiI1F3xzv3vK5dBCXUCLQgGYS+mUeigK1iKQzvED+QnQ==,
       }
 
+  '@types/debug@4.1.12':
+    resolution:
+      {
+        integrity: sha512-vIChWdVG3LG1SMxEvI/AK+FWJthlrqlTu7fbrlywTkkaONwk/UAGaULXRlf8vkzFBLVm0zkMdCquhL5aOjhXPQ==,
+      }
+
   '@types/hast@3.0.4':
     resolution:
       {
@@ -929,6 +956,12 @@ packages:
     resolution:
       {
         integrity: sha512-5+G/QXO/DvHZw60FjvbDzO4JmlD/nG5m2/vVGt25VN1eeP3w2bCoks1Wa7VuptMPM1TxJdx6RjO70N9Fw0nZPA==,
+      }
+
+  '@types/ms@2.1.0':
+    resolution:
+      {
+        integrity: sha512-GsCCIZDE/p3i96vtEqx+7dBUGXrc7zeSK3wwPHIaRThS+9OhWIXRqzs4d6k1SVU8g91DrNRWxWUGhp5KXQb2VA==,
       }
 
   '@types/node@12.20.55':
@@ -1299,10 +1332,22 @@ packages:
         integrity: sha512-EHcyIPBQ4BSGlvjB16k5KgAJ27CIsHY/2JBmCRReo48y9rQ3MaUzWX3KVlBa4U7MyX02HdVj0K7C3WaB3ju7FQ==,
       }
 
+  buffer@6.0.3:
+    resolution:
+      {
+        integrity: sha512-FTiCpNxtwiZZHEZbcbTIcZjERVICn9yq/pDFkTl95/AxzD1naBctN7YO68riM/gLSDY7sdrMby8hofADYuuqOA==,
+      }
+
   builtins@5.1.0:
     resolution:
       {
         integrity: sha512-SW9lzGTLvWTP1AY8xeAMZimqDrIaSdLQUcVr9DMef51niJ022Ri87SwRRKYm4A6iHfkPaiVUu/Duw2Wc4J7kKg==,
+      }
+
+  cache-manager@6.4.1:
+    resolution:
+      {
+        integrity: sha512-DVy28v0FbeBp2SmFgKTa4o6muKP3T78Id0nht5D6mBAar1Nuc5z4nL6G0jpnEbYq8FS10dtrBNzQri5l9uJ/zA==,
       }
 
   cachedir@2.3.0:
@@ -2762,6 +2807,12 @@ packages:
     resolution:
       {
         integrity: sha512-oxVHkHR/EJf2CNXnWxRLW6mg7JyCCUcG0DtEGmL2ctUo1PNTin1PUil+r/+4r5MpVgC/fn1kjsx7mjSujKqIpw==,
+      }
+
+  keyv@5.3.1:
+    resolution:
+      {
+        integrity: sha512-13hQT2q2VIwOoaJdJa7nY3J8UVbYtMTJFHnwm9LI+SaQRfUiM6Em9KZeOVTCKbMnGcRIL3NSUFpAdjZCq24nLQ==,
       }
 
   kind-of@6.0.3:
@@ -4894,6 +4945,10 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.0
 
+  '@keyv/serialize@1.0.3':
+    dependencies:
+      buffer: 6.0.3
+
   '@manypkg/find-root@1.1.0':
     dependencies:
       '@babel/runtime': 7.26.9
@@ -4989,6 +5044,10 @@ snapshots:
     dependencies:
       '@types/node': 22.13.9
 
+  '@types/debug@4.1.12':
+    dependencies:
+      '@types/ms': 2.1.0
+
   '@types/hast@3.0.4':
     dependencies:
       '@types/unist': 3.0.3
@@ -5000,6 +5059,8 @@ snapshots:
   '@types/minimist@1.2.5': {}
 
   '@types/module-alias@2.0.4': {}
+
+  '@types/ms@2.1.0': {}
 
   '@types/node@12.20.55': {}
 
@@ -5223,9 +5284,18 @@ snapshots:
       base64-js: 1.5.1
       ieee754: 1.2.1
 
+  buffer@6.0.3:
+    dependencies:
+      base64-js: 1.5.1
+      ieee754: 1.2.1
+
   builtins@5.1.0:
     dependencies:
       semver: 7.7.1
+
+  cache-manager@6.4.1:
+    dependencies:
+      keyv: 5.3.1
 
   cachedir@2.3.0: {}
 
@@ -6132,6 +6202,10 @@ snapshots:
   keyv@4.5.4:
     dependencies:
       json-buffer: 3.0.1
+
+  keyv@5.3.1:
+    dependencies:
+      '@keyv/serialize': 1.0.3
 
   kind-of@6.0.3: {}
 

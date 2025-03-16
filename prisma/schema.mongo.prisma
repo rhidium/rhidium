@@ -30,11 +30,11 @@ model Guild {
   modRoleId         String?
   modLogChannelId   String?
 
-  MemberJoinChannelId String?
+  memberJoinChannelId String?
   MemberJoinEmbed     Embed?  @relation("MemberJoinEmbed", fields: [MemberJoinEmbedId], references: [id])
   MemberJoinEmbedId   String? @db.ObjectId
 
-  MemberLeaveChannelId String?
+  memberLeaveChannelId String?
   MemberLeaveEmbed     Embed?  @relation("MemberLeaveEmbed", fields: [MemberLeaveEmbedId], references: [id])
   MemberLeaveEmbedId   String? @db.ObjectId
 }

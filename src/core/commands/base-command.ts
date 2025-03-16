@@ -26,8 +26,8 @@ import {
   CommandThrottle,
   CommandThrottleOptions,
   cooldownResourceId,
+  setThrottleInCache,
   throttleFromCache,
-  throttleTTLCache,
 } from './cooldown';
 import { Client, defaultEmojis } from '../client';
 import {
@@ -794,7 +794,7 @@ export class BaseCommand<I extends BaseInteraction = BaseInteraction> {
       // otherwise failed-constraints commands will
       // consume throttle points
       if (permLevel <= PermLevel['Server Owner']) {
-        const isOnCooldown = this.throttleUsage(interaction, client);
+        const isOnCooldown = await this.throttleUsage(interaction, client);
         if (isOnCooldown) return false;
       }
     }
@@ -911,7 +911,7 @@ export class BaseCommand<I extends BaseInteraction = BaseInteraction> {
    * configured cooldown
    * @returns Wether or not the command is on cooldown for this interaction
    */
-  throttleUsage = (interaction: I, client: Client): boolean => {
+  throttleUsage = async (interaction: I, client: Client): Promise<boolean> => {
     // Unique file hash, allow e.g. button and modal named "test"
     // This also means aliases are accounted for - yay!
     const now = Date.now();
@@ -919,7 +919,7 @@ export class BaseCommand<I extends BaseInteraction = BaseInteraction> {
     const resourceId = cooldownResourceId(cooldown.type, interaction);
     const throttleId = `${this.sourceHash}@${resourceId}`;
     const durationInMS = cooldown.duration;
-    const throttleEntry = throttleFromCache(throttleId) ?? {
+    const throttleEntry = (await throttleFromCache(throttleId)) ?? {
       id: throttleId,
       throttleId,
       duration: durationInMS,
@@ -949,7 +949,7 @@ export class BaseCommand<I extends BaseInteraction = BaseInteraction> {
     }
 
     throttleEntry.usages.push(new Date(now));
-    throttleTTLCache.set(throttleId, throttleEntry, durationInMS);
+    await setThrottleInCache(throttleEntry, durationInMS);
 
     return false;
   };

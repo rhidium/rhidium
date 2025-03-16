@@ -5,8 +5,7 @@ import {
   ChatInputCommand,
   InteractionUtils,
   PermLevel,
-  guildFromCache,
-  updateGuild,
+  Database,
 } from '@core';
 
 const MemberJoinChannelCommand = new ChatInputCommand({
@@ -41,7 +40,7 @@ const MemberJoinChannelCommand = new ChatInputCommand({
 
     await MemberJoinChannelCommand.deferReplyInternal(interaction);
 
-    const guildSettings = await guildFromCache(interaction.guildId);
+    const guildSettings = await Database.Guild.resolve(interaction.guildId);
     if (!guildSettings) {
       await MemberJoinChannelCommand.reply(
         interaction,
@@ -51,9 +50,10 @@ const MemberJoinChannelCommand = new ChatInputCommand({
     }
 
     if (disable) {
-      guildSettings.MemberJoinChannelId = null;
-      await updateGuild(guildSettings, {
-        data: { MemberJoinChannelId: null },
+      guildSettings.memberJoinChannelId = null;
+      await Database.Guild.update({
+        where: { id: interaction.guildId },
+        data: { memberJoinChannelId: null },
       });
       await MemberJoinChannelCommand.reply(
         interaction,
@@ -78,8 +78,8 @@ const MemberJoinChannelCommand = new ChatInputCommand({
           fields: [
             {
               name: Lang.t('commands:member-join-channel.title'),
-              value: guildSettings.MemberJoinChannelId
-                ? `<#${guildSettings.MemberJoinChannelId}>`
+              value: guildSettings.memberJoinChannelId
+                ? `<#${guildSettings.memberJoinChannelId}>`
                 : Lang.t('general:notSet'),
             },
           ],
@@ -88,9 +88,10 @@ const MemberJoinChannelCommand = new ChatInputCommand({
       return;
     }
 
-    guildSettings.MemberJoinChannelId = channel.id;
-    await updateGuild(guildSettings, {
-      data: { MemberJoinChannelId: channel.id },
+    guildSettings.memberJoinChannelId = channel.id;
+    await Database.Guild.update({
+      where: { id: interaction.guildId },
+      data: { memberJoinChannelId: channel.id },
     });
     await MemberJoinChannelCommand.reply(
       interaction,

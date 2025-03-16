@@ -6,7 +6,7 @@ import {
   ComponentCommandType,
   TimeUtils,
   UnitConstants,
-  CommandStatisticsPayload,
+  PopulatedCommandStatistics,
 } from '@core';
 
 const unknown = Lang.t('general:unknown');
@@ -33,7 +33,7 @@ export const stringCommandTypeFromInteger = (type: number) => {
 
 export const embedFromUsageStatistics = (
   client: Client,
-  stats: CommandStatisticsPayload,
+  stats: PopulatedCommandStatistics,
 ) => {
   const [commandId] = stats.commandId.split('@');
 
@@ -178,7 +178,7 @@ export const embedFromUsageStatistics = (
 
 export const compactEmbedFromUsageStatistics = (
   client: Client,
-  stats: CommandStatisticsPayload[],
+  stats: PopulatedCommandStatistics[],
   indexOffset = 0,
 ) => {
   const embed = client.embeds.branding({

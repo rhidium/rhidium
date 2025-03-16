@@ -3,10 +3,9 @@ import {
   ClientWithCluster,
   ClusterUtils,
   ComponentCommandType,
-  dbCommandByName,
+  Database,
   Job,
   NumberUtils,
-  prisma,
   QueueCallbackFunction,
   QueueManager,
   UnitConstants,
@@ -36,7 +35,8 @@ export const processUsageStatistics: QueueCallbackFunction<
     const data =
       dataToSave.find(
         (d) => d.commandId === stat.commandId && d.type === stat.type,
-      ) ?? (await dbCommandByName(stat.commandId, stat.type));
+      ) ??
+      (await Database.CommandStatistics.byCommandId(stat.commandId, stat.type));
 
     data.usages = [...data.usages, ...stat.usages];
     data.lastUsedAt = stat.lastUsed;
@@ -89,23 +89,20 @@ export const processUsageStatistics: QueueCallbackFunction<
 
   await Promise.all(
     dataToSave.map((data) =>
-      prisma.commandStatistics.update({
-        where: { commandId: data.commandId, type: data.type },
-        data: {
-          errorCount: data.errorCount,
-          firstUsedAt: data.firstUsedAt,
-          lastError: data.lastError,
-          lastErrorAt: data.lastErrorAt,
-          lastUsedAt: data.lastUsedAt,
-          runtimeTotal: data.runtimeTotal,
-          runtimeMax: data.runtimeMax,
-          runtimeMin: data.runtimeMin,
-          runtimeMean: data.runtimeMean,
-          runtimeMedian: data.runtimeMedian,
-          runtimeVariance: data.runtimeVariance,
-          runtimeStdDeviation: data.runtimeStdDeviation,
-          usages: { set: data.usages },
-        },
+      Database.CommandStatistics.updateByCommandId(data.commandId, data.type, {
+        errorCount: data.errorCount,
+        firstUsedAt: data.firstUsedAt,
+        lastError: data.lastError,
+        lastErrorAt: data.lastErrorAt,
+        lastUsedAt: data.lastUsedAt,
+        runtimeTotal: data.runtimeTotal,
+        runtimeMax: data.runtimeMax,
+        runtimeMin: data.runtimeMin,
+        runtimeMean: data.runtimeMean,
+        runtimeMedian: data.runtimeMedian,
+        runtimeVariance: data.runtimeVariance,
+        runtimeStdDeviation: data.runtimeStdDeviation,
+        usages: { set: data.usages },
       }),
     ),
   );

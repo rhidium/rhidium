@@ -5,8 +5,7 @@ import {
   ChatInputCommand,
   InteractionUtils,
   PermLevel,
-  guildFromCache,
-  updateGuild,
+  Database,
 } from '@core';
 
 const ModeratorRoleCommand = new ChatInputCommand({
@@ -44,7 +43,7 @@ const ModeratorRoleCommand = new ChatInputCommand({
 
     await ModeratorRoleCommand.deferReplyInternal(interaction);
 
-    const guildSettings = await guildFromCache(interaction.guildId);
+    const guildSettings = await Database.Guild.resolve(interaction.guildId);
     if (!guildSettings) {
       await ModeratorRoleCommand.reply(
         interaction,
@@ -55,7 +54,8 @@ const ModeratorRoleCommand = new ChatInputCommand({
 
     if (remove) {
       guildSettings.modRoleId = null;
-      await updateGuild(guildSettings, {
+      await Database.Guild.update({
+        where: { id: interaction.guildId },
         data: { modRoleId: null },
       });
       await ModeratorRoleCommand.reply(
@@ -92,7 +92,8 @@ const ModeratorRoleCommand = new ChatInputCommand({
     }
 
     guildSettings.modRoleId = role.id;
-    await updateGuild(guildSettings, {
+    await Database.Guild.update({
+      where: { id: interaction.guildId },
       data: { modRoleId: role.id },
     });
     await ModeratorRoleCommand.reply(

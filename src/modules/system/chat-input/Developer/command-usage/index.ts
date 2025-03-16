@@ -13,13 +13,11 @@ import {
 import CommandStatisticOption from '../../../auto-completes/command-statistic';
 import {
   ArrayUtils,
-  COMMAND_STATISTICS_ROOT_ID,
   ChatInputCommand,
+  Database,
   InteractionUtils,
   PermLevel,
-  commandStatisticsTTLCache,
   isAutoCompleteResponseType,
-  prisma,
 } from '@core';
 
 export const compactEntriesPerPage = 10;
@@ -37,9 +35,7 @@ const CommandUsageCommand = new ChatInputCommand({
 
     const subcommand = options.getSubcommand();
     if (subcommand === CommandUsageConstants.LEADERBOARD_SUBCOMMAND_NAME) {
-      const allStats = await commandStatisticsTTLCache.getWithFetch(
-        COMMAND_STATISTICS_ROOT_ID,
-      );
+      const allStats = await Database.CommandStatistics.findMany();
       if (!allStats || !allStats[0]) {
         await CommandUsageCommand.reply(
           interaction,
@@ -77,8 +73,7 @@ const CommandUsageCommand = new ChatInputCommand({
     ) {
       const value = await CommandStatisticOption.getValue(interaction, true);
       if (isAutoCompleteResponseType(value)) return;
-      await prisma.commandStatistics.delete({ where: { id: value.id } });
-      commandStatisticsTTLCache.delete(COMMAND_STATISTICS_ROOT_ID);
+      await Database.CommandStatistics.delete({ id: value.id });
       await CommandUsageCommand.reply(
         interaction,
         `Successfully deleted usage statistics for \`${value.commandId}\` (${stringCommandTypeFromInteger(value.type)})`,

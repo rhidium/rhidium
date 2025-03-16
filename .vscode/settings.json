@@ -1,4 +1,7 @@
 {
+  "typescript.preferences.autoImportFileExcludePatterns": [
+    "**/*.namespaces.ts"
+  ],
   "typescript.format.enable": true,
   "typescript.referencesCodeLens.enabled": true,
   "typescript.implementationsCodeLens.enabled": true,
@@ -49,6 +52,8 @@
     "Hillebrand",
     "isready",
     "lintstagedrc",
+    "mdel",
+    "MDELETE",
     "Mirasaki",
     "repliable",
     "Rhidium",

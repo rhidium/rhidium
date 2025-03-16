@@ -6,7 +6,7 @@ import {
   MessagePayload,
   PermissionFlagsBits,
 } from 'discord.js';
-import { Lang, Client, appConfig, guildFromCache } from '@core';
+import { Lang, Client, appConfig, Database } from '@core';
 
 /**
  * Perform logging of a mod action to a specific server,
@@ -20,7 +20,7 @@ const modLog = async (
   moderator: GuildMember,
   reason: string = Lang.t('general:noReasonProvided'),
 ) => {
-  const settings = await guildFromCache(guild.id);
+  const settings = await Database.Guild.resolve(guild.id);
   if (!settings || !settings.modLogChannelId) return;
 
   const modLogChannel = guild.channels.cache.get(settings.modLogChannelId);
@@ -51,7 +51,7 @@ const adminLog = async (
   guild: Guild,
   msg: string | MessagePayload | MessageCreateOptions | EmbedBuilder,
 ) => {
-  const settings = await guildFromCache(guild.id);
+  const settings = await Database.Guild.resolve(guild.id);
   if (!settings || !settings.adminLogChannelId) return;
 
   const adminLogChannel = guild.channels.cache.get(settings.adminLogChannelId);

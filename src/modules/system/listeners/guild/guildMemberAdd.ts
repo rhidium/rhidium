@@ -6,10 +6,10 @@ import {
   ClientEventListener,
   PermissionUtils,
   TimeUtils,
-  guildFromCache,
   buildPlaceholders,
   replacePlaceholdersAcrossEmbed,
   replacePlaceholders,
+  Database,
 } from '@core';
 
 const requiredPermissions = [
@@ -23,10 +23,10 @@ export default new ClientEventListener({
     const { logger } = client;
     const { guild } = member;
 
-    const guildSettings = await guildFromCache(guild.id);
-    if (!guildSettings || !guildSettings.MemberJoinChannelId) return;
+    const guildSettings = await Database.Guild.resolve(guild.id);
+    if (!guildSettings || !guildSettings.memberJoinChannelId) return;
 
-    const channel = guild.channels.cache.get(guildSettings.MemberJoinChannelId);
+    const channel = guild.channels.cache.get(guildSettings.memberJoinChannelId);
     if (!channel) {
       void LoggingServices.adminLog(
         guild,

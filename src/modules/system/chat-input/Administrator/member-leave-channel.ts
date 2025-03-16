@@ -5,8 +5,7 @@ import {
   ChatInputCommand,
   InteractionUtils,
   PermLevel,
-  guildFromCache,
-  updateGuild,
+  Database,
 } from '@core';
 
 const MemberLeaveChannelCommand = new ChatInputCommand({
@@ -41,7 +40,7 @@ const MemberLeaveChannelCommand = new ChatInputCommand({
 
     await MemberLeaveChannelCommand.deferReplyInternal(interaction);
 
-    const guildSettings = await guildFromCache(interaction.guildId);
+    const guildSettings = await Database.Guild.resolve(interaction.guildId);
     if (!guildSettings) {
       await MemberLeaveChannelCommand.reply(
         interaction,
@@ -51,9 +50,10 @@ const MemberLeaveChannelCommand = new ChatInputCommand({
     }
 
     if (disable) {
-      guildSettings.MemberLeaveChannelId = null;
-      await updateGuild(guildSettings, {
-        data: { MemberLeaveChannelId: null },
+      guildSettings.memberLeaveChannelId = null;
+      await Database.Guild.update({
+        where: { id: interaction.guildId },
+        data: { memberLeaveChannelId: null },
       });
       await MemberLeaveChannelCommand.reply(
         interaction,
@@ -78,8 +78,8 @@ const MemberLeaveChannelCommand = new ChatInputCommand({
           fields: [
             {
               name: Lang.t('commands:member-leave-channel.title'),
-              value: guildSettings.MemberLeaveChannelId
-                ? `<#${guildSettings.MemberLeaveChannelId}>`
+              value: guildSettings.memberLeaveChannelId
+                ? `<#${guildSettings.memberLeaveChannelId}>`
                 : Lang.t('general:notSet'),
             },
           ],
@@ -88,9 +88,10 @@ const MemberLeaveChannelCommand = new ChatInputCommand({
       return;
     }
 
-    guildSettings.MemberLeaveChannelId = channel.id;
-    await updateGuild(guildSettings, {
-      data: { MemberLeaveChannelId: channel.id },
+    guildSettings.memberLeaveChannelId = channel.id;
+    await Database.Guild.update({
+      where: { id: interaction.guildId },
+      data: { memberLeaveChannelId: channel.id },
     });
     await MemberLeaveChannelCommand.reply(
       interaction,

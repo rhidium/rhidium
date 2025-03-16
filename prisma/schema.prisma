@@ -34,12 +34,12 @@ model Guild {
   modLogChannelId   String?                                       // The id of the mod log channel
 
   // Embed configuration for the guildMemberAdd event
-  MemberJoinChannelId String?
+  memberJoinChannelId String?
   MemberJoinEmbed     Embed?  @relation("MemberJoinEmbed", fields: [MemberJoinEmbedId], references: [id])
   MemberJoinEmbedId   Int?
 
   // Embed configuration for the guildMemberRemove event
-  MemberLeaveChannelId String?
+  memberLeaveChannelId String?
   MemberLeaveEmbed     Embed?  @relation("MemberLeaveEmbed", fields: [MemberLeaveEmbedId], references: [id])
   MemberLeaveEmbedId   Int?
 }

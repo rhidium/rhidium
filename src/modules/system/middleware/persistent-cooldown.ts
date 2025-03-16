@@ -5,9 +5,7 @@ import {
   InteractionUtils,
   TimeUtils,
   cooldownResourceId,
-  cooldownFromCache,
-  prisma,
-  updateCooldown,
+  Database,
 } from '@core';
 import { MessageFlags } from 'discord.js';
 
@@ -37,12 +35,17 @@ export const persistentCooldownMiddleware: CommandMiddlewareFunction = async ({
   const durationInMS = cooldown.duration;
 
   // Not cached because we have an expired-usage cleaning job
-  let cooldownEntry = await cooldownFromCache(cooldownId);
-  if (!cooldownEntry) {
-    cooldownEntry = await prisma.commandCooldown.create({
-      data: { cooldownId, usages: [], duration: durationInMS },
-    });
-  }
+  const cooldownEntry =
+    (await Database.CommandCooldown.byCooldownId(cooldownId)) ??
+    (await Database.CommandCooldown.create({
+      cooldownId,
+      usages: [],
+      duration: durationInMS,
+    }));
+
+  // [DEV] Cache keys legit don't include query LMAOOO
+  // [DEV] !this.useCache || !cacheResult does NOT make sense
+  // [DEV] The result of the operation.
 
   // Is on cooldown
   const nonExpiredUsages = cooldownEntry.usages.filter(
@@ -71,7 +74,8 @@ export const persistentCooldownMiddleware: CommandMiddlewareFunction = async ({
 
   // Increment usages
   cooldownEntry.usages.push(new Date(now));
-  await updateCooldown(cooldownEntry, {
+  await Database.CommandCooldown.update({
+    where: { id: cooldownEntry.id },
     data: { usages: cooldownEntry.usages },
   });
 

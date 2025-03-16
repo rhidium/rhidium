@@ -2,6 +2,7 @@
  * Provides exports as namespaces, primarily used for typedoc documentation, never imported in the library itself.
  * Typedoc documentation could alternatively use multiple entry points which would create the namespaces for us.
  */
+export * as Cache from './cache';
 export * as MClient from './client';
 export * as Commands from './commands/index.namespaces';
 export * as ComponentActions from './component-actions';

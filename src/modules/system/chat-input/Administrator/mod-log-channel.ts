@@ -5,8 +5,7 @@ import {
   ChatInputCommand,
   InteractionUtils,
   PermLevel,
-  guildFromCache,
-  updateGuild,
+  Database,
 } from '@core';
 
 const ModLogChannelCommand = new ChatInputCommand({
@@ -41,7 +40,7 @@ const ModLogChannelCommand = new ChatInputCommand({
 
     await ModLogChannelCommand.deferReplyInternal(interaction);
 
-    const guildSettings = await guildFromCache(interaction.guildId);
+    const guildSettings = await Database.Guild.resolve(interaction.guildId);
     if (!guildSettings) {
       await ModLogChannelCommand.reply(
         interaction,
@@ -52,7 +51,8 @@ const ModLogChannelCommand = new ChatInputCommand({
 
     if (disable) {
       guildSettings.modLogChannelId = null;
-      await updateGuild(guildSettings, {
+      await Database.Guild.update({
+        where: { id: interaction.guildId },
         data: { modLogChannelId: null },
       });
       await ModLogChannelCommand.reply(
@@ -89,7 +89,8 @@ const ModLogChannelCommand = new ChatInputCommand({
     }
 
     guildSettings.modLogChannelId = channel.id;
-    await updateGuild(guildSettings, {
+    await Database.Guild.update({
+      where: { id: interaction.guildId },
       data: { modLogChannelId: channel.id },
     });
     await ModLogChannelCommand.reply(

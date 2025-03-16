@@ -27,11 +27,10 @@ import {
   InteractionUtils,
   StringUtils,
   UnitConstants,
-  guildTTLCache,
-  prisma,
   buildPlaceholders,
   replacePlaceholdersAcrossEmbed,
   replacePlaceholders,
+  Database,
 } from '@core';
 
 const jsonCodeBlockOffset = 12;
@@ -267,15 +266,21 @@ export const configureEmbedController: EmbedController = async (
     fields: { create: fields },
   };
 
-  guildTTLCache.delete(interaction.guildId);
-  const updatedEmbed = await prisma.embed.upsert({
-    update: upsertData,
-    create: createEmbedData,
-    where: {
-      id: upsertId,
+  const updatedGuild = await Database.Guild.update({
+    where: { id: guildSettings.id },
+    data: {
+      [settingKey]: {
+        upsert: {
+          update: upsertData,
+          create: createEmbedData,
+          where: {
+            id: upsertId,
+          },
+        },
+      },
     },
-    include: { fields: true },
   });
+  const updatedEmbed = updatedGuild[settingKey];
 
   await i.deleteReply();
   await interaction.editReply({
@@ -321,7 +326,7 @@ export const configureEmbedController: EmbedController = async (
 export const manageEmbedFieldsController: EmbedFieldController = async (
   client,
   interaction,
-  _guildSettings,
+  guildSettings,
   setting,
 ) => {
   const { options } = interaction;
@@ -367,16 +372,25 @@ export const manageEmbedFieldsController: EmbedFieldController = async (
         inline,
       };
 
-      guildTTLCache.delete(interaction.guildId);
-      const updatedSetting = await prisma.embed.update({
-        where: { id: setting.id },
-        include: { fields: true },
+      const updatedGuild = await Database.Guild.update({
+        where: { id: guildSettings.id },
         data: {
-          fields: {
-            create: [newField],
+          [settingKey]: {
+            update: {
+              fields: {
+                create: [newField],
+              },
+            },
           },
         },
       });
+      const updatedSetting = updatedGuild[settingKey];
+
+      if (!updatedSetting) {
+        throw new Error(
+          'Unable to resolve working setting after field addition',
+        );
+      }
 
       const rawEmbed = embedFromEmbedModel(updatedSetting);
       const placeholders = buildPlaceholders(
@@ -461,14 +475,25 @@ export const manageEmbedFieldsController: EmbedFieldController = async (
         return;
       }
 
-      guildTTLCache.delete(interaction.guildId);
-      const updatedSetting = await prisma.embed.update({
-        where: { id: setting.id },
-        include: { fields: true },
+      const updatedGuild = await Database.Guild.update({
+        where: { id: guildSettings.id },
         data: {
-          fields: { delete: { id: targetField.id } },
+          [settingKey]: {
+            update: {
+              fields: {
+                delete: { id: targetField.id },
+              },
+            },
+          },
         },
       });
+      const updatedSetting = updatedGuild[settingKey];
+
+      if (!updatedSetting) {
+        throw new Error(
+          'Unable to resolve working setting after field removal',
+        );
+      }
 
       const rawEmbed = embedFromEmbedModel(updatedSetting);
       const placeholders = buildPlaceholders(
@@ -532,14 +557,25 @@ export const manageEmbedFieldsController: EmbedFieldController = async (
         client,
         interaction,
         async onConfirm(i) {
-          guildTTLCache.delete(interaction.guildId);
-          const updatedSetting = await prisma.embed.update({
-            where: { id: setting.id },
-            include: { fields: true },
+          const updatedGuild = await Database.Guild.update({
+            where: { id: guildSettings.id },
             data: {
-              fields: { deleteMany: {} },
+              [settingKey]: {
+                update: {
+                  fields: {
+                    deleteMany: {},
+                  },
+                },
+              },
             },
           });
+          const updatedSetting = updatedGuild[settingKey];
+
+          if (!updatedSetting) {
+            throw new Error(
+              'Unable to resolve working setting after resetting fields',
+            );
+          }
 
           const rawEmbed = embedFromEmbedModel(updatedSetting);
           const placeholders = buildPlaceholders(

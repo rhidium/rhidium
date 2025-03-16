@@ -1,11 +1,11 @@
-import { cooldownTTLCache, Job, prisma } from '@core';
+import { Database, Job } from '@core';
 
 const CleanCooldownData = new Job({
   id: 'clean-cooldown-data',
   schedule: '0 0 * * *', // Every day at midnight
   run: async () => {
-    await cooldownTTLCache.clear();
-    const data = await prisma.commandCooldown.findMany();
+    const data = await Database.CommandCooldown.findMany();
+
     for (const entry of data) {
       const { duration } = entry;
       const now = Date.now();
@@ -19,12 +19,13 @@ const CleanCooldownData = new Job({
       const finalLength = entry.usages.length;
       if (finalLength !== initialLength) {
         if (finalLength === 0) {
-          await prisma.commandCooldown.delete({ where: { id: entry.id } });
-        } else
-          await prisma.commandCooldown.update({
+          await Database.CommandCooldown.delete({ id: entry.id });
+        } else {
+          await Database.CommandCooldown.update({
             where: { id: entry.id },
             data: { usages: entry.usages },
           });
+        }
       }
     }
   },

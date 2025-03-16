@@ -4,8 +4,7 @@ import {
   ChatInputCommand,
   InteractionUtils,
   PermLevel,
-  guildFromCache,
-  updateGuild,
+  Database,
 } from '@core';
 import { LoggingServices } from '../../services';
 
@@ -41,7 +40,7 @@ const AdminLogChannelCommand = new ChatInputCommand({
 
     await AdminLogChannelCommand.deferReplyInternal(interaction);
 
-    const guildSettings = await guildFromCache(interaction.guildId);
+    const guildSettings = await Database.Guild.resolve(interaction.guildId);
     if (!guildSettings) {
       await AdminLogChannelCommand.reply(
         interaction,
@@ -52,7 +51,8 @@ const AdminLogChannelCommand = new ChatInputCommand({
 
     if (disable) {
       guildSettings.adminLogChannelId = null;
-      await updateGuild(guildSettings, {
+      await Database.Guild.update({
+        where: { id: interaction.guildId },
         data: { adminLogChannelId: null },
       });
       await AdminLogChannelCommand.reply(
@@ -89,7 +89,8 @@ const AdminLogChannelCommand = new ChatInputCommand({
     }
 
     guildSettings.adminLogChannelId = channel.id;
-    await updateGuild(guildSettings, {
+    await Database.Guild.update({
+      where: { id: interaction.guildId },
       data: { adminLogChannelId: channel.id },
     });
     await AdminLogChannelCommand.reply(

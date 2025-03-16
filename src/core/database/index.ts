@@ -1,7 +1,8 @@
-import { PrismaClient } from '@prisma/client';
+export * from './populated';
+export * from './wrappers';
 
-export const prisma = new PrismaClient();
-
-export * from './CommandCooldown';
-export * from './CommandStatistics';
-export * from './Guilds';
+export * from './client';
+export * from './models';
+export * from './select';
+export * from './types';
+export * from './util';

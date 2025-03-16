@@ -15,7 +15,7 @@ import {
   ChatInputCommand,
   InteractionUtils,
   PermLevel,
-  guildFromCache,
+  Database,
 } from '@core';
 
 const ConfigureEmbedsCommand = new ChatInputCommand({
@@ -42,7 +42,7 @@ const ConfigureEmbedsCommand = new ChatInputCommand({
 
     await ConfigureEmbedsCommand.deferReplyInternal(interaction);
 
-    const guildSettings = await guildFromCache(interaction.guild.id);
+    const guildSettings = await Database.Guild.resolve(interaction.guild.id);
     if (!guildSettings) {
       await ConfigureEmbedsCommand.reply(
         interaction,

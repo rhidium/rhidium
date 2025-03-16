@@ -1,5 +1,5 @@
 import { GuildMember, PermissionFlagsBits, Snowflake } from 'discord.js';
-import { guildFromCache } from '../database';
+import { Database } from '../database';
 
 export const permConfig: ClientPermissionLevel[] = [
   {
@@ -12,7 +12,7 @@ export const permConfig: ClientPermissionLevel[] = [
     name: 'Moderator',
     level: 1,
     hasLevel: async (_config, member) => {
-      const guildSettings = await guildFromCache(member.guild.id);
+      const guildSettings = await Database.Guild.resolve(member.guild.id);
       if (!guildSettings) return false;
       if (!guildSettings.modRoleId) {
         return (
@@ -31,7 +31,7 @@ export const permConfig: ClientPermissionLevel[] = [
     name: 'Administrator',
     level: 2,
     hasLevel: async (_config, member) => {
-      const guildSettings = await guildFromCache(member.guild.id);
+      const guildSettings = await Database.Guild.resolve(member.guild.id);
       if (!guildSettings) return false;
       if (!guildSettings.adminRoleId) {
         return member.permissions.has(PermissionFlagsBits.Administrator);
