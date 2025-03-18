@@ -30,7 +30,7 @@ const discordInfoTimestamp = (timestamp: number = Date.now()): string =>
     TimestampStyles.ShortDateTime,
   )} (${discordTimestamp(timestamp, TimestampStyles.RelativeTime)})`;
 
-const msToHumanReadable = (ms: number, maxParts = 2) => {
+const humanReadableMs = (ms: number, maxParts = 2) => {
   const days = (ms / UnitConstants.MS_IN_ONE_DAY) | 0;
   const hours =
     ((ms % UnitConstants.MS_IN_ONE_DAY) / UnitConstants.MS_IN_ONE_HOUR) | 0;
@@ -174,7 +174,7 @@ class TimeUtils {
    * @param maxParts The maximum number of time units to include
    * @returns A human-readable string
    */
-  static readonly msToHumanReadable = msToHumanReadable;
+  static readonly humanReadableMs = humanReadableMs;
   /**
    * Converts a hrTime tuple to milliseconds
    * @param hrTime The hrTime tuple

@@ -5,22 +5,19 @@ import {
   ButtonStyle,
   ChatInputCommandInteraction,
   ComponentType,
+  InteractionEditReplyOptions,
   InteractionReplyOptions,
   RepliableInteraction,
   SlashCommandBooleanOption,
 } from 'discord.js';
 import { Client } from '../../client';
-import {
-  InteractionReplyDynamicOptions,
-  InteractionUtils,
-} from '../interactions';
+import { InteractionUtils } from '../interactions';
 import { UnitConstants } from '../../constants';
 
 type PromptConfirmationOptions = {
   client: Client;
   interaction: RepliableInteraction;
-  content?: InteractionReplyOptions;
-  options?: InteractionReplyDynamicOptions;
+  content?: InteractionReplyOptions & InteractionEditReplyOptions;
   onConfirm?: (interaction: ButtonInteraction) => void | Promise<void>;
   onCancel?: (interaction: ButtonInteraction) => void | Promise<void>;
   shouldReplyOnConfirm?: boolean;
@@ -96,13 +93,12 @@ class ConfirmationInput {
    * @returns The interaction, false if cancelled, or 'expired'
    */
   static readonly promptConfirmation = async (
-    _options: PromptConfirmationOptions,
+    options: PromptConfirmationOptions,
   ): Promise<RepliableInteraction | false | 'expired'> => {
-    let { content } = _options;
+    let { content } = options;
     const {
       client,
       interaction,
-      options,
       onConfirm,
       onCancel,
       shouldReplyOnConfirm = false,
@@ -111,7 +107,7 @@ class ConfirmationInput {
       disableComponents = true,
       removeEmbeds = true,
       removeFiles = true,
-    } = _options;
+    } = options;
 
     if (!content) content = {};
     if (!content.components) content.components = [];
@@ -125,13 +121,14 @@ class ConfirmationInput {
       ? [...content.components, confirmationRow]
       : [confirmationRow];
 
-    const message = await InteractionUtils.replyEphemeral(interaction, {
+    const ctx = {
       content: client.I18N.t('core:commands.promptConfirmation'),
       ...content,
-      ...options,
       components,
-      withResponse: true,
-    });
+      withResponse: false,
+    };
+
+    const message = await InteractionUtils.replyEphemeral(interaction, ctx);
 
     if (!message) {
       void InteractionUtils.replyEphemeral(interaction, {

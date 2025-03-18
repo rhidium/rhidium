@@ -1,47 +1,11 @@
 import {
   EmbedBuilder,
   Guild,
-  GuildMember,
   MessageCreateOptions,
   MessagePayload,
   PermissionFlagsBits,
 } from 'discord.js';
-import { Lang, Client, appConfig, Database } from '@core';
-
-/**
- * Perform logging of a mod action to a specific server,
- * this function does not notify if missing permissions
- */
-const modLog = async (
-  client: Client<true>,
-  guild: Guild,
-  action: string,
-  target: GuildMember,
-  moderator: GuildMember,
-  reason: string = Lang.t('general:noReasonProvided'),
-) => {
-  const settings = await Database.Guild.resolve(guild.id);
-  if (!settings || !settings.modLogChannelId) return;
-
-  const modLogChannel = guild.channels.cache.get(settings.modLogChannelId);
-  if (!modLogChannel || !modLogChannel.isTextBased()) return;
-
-  const hasPerms = modLogChannel
-    .permissionsFor(appConfig.client.id)
-    ?.has([PermissionFlagsBits.SendMessages, PermissionFlagsBits.EmbedLinks]);
-  if (!hasPerms) return;
-
-  const embed = client.embeds.info({
-    title: `${action} | ${target.user.tag}`,
-    description: [
-      `**${Lang.t('general:reason')}:** ${reason}\n**${Lang.t('general:moderator')}:**`,
-      moderator.user.tag,
-    ].join(' '),
-  });
-  embed.setThumbnail(target.user.displayAvatarURL({ forceStatic: false }));
-
-  await modLogChannel.send({ embeds: [embed] });
-};
+import { appConfig, Database } from '@core';
 
 /**
  * Perform logging of anything internal, can be considered
@@ -67,6 +31,5 @@ const adminLog = async (
 };
 
 export class LoggingServices {
-  static readonly modLog = modLog;
   static readonly adminLog = adminLog;
 }

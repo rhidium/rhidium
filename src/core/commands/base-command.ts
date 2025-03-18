@@ -923,7 +923,7 @@ export class BaseCommand<I extends BaseInteraction = BaseInteraction> {
         firstNonExpired.valueOf() + durationInMs,
       );
       const remaining = firstUsageExpires.valueOf() - now;
-      const expiresIn = TimeUtils.msToHumanReadable(remaining);
+      const expiresIn = TimeUtils.humanReadableMs(remaining);
       const relativeOutput = expiresIn === '0 seconds' ? '1 second' : expiresIn;
       void InteractionUtils.replyEphemeral(interaction, {
         content: client.I18N.t('core:commands.onCooldown', {

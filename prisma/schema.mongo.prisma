@@ -3,6 +3,10 @@ generator client {
   // binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
+// [DEV] This file is currently NOT up-to-date with the latest changes in the schema.prisma file.
+// [DEV] This file is currently NOT up-to-date with the latest changes in the schema.prisma file.
+// [DEV] This file is currently NOT up-to-date with the latest changes in the schema.prisma file.
+
 datasource db {
   provider = "mongodb"
   url      = env("DATABASE_URL")

@@ -1,3 +1,10 @@
+import {
+  ActionRowBuilder,
+  ModalActionRowComponentBuilder,
+  SlashCommandStringOption,
+  TextInputBuilder,
+  TextInputStyle,
+} from 'discord.js';
 import { UnitConstants } from '../../constants';
 
 class DurationInput {
@@ -27,7 +34,7 @@ class DurationInput {
    * @param input The human input string
    * @returns The time in milliseconds
    */
-  static readonly inputToMs = (input: string): number => {
+  static readonly inputToMs = (input: string, maxMs?: number): number => {
     let match;
     let totalMs = 0;
 
@@ -41,7 +48,75 @@ class DurationInput {
       }
     }
 
-    return totalMs;
+    if (typeof maxMs === 'undefined') {
+      return totalMs;
+    }
+
+    return Math.min(totalMs, maxMs);
+  };
+
+  static readonly formatSuffixShort = ' (e.g. 2h, 15m)';
+  static readonly formatSuffix = ' (e.g. 1d, 2h, 15m, 30s)';
+  static readonly withFormatSuffix = (
+    input: string,
+    omitSuffix: boolean | 'short' = false,
+  ) =>
+    omitSuffix === true
+      ? input
+      : `${input}${omitSuffix === 'short' ? this.formatSuffixShort : this.formatSuffix}`;
+
+  static readonly addOptionHandler = (
+    i: SlashCommandStringOption,
+    options?: {
+      required?: boolean;
+      name?: string;
+      description?: string;
+      omitSuffix?: boolean;
+      shortSuffix?: boolean;
+    },
+  ) =>
+    i
+      .setName(options?.name ?? 'duration')
+      .setDescription(
+        `${this.withFormatSuffix(options?.description ?? 'The duration', options?.shortSuffix ? 'short' : options?.omitSuffix)}.`,
+      )
+      .setRequired(options?.required ?? false)
+      .setMinLength(1)
+      .setMaxLength(100);
+
+  static readonly durationTextInput = (options?: {
+    customId?: string;
+    label?: string;
+    placeholder?: string;
+    required?: boolean;
+    omitSuffix?: boolean;
+    shortSuffix?: boolean | 'short';
+  }) => {
+    const {
+      customId = 'duration',
+      label = 'Duration',
+      placeholder = `The duration ${this.formatSuffix}`,
+      required = false,
+      omitSuffix = false,
+      shortSuffix = false,
+    } = options ?? {};
+    const style =
+      placeholder.length > 50 ? TextInputStyle.Paragraph : TextInputStyle.Short;
+
+    return new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(
+      [
+        new TextInputBuilder()
+          .setCustomId(customId)
+          .setStyle(style)
+          .setLabel(label)
+          .setPlaceholder(
+            `${this.withFormatSuffix(placeholder ?? 'The duration', shortSuffix ? 'short' : omitSuffix)}.`,
+          )
+          .setMinLength(1)
+          .setMaxLength(100)
+          .setRequired(required),
+      ],
+    );
   };
 }
 

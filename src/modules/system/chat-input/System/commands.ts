@@ -30,7 +30,7 @@ class EmbedResolver {
       cooldown.usages === 1 ? '1 use' : `${cooldown.usages} uses`;
     const cooldownOutput = cooldown.enabled
       ? [
-          `**${cooldownUsagesOutput}** in **${TimeUtils.msToHumanReadable(cooldown.duration)}**`,
+          `**${cooldownUsagesOutput}** in **${TimeUtils.humanReadableMs(cooldown.duration)}**`,
           `(type \`${resolveCooldownType(cooldown.type)}\`)`,
         ].join(' ')
       : 'n/a';

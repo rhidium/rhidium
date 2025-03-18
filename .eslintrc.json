@@ -7,7 +7,8 @@
     "dist/",
     "docs/",
     "node_modules/",
-    "scripts/"
+    "scripts/",
+    "prisma/seed.ts"
   ],
   "rules": {
     "prettier/prettier": [
@@ -25,10 +26,7 @@
     "n/no-unpublished-import": [
       "error",
       {
-        "allowModules": [
-          "typedoc",
-          "ts-json-schema-generator"
-        ]
+        "allowModules": ["typedoc", "ts-json-schema-generator"]
       }
     ],
     "n/no-unsupported-features/node-builtins": [

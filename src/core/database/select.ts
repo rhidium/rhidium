@@ -37,10 +37,78 @@ const populatedEmbed = Prisma.validator<Prisma.EmbedDefaultArgs>()({
 });
 type PopulatedEmbed = Prisma.EmbedGetPayload<typeof populatedEmbed>;
 
+// Prisma.AutoModerationAction
+const populatedAutoModerationAction =
+  Prisma.validator<Prisma.AutoModerationActionDefaultArgs>()({
+    select: {
+      id: true,
+      action: true,
+      triggerThreshold: true,
+      actionDurationMs: true,
+      deleteMessageSeconds: true,
+      oncePerMember: true,
+      GuildId: true,
+      ExecutedWarnings: {
+        select: {
+          id: true,
+          IssuedByGuildId: true,
+          IssuedByUserId: true,
+          MemberGuildId: true,
+          MemberUserId: true,
+        },
+      },
+    },
+  });
+type PopulatedAutoModerationAction = Prisma.AutoModerationActionGetPayload<
+  typeof populatedAutoModerationAction
+>;
+
+// Prisma.SeverityConfiguration
+const populatedSeverityConfiguration =
+  Prisma.validator<Prisma.SeverityConfigurationDefaultArgs>()({
+    select: {
+      GuildId: true,
+      LOW: true,
+      MEDIUM: true,
+      HIGH: true,
+    },
+  });
+type PopulatedSeverityConfiguration = Prisma.SeverityConfigurationGetPayload<
+  typeof populatedSeverityConfiguration
+>;
+
+// Prisma.Warning
+const populatedWarning = Prisma.validator<Prisma.WarningDefaultArgs>()({
+  select: {
+    id: true,
+    severity: true,
+    message: true,
+    date: true,
+    validUntil: true,
+    MemberUserId: true,
+    MemberGuildId: true,
+    IssuedByUserId: true,
+    IssuedByGuildId: true,
+    TriggeredActions: {
+      select: {
+        id: true,
+      },
+    },
+  },
+});
+type PopulatedWarning = Prisma.WarningGetPayload<typeof populatedWarning>;
+
 // Prisma.User
 const populatedUser = Prisma.validator<Prisma.UserDefaultArgs>()({
   select: {
     id: true,
+    risk: true,
+    riskOriginGuildIds: true,
+    _count: {
+      select: {
+        Members: true,
+      },
+    },
   },
 });
 type PopulatedUser = Prisma.UserGetPayload<typeof populatedUser>;
@@ -49,8 +117,16 @@ type PopulatedUser = Prisma.UserGetPayload<typeof populatedUser>;
 const populatedMember = Prisma.validator<Prisma.MemberDefaultArgs>()({
   select: {
     id: true,
-    User: populatedUser,
+    UserId: true,
     GuildId: true,
+    IssuedWarnings: populatedWarning,
+    ReceivedWarnings: populatedWarning,
+    _count: {
+      select: {
+        IssuedWarnings: true,
+        ReceivedWarnings: true,
+      },
+    },
   },
 });
 type PopulatedMember = Prisma.MemberGetPayload<typeof populatedMember>;
@@ -59,17 +135,26 @@ type PopulatedMember = Prisma.MemberGetPayload<typeof populatedMember>;
 const populatedGuild = Prisma.validator<Prisma.GuildDefaultArgs>()({
   select: {
     id: true,
-    // Role configuration
-    autoRoleIds: true,
+
+    // Permissions and audit
     adminRoleId: true,
     adminLogChannelId: true,
     modRoleId: true,
     modLogChannelId: true,
-    // Embed configuration
+
+    // Moderation
+    useModLogChannel: true,
+    SeverityConfiguration: populatedSeverityConfiguration,
+    AutoModerationActions: populatedAutoModerationAction,
+
+    // Utility
+    autoRoleIds: true,
     memberJoinChannelId: true,
+    memberLeaveChannelId: true,
+
+    // Embed configuration
     MemberJoinEmbed: populatedEmbed,
     MemberJoinEmbedId: true,
-    memberLeaveChannelId: true,
     MemberLeaveEmbed: populatedEmbed,
     MemberLeaveEmbedId: true,
   },
@@ -122,6 +207,12 @@ export {
   type PopulatedEmbed,
   populatedEmbedField,
   type PopulatedEmbedField,
+  populatedAutoModerationAction,
+  type PopulatedAutoModerationAction,
+  populatedSeverityConfiguration,
+  type PopulatedSeverityConfiguration,
+  populatedWarning,
+  type PopulatedWarning,
   populatedUser,
   type PopulatedUser,
   populatedMember,

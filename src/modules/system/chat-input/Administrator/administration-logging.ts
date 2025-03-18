@@ -1,4 +1,3 @@
-import { LoggingServices } from '../../services';
 import { ChannelType, SlashCommandBuilder } from 'discord.js';
 import {
   Lang,
@@ -7,24 +6,25 @@ import {
   PermLevel,
   Database,
 } from '@core';
+import { LoggingServices } from '../../services';
 
-const ModLogChannelCommand = new ChatInputCommand({
+const AdministrationLoggingCommand = new ChatInputCommand({
   permLevel: PermLevel.Administrator,
   isEphemeral: true,
   guildOnly: true,
   data: new SlashCommandBuilder()
-    .setDescription('Set the channel to send moderator log messages to')
+    .setDescription('Set the channel to send admin log (audit) messages to')
     .addChannelOption((option) =>
       option
         .setName('channel')
-        .setDescription('The channel to send moderator log messages to')
+        .setDescription('The channel to send admin log (audit) messages to')
         .setRequired(false)
         .addChannelTypes(ChannelType.GuildText, ChannelType.GuildAnnouncement),
     )
     .addBooleanOption((option) =>
       option
         .setName('disable')
-        .setDescription('Disable moderator log messages')
+        .setDescription('Disable admin log messages')
         .setRequired(false),
     ),
   run: async (client, interaction) => {
@@ -38,11 +38,11 @@ const ModLogChannelCommand = new ChatInputCommand({
     );
     if (!guildAvailable) return;
 
-    await ModLogChannelCommand.deferReplyInternal(interaction);
+    await AdministrationLoggingCommand.deferReplyInternal(interaction);
 
     const guildSettings = await Database.Guild.resolve(interaction.guildId);
     if (!guildSettings) {
-      await ModLogChannelCommand.reply(
+      await AdministrationLoggingCommand.reply(
         interaction,
         client.embeds.error(Lang.t('general:settings.notFound')),
       );
@@ -50,20 +50,20 @@ const ModLogChannelCommand = new ChatInputCommand({
     }
 
     if (disable) {
-      guildSettings.modLogChannelId = null;
+      guildSettings.adminLogChannelId = null;
       await Database.Guild.update({
         where: { id: interaction.guildId },
-        data: { modLogChannelId: null },
+        data: { adminLogChannelId: null },
       });
-      await ModLogChannelCommand.reply(
+      await AdministrationLoggingCommand.reply(
         interaction,
-        client.embeds.success(Lang.t('commands:mod-log-channel.disabled')),
+        client.embeds.success(Lang.t('commands:admin-log-channel.disabled')),
       );
       void LoggingServices.adminLog(
         interaction.guild,
         client.embeds.info({
-          title: Lang.t('commands:mod-log-channel.disabled'),
-          description: Lang.t('commands:mod-log-channel.disabledBy', {
+          title: Lang.t('commands:admin-log-channel.disabled'),
+          description: Lang.t('commands:admin-log-channel.disabledBy', {
             username: interaction.user.username,
           }),
         }),
@@ -72,14 +72,14 @@ const ModLogChannelCommand = new ChatInputCommand({
     }
 
     if (!channel) {
-      await ModLogChannelCommand.reply(
+      await AdministrationLoggingCommand.reply(
         interaction,
         client.embeds.branding({
           fields: [
             {
-              name: Lang.t('commands:mod-log-channel.title'),
-              value: guildSettings.modLogChannelId
-                ? `<#${guildSettings.modLogChannelId}>`
+              name: Lang.t('commands:admin-log-channel.title'),
+              value: guildSettings.adminLogChannelId
+                ? `<#${guildSettings.adminLogChannelId}>`
                 : Lang.t('general:notSet'),
             },
           ],
@@ -88,15 +88,15 @@ const ModLogChannelCommand = new ChatInputCommand({
       return;
     }
 
-    guildSettings.modLogChannelId = channel.id;
+    guildSettings.adminLogChannelId = channel.id;
     await Database.Guild.update({
       where: { id: interaction.guildId },
-      data: { modLogChannelId: channel.id },
+      data: { adminLogChannelId: channel.id },
     });
-    await ModLogChannelCommand.reply(
+    await AdministrationLoggingCommand.reply(
       interaction,
       client.embeds.success(
-        Lang.t('commands:mod-log-channel.changed', {
+        Lang.t('commands:admin-log-channel.changed', {
           channel: channel.toString(),
         }),
       ),
@@ -104,7 +104,7 @@ const ModLogChannelCommand = new ChatInputCommand({
     void LoggingServices.adminLog(
       interaction.guild,
       client.embeds.info({
-        title: Lang.t('commands:mod-log-channel.changedTitle'),
+        title: Lang.t('commands:admin-log-channel.changedTitle'),
         fields: [
           {
             name: Lang.t('general:channel'),
@@ -123,4 +123,4 @@ const ModLogChannelCommand = new ChatInputCommand({
   },
 });
 
-export default ModLogChannelCommand;
+export default AdministrationLoggingCommand;

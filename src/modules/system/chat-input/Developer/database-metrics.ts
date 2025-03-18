@@ -2,8 +2,8 @@ import {
   modelOperations,
   ChatInputCommand,
   Database,
-  Model,
   ModelOperation,
+  modelEntries,
 } from '@core';
 import {
   SlashCommandBuilder,
@@ -24,7 +24,7 @@ const modelMetricsSubcommand = new SlashCommandSubcommandGroupBuilder()
   .setName('model')
   .setDescription('View metrics for a specific database model');
 
-for (const [key, value] of Object.entries(Model)) {
+for (const [key, value] of modelEntries) {
   modelMetricsSubcommand.addSubcommand(
     new SlashCommandSubcommandBuilder()
       .setName(value.toLowerCase())
@@ -65,7 +65,7 @@ const DatabaseMetricsCommand = new ChatInputCommand({
                   description:
                     'Displaying a summary of all database models and their metrics',
                   fields: await Promise.all(
-                    Object.entries(Model).map(async ([key, value]) => {
+                    modelEntries.map(async ([key, value]) => {
                       const accessor = Database[value];
                       const count = await accessor.count();
                       const metricsAvgFnRuntime = Object.entries(
@@ -128,7 +128,7 @@ const DatabaseMetricsCommand = new ChatInputCommand({
       }
 
       case 'model': {
-        const model = Object.entries(Model).find(
+        const model = modelEntries.find(
           ([, value]) => value.toLowerCase() === subcommand,
         )?.[1];
 

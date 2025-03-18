@@ -15,6 +15,10 @@
       "path": "./node_modules/cz-conventional-changelog"
     }
   },
+  "prisma": {
+    "schema": "prisma/schema.prisma",
+    "seed": "ts-node-dev ./prisma/seed.ts"
+  },
   "scripts": {
     "build": "tsc",
     "prebuild": "rimraf dist",

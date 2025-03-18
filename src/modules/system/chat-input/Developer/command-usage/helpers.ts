@@ -51,7 +51,7 @@ export const embedFromUsageStatistics = (
     : unknown;
 
   const runtimeTotal = stats.runtimeTotal
-    ? TimeUtils.msToHumanReadable(stats.runtimeTotal)
+    ? TimeUtils.humanReadableMs(stats.runtimeTotal)
     : unknown;
   const firstUsedAt = stats.firstUsedAt
     ? TimeUtils.discordInfoTimestamp(stats.firstUsedAt.valueOf())
@@ -190,7 +190,7 @@ export const compactEmbedFromUsageStatistics = (
         ? `${stat.runtimeMean.toFixed(2)}ms`
         : unknown;
       const totalRuntime = stat.runtimeTotal
-        ? `${TimeUtils.msToHumanReadable(stat.runtimeTotal)}`
+        ? `${TimeUtils.humanReadableMs(stat.runtimeTotal)}`
         : unknown;
       return {
         name: `${index + 1 + indexOffset}. ${commandId} (${stringCommandTypeFromInteger(stat.type)})`,

@@ -5,6 +5,7 @@ import {
   Guild,
   GuildChannel,
   GuildMember,
+  GuildTextBasedChannel,
   PermissionFlagsBits,
   PermissionsBitField,
   Snowflake,
@@ -94,7 +95,7 @@ const filterInvalidPermissions = (perms: bigint[]) =>
 
 const hasChannelPermissions = (
   userId: Snowflake,
-  channel: GuildChannel,
+  channel: GuildChannel | GuildTextBasedChannel,
   perms: bigint[],
 ) => {
   let resolvedPermArr = perms;
@@ -159,6 +160,7 @@ const permissionsForCommands = (
 ];
 
 class PermissionUtils {
+  static readonly FLAGS = PermissionFlagsBits;
   /**
    * Array of valid Discord permission values
    */

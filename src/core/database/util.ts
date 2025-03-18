@@ -1,3 +1,4 @@
+import { Severity } from '@prisma/client';
 import { randomBytes } from 'crypto';
 
 export const generateKey = (
@@ -6,3 +7,10 @@ export const generateKey = (
 ): string => {
   return randomBytes(size).toString(format);
 };
+
+export const severityEntries = Object.entries(Severity);
+export const severityValues = severityEntries.map(([, value]) => value);
+export const severityChoices = severityEntries.map(([key, value]) => ({
+  name: key,
+  value,
+}));

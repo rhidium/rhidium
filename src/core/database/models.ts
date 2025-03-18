@@ -23,10 +23,16 @@ enum Model {
 }
 
 const seenModels = new Set<string>();
+const modelEntries = Object.entries(Model);
+const modelValues = modelEntries.map(([, value]) => value);
+const modelChoices = modelEntries.map(([key, value]) => ({
+  name: key,
+  value,
+}));
 
 // Ensure lowercased models don't overlap,
 // as we use the lc model name as subcmds
-for (const model of Object.values(Model)) {
+for (const model of modelValues) {
   const lowercased = model.toLowerCase();
   if (seenModels.has(lowercased)) {
     throw new Error(`Duplicate lowercased model detected: ${model}`);
@@ -51,4 +57,13 @@ type Models = {
   CommandStatistics: CommandStatistics;
 };
 
-export { Model, type ModelUnion, type PopulatedModelUnion, type Models };
+export {
+  Model,
+  seenModels,
+  modelEntries,
+  modelValues,
+  modelChoices,
+  type ModelUnion,
+  type PopulatedModelUnion,
+  type Models,
+};

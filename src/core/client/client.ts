@@ -386,7 +386,7 @@ export class Client<
       }
 
       const sharedErrorLines = [
-        'this should never happen and is very likely a bug in your code -',
+        'this should never happen and is very likely a bug in your code (do you have multiple components with the same (custom)-id) -',
         'please investigate and create a GitHub issue if you believe this is a bug.',
       ];
 
@@ -456,9 +456,8 @@ export class Client<
         // Unknown command type
         throw new Error(
           [
-            `Unknown command type for command "${commandId}" - this should never happen,`,
-            'and is very likely a bug in your code - please investigate',
-            'and create a GitHub issue if you believe this is a bug.',
+            `Unknown command type for command "${commandId}",
+            ${sharedErrorLines.join(' ')}`,
           ].join(' '),
         );
       }

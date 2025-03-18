@@ -10,39 +10,142 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// 
+// Start of Enums
+// 
+
+enum Severity {
+  LOW // Low severity warning, by default counts as 1 warning.
+  MEDIUM // Medium severity warning, by default counts as 2 warnings.
+  HIGH // High severity warning, by default counts as 3 warnings.
+}
+
+enum ModerationAction {
+  KICK // Kicks the member from the guild, they will have to manually rejoin the server.
+  BAN_DURATION // Bans the member from the guild until the actionDurationMs has passed.
+  BAN_PERMANENT // Permanently bans the member from the guild/server.
+  MUTE_DURATION // Mutes the member until the actionDurationMs has passed.
+  MUTE_PERMANENT // Permanently mutes the member on the guild/server.
+}
+
+enum RiskLevel {
+  NONE // No risk level, the user has never been moderated.
+  LOW // Low risk level, the user has been moderated at least once.
+  MEDIUM // Medium risk level, the user has been moderated multiple times.
+  HIGH // High risk level, the user has been moderated frequently.
+  SEVERE // Severe risk level, the user has been moderated frequently, across multiple guilds.
+}
+
+// 
+// Start of base models
+// 
+
 model User {
   id      String   @id @unique                                    // The Discord id of the user
+  risk    RiskLevel @default(NONE)                                // The risk level of the user, based on their moderation history
+  riskOriginGuildIds String[]                                     // The guilds where the user has been moderated, contributing to their risk level
   Members Member[]                                                // A user can be a member of multiple guilds
 }
 
-model Member {                                                    // Note: Structure reflects the Discord API
-  id  String @id @unique                                          // The id of the Discord user
-  User    User   @relation(fields: [id], references: [id])        // The Discord user for the guild member
+model Member {
+  id     String   @unique @default(uuid(7))                   // The internal id of the member
+
+  UserId String                                                   // The id of the Discord user
+  User    User @relation(fields: [UserId], references: [id])      // The Discord user for the guild member
   GuildId String                                                  // The id of the guild this member belongs to
-  Guild   Guild  @relation(fields: [GuildId], references: [id])   // A member belongs to a single guild
+  Guild   Guild @relation(fields: [GuildId], references: [id])    // A member belongs to a single guild
+
+  ReceivedWarnings Warning[] @relation("ReceivedWarnings")        // A member can receive multiple warnings
+  IssuedWarnings Warning[] @relation("IssuedWarnings")            // A member can issue multiple warnings
+
+  @@id(name: "GuildId_UserId", fields: [UserId, GuildId])         // Define a composite primary key
+  @@index([UserId, GuildId], name: "UserInd")                     // Create an index for quering members by user
+  @@index([GuildId, UserId], name: "GuildInd")                    // Create an index for quering members by guild
+  @@unique([UserId, GuildId], name: "UserGuild")                  // Require that a user can only be a member of a guild once
 }
 
 model Guild {
   id      String   @id @unique                                    // The Discord id of the guild (server)
   Members Member[]                                                // A guild can have multiple members
 
-  // Role configuration
-  autoRoleIds       String[]                                      // List of role ids that are automatically assigned to new members
+  // Permissions and audit
   adminRoleId       String?                                       // The id of the admin role
   adminLogChannelId String?                                       // The id of the admin log channel
   modRoleId         String?                                       // The id of the moderator role
   modLogChannelId   String?                                       // The id of the mod log channel
 
-  // Embed configuration for the guildMemberAdd event
-  memberJoinChannelId String?
-  MemberJoinEmbed     Embed?  @relation("MemberJoinEmbed", fields: [MemberJoinEmbedId], references: [id])
-  MemberJoinEmbedId   Int?
+  // Moderation
+  useModLogChannel Boolean                                        // Whether the public mod log channel is currently active/enabled
+  SeverityConfiguration SeverityConfiguration?                    // Custom severity configuration for the guild
+  AutoModerationActions AutoModerationAction[]                    // The actions to take when a member reaches a certain number of warnings
 
-  // Embed configuration for the guildMemberRemove event
-  memberLeaveChannelId String?
-  MemberLeaveEmbed     Embed?  @relation("MemberLeaveEmbed", fields: [MemberLeaveEmbedId], references: [id])
+  // Utility
+  autoRoleIds       String[]                                      // List of role ids that are automatically assigned to new members
+  memberJoinChannelId String?                                     // The id of the channel to send member join messages to
+  memberLeaveChannelId String?                                    // The id of the channel to send member leave messages to
+
+  // Allow guilds to customize embeds
+  MemberJoinEmbed     Embed? @relation("MemberJoinEmbed", fields: [MemberJoinEmbedId], references: [id])
+  MemberJoinEmbedId   Int?
+  MemberLeaveEmbed     Embed? @relation("MemberLeaveEmbed", fields: [MemberLeaveEmbedId], references: [id])
   MemberLeaveEmbedId   Int?
 }
+
+// 
+// Start of moderation models
+// 
+
+model SeverityConfiguration {
+  GuildId String @id @unique                                      // The guild this configuration belongs to         
+  Guild  Guild @relation(fields: [GuildId], references: [id])
+  LOW Int @default(1)                                             // This model allows the guild to customize the severity of warnings,
+  MEDIUM Int @default(2)                                          // which determines how many warnings/strikes/points a warning counts as.
+  HIGH Int @default(3)                                            // All possible enum values should be present/defined here.
+}
+
+model Warning {
+  id      Int   @id @default(autoincrement())
+
+  severity Severity                                               // Determines how many warnings this warning counts as
+  message String                                                  // The message/reason that was sent with the warning
+  date    DateTime                                                // The date the warning was issued
+  validUntil DateTime?                                            // The date the warning is valid until. If null, the warning is valid indefinitely
+
+  MemberUserId  String                                            // The member that the warning is for / was issued to
+  MemberGuildId String                                            // The guild the member is in
+  Member    Member @relation("ReceivedWarnings", fields: [MemberUserId, MemberGuildId], references: [UserId, GuildId])
+
+  IssuedByUserId String                                           // The member that issued the warning
+  IssuedByGuildId String                                          // The guild the issuer is in
+  IssuedBy   Member @relation("IssuedWarnings", fields: [IssuedByUserId, IssuedByGuildId], references: [UserId, GuildId])
+
+  TriggeredActions AutoModerationAction[]                         // The (auto-moderation) actions that were triggered by this warning
+
+  @@index([MemberUserId, MemberGuildId], name: "MemberInd")       // Create an index for quering warnings by member
+  @@index([IssuedByUserId, IssuedByGuildId], name: "IssuedByInd") // Create an index for quering warnings by issuer
+}
+
+model AutoModerationAction {
+  id      Int   @id @default(autoincrement())
+
+  action ModerationAction                                         // The action to take when the triggerThreshold is reached
+  triggerThreshold Int                                            // The triggerThreshold is the number of warnings (severity) a member can have before the action is taken
+  actionDurationMs Int?                                           // The duration of the action in milliseconds. Only used for actions ending in "_UNTIL"
+  deleteMessageSeconds Int?                                       // How long to go back when deleting messages for the action (if applicable)
+  oncePerMember Boolean                                           // Whether the action should only be taken once per member, action is triggered again each time the threshold is reached
+
+  GuildId String                                                  // The guild this action belongs to
+  Guild  Guild @relation(fields: [GuildId], references: [id])
+
+  ExecutedWarnings Warning[]                                      // The warnings this action was executed for
+
+  @@index([GuildId])
+  @@unique([GuildId, action, triggerThreshold], name: "GuildId_Action")
+}
+
+// 
+// Start of internal/core models
+//
 
 model CommandCooldown {
   id         Int        @id @default(autoincrement())
@@ -100,7 +203,7 @@ model Embed {
 
 model EmbedField {
   id      Int     @id @unique @default(autoincrement())
-  Embed   Embed?  @relation(fields: [EmbedId], references: [id])
+  Embed   Embed? @relation(fields: [EmbedId], references: [id])
   EmbedId Int?
 
   name    String

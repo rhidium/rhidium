@@ -53,7 +53,7 @@ export const persistentCooldownMiddleware: CommandMiddlewareFunction = async ({
       firstNonExpired.valueOf() + durationInMs,
     );
     const remaining = firstUsageExpires.valueOf() - now;
-    const expiresIn = TimeUtils.msToHumanReadable(remaining);
+    const expiresIn = TimeUtils.humanReadableMs(remaining);
     const relativeOutput = expiresIn === '0 seconds' ? '1 second' : expiresIn;
     await InteractionUtils.replyEphemeral(interaction, {
       content: Lang.t('core:commands.onCooldown', {

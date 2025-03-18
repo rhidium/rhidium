@@ -84,7 +84,7 @@ const StatsCommand = new ChatInputCommand({
         },
         {
           name: Lang.t('general:system.uptime'),
-          value: `🕐 ${TimeUtils.msToHumanReadable(client.uptime ?? 0)}`,
+          value: `🕐 ${TimeUtils.humanReadableMs(client.uptime ?? 0)}`,
           inline: false,
         },
         {
