@@ -45,10 +45,11 @@ model User {
   risk    RiskLevel @default(NONE)                                // The risk level of the user, based on their moderation history
   riskOriginGuildIds String[]                                     // The guilds where the user has been moderated, contributing to their risk level
   Members Member[]                                                // A user can be a member of multiple guilds
+  AuditLogs AuditLog[]                                            // A member can perform actions on/across multiple guilds
 }
 
 model Member {
-  id     String   @unique @default(uuid(7))                   // The internal id of the member
+  id     String   @unique @default(uuid(7))                       // The internal id of the member
 
   UserId String                                                   // The id of the Discord user
   User    User @relation(fields: [UserId], references: [id])      // The Discord user for the guild member
@@ -67,6 +68,7 @@ model Member {
 model Guild {
   id      String   @id @unique                                    // The Discord id of the guild (server)
   Members Member[]                                                // A guild can have multiple members
+  AuditLogs AuditLog[]                                            // A guild can have multiple audit logs
 
   // Permissions and audit
   adminRoleId       String?                                       // The id of the admin role
@@ -75,7 +77,6 @@ model Guild {
   modLogChannelId   String?                                       // The id of the mod log channel
 
   // Moderation
-  useModLogChannel Boolean                                        // Whether the public mod log channel is currently active/enabled
   SeverityConfiguration SeverityConfiguration?                    // Custom severity configuration for the guild
   AutoModerationActions AutoModerationAction[]                    // The actions to take when a member reaches a certain number of warnings
 
@@ -146,6 +147,17 @@ model AutoModerationAction {
 // 
 // Start of internal/core models
 //
+
+model AuditLog {
+  id      Int     @id @default(autoincrement())
+  type    String                                                  // The type of action that was performed
+  date    DateTime                                                // The date the action was performed
+  data    Json                                                    // The data associated with the action
+  UserId String                                                   // The user that performed the action
+  User    User @relation(fields: [UserId], references: [id])
+  GuildId String?                                                 // The guild the action was performed in, if applicable
+  Guild   Guild? @relation(fields: [GuildId], references: [id])
+}
 
 model CommandCooldown {
   id         Int        @id @default(autoincrement())

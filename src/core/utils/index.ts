@@ -7,3 +7,4 @@ export * from './emojis';
 export * from './files';
 export * from './interactions';
 export * from './permissions';
+export * from './prompts';

@@ -5,8 +5,8 @@ import {
   InteractionUtils,
   PermLevel,
   Database,
+  AuditLogType,
 } from '@core';
-import { LoggingServices } from '../../services';
 
 const AdministrationLoggingCommand = new ChatInputCommand({
   permLevel: PermLevel.Administrator,
@@ -40,18 +40,11 @@ const AdministrationLoggingCommand = new ChatInputCommand({
 
     await AdministrationLoggingCommand.deferReplyInternal(interaction);
 
-    const guildSettings = await Database.Guild.resolve(interaction.guildId);
-    if (!guildSettings) {
-      await AdministrationLoggingCommand.reply(
-        interaction,
-        client.embeds.error(Lang.t('general:settings.notFound')),
-      );
-      return;
-    }
+    const [guild, , user] =
+      await Database.Guild.resolveFromInteraction(interaction);
 
     if (disable) {
-      guildSettings.adminLogChannelId = null;
-      await Database.Guild.update({
+      const updatedGuild = await Database.Guild.update({
         where: { id: interaction.guildId },
         data: { adminLogChannelId: null },
       });
@@ -59,15 +52,13 @@ const AdministrationLoggingCommand = new ChatInputCommand({
         interaction,
         client.embeds.success(Lang.t('commands:admin-log-channel.disabled')),
       );
-      void LoggingServices.adminLog(
-        interaction.guild,
-        client.embeds.info({
-          title: Lang.t('commands:admin-log-channel.disabled'),
-          description: Lang.t('commands:admin-log-channel.disabledBy', {
-            username: interaction.user.username,
-          }),
-        }),
-      );
+      void Database.AuditLog.util({
+        client,
+        type: AuditLogType.AUDIT_LOG_CHANNEL_DISABLED,
+        user,
+        guild,
+        data: { before: guild, after: updatedGuild },
+      });
       return;
     }
 
@@ -78,8 +69,8 @@ const AdministrationLoggingCommand = new ChatInputCommand({
           fields: [
             {
               name: Lang.t('commands:admin-log-channel.title'),
-              value: guildSettings.adminLogChannelId
-                ? `<#${guildSettings.adminLogChannelId}>`
+              value: guild.adminLogChannelId
+                ? `<#${guild.adminLogChannelId}>`
                 : Lang.t('general:notSet'),
             },
           ],
@@ -88,8 +79,7 @@ const AdministrationLoggingCommand = new ChatInputCommand({
       return;
     }
 
-    guildSettings.adminLogChannelId = channel.id;
-    await Database.Guild.update({
+    const updatedGuild = await Database.Guild.update({
       where: { id: interaction.guildId },
       data: { adminLogChannelId: channel.id },
     });
@@ -101,24 +91,13 @@ const AdministrationLoggingCommand = new ChatInputCommand({
         }),
       ),
     );
-    void LoggingServices.adminLog(
-      interaction.guild,
-      client.embeds.info({
-        title: Lang.t('commands:admin-log-channel.changedTitle'),
-        fields: [
-          {
-            name: Lang.t('general:channel'),
-            value: `<#${channel.id}>`,
-            inline: true,
-          },
-          {
-            name: Lang.t('general:member'),
-            value: interaction.user.toString(),
-            inline: true,
-          },
-        ],
-      }),
-    );
+    void Database.AuditLog.util({
+      client,
+      type: AuditLogType.AUDIT_LOG_CHANNEL_CHANGED,
+      user,
+      guild,
+      data: { before: guild, after: updatedGuild },
+    });
     return;
   },
 });

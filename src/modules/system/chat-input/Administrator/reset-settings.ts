@@ -36,7 +36,6 @@ const ResetSettingsCommand = new ChatInputCommand({
         data: {
           adminLogChannelId: null,
           modLogChannelId: null,
-          useModLogChannel: true,
           adminRoleId: null,
           modRoleId: null,
           autoRoleIds: {

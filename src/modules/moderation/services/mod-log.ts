@@ -52,14 +52,14 @@ class ModLogServices {
 
   static readonly send = async (options: ModLogOptions): Promise<boolean> => {
     const { message } = options;
-    const channel = options.guild.useModLogChannel
+    const channel = options.guild.modLogChannelId
       ? this.channel(options)
       : null;
 
     if (
       !channel ||
       this.checkPermissions(channel) !== true ||
-      !options.guild.useModLogChannel
+      !options.guild.modLogChannelId
     ) {
       return false;
     }

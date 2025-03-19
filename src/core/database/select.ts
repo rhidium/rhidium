@@ -2,6 +2,19 @@
 
 import { Prisma } from '@prisma/client';
 
+// Prisma.AuditLog
+const populatedAuditLog = Prisma.validator<Prisma.AuditLogDefaultArgs>()({
+  select: {
+    id: true,
+    type: true,
+    date: true,
+    data: true,
+    GuildId: true,
+    UserId: true,
+  },
+});
+type PopulatedAuditLog = Prisma.AuditLogGetPayload<typeof populatedAuditLog>;
+
 // Prisma.EmbedField
 const populatedEmbedField = Prisma.validator<Prisma.EmbedFieldDefaultArgs>()({
   select: {
@@ -143,7 +156,6 @@ const populatedGuild = Prisma.validator<Prisma.GuildDefaultArgs>()({
     modLogChannelId: true,
 
     // Moderation
-    useModLogChannel: true,
     SeverityConfiguration: populatedSeverityConfiguration,
     AutoModerationActions: populatedAutoModerationAction,
 
@@ -203,6 +215,8 @@ type PopulatedCommandStatistics = Prisma.CommandStatisticsGetPayload<
 >;
 
 export {
+  populatedAuditLog,
+  type PopulatedAuditLog,
   populatedEmbed,
   type PopulatedEmbed,
   populatedEmbedField,

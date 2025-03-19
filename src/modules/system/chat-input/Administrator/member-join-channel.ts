@@ -1,4 +1,3 @@
-import { LoggingServices } from '../../services';
 import { ChannelType, SlashCommandBuilder } from 'discord.js';
 import {
   Lang,
@@ -6,6 +5,7 @@ import {
   InteractionUtils,
   PermLevel,
   Database,
+  AuditLogType,
 } from '@core';
 
 const MemberJoinChannelCommand = new ChatInputCommand({
@@ -40,18 +40,11 @@ const MemberJoinChannelCommand = new ChatInputCommand({
 
     await MemberJoinChannelCommand.deferReplyInternal(interaction);
 
-    const guildSettings = await Database.Guild.resolve(interaction.guildId);
-    if (!guildSettings) {
-      await MemberJoinChannelCommand.reply(
-        interaction,
-        client.embeds.error(Lang.t('general:settings.notFound')),
-      );
-      return;
-    }
+    const [guild, , user] =
+      await Database.Guild.resolveFromInteraction(interaction);
 
     if (disable) {
-      guildSettings.memberJoinChannelId = null;
-      await Database.Guild.update({
+      const updatedGuild = await Database.Guild.update({
         where: { id: interaction.guildId },
         data: { memberJoinChannelId: null },
       });
@@ -59,15 +52,13 @@ const MemberJoinChannelCommand = new ChatInputCommand({
         interaction,
         client.embeds.success(Lang.t('commands:member-join-channel.disabled')),
       );
-      void LoggingServices.adminLog(
-        interaction.guild,
-        client.embeds.info({
-          title: Lang.t('commands:member-join-channel.disabledTitle'),
-          description: Lang.t('commands:member-join-channel.disabledBy', {
-            username: interaction.user.username,
-          }),
-        }),
-      );
+      void Database.AuditLog.util({
+        client,
+        type: AuditLogType.MEMBER_JOIN_CHANNEL_DISABLED,
+        user,
+        guild,
+        data: { before: guild, after: updatedGuild },
+      });
       return;
     }
 
@@ -78,8 +69,8 @@ const MemberJoinChannelCommand = new ChatInputCommand({
           fields: [
             {
               name: Lang.t('commands:member-join-channel.title'),
-              value: guildSettings.memberJoinChannelId
-                ? `<#${guildSettings.memberJoinChannelId}>`
+              value: guild.memberJoinChannelId
+                ? `<#${guild.memberJoinChannelId}>`
                 : Lang.t('general:notSet'),
             },
           ],
@@ -88,8 +79,7 @@ const MemberJoinChannelCommand = new ChatInputCommand({
       return;
     }
 
-    guildSettings.memberJoinChannelId = channel.id;
-    await Database.Guild.update({
+    const updatedGuild = await Database.Guild.update({
       where: { id: interaction.guildId },
       data: { memberJoinChannelId: channel.id },
     });
@@ -101,24 +91,13 @@ const MemberJoinChannelCommand = new ChatInputCommand({
         }),
       ),
     );
-    void LoggingServices.adminLog(
-      interaction.guild,
-      client.embeds.info({
-        title: Lang.t('commands:member-join-channel.changedTitle'),
-        fields: [
-          {
-            name: Lang.t('general:channel'),
-            value: `<#${channel.id}>`,
-            inline: true,
-          },
-          {
-            name: Lang.t('general:member'),
-            value: interaction.user.toString(),
-            inline: true,
-          },
-        ],
-      }),
-    );
+    void Database.AuditLog.util({
+      client,
+      type: AuditLogType.MEMBER_JOIN_CHANNEL_CHANGED,
+      user,
+      guild,
+      data: { before: guild, after: updatedGuild },
+    });
     return;
   },
 });

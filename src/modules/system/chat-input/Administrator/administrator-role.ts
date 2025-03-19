@@ -1,4 +1,3 @@
-import { LoggingServices } from '../../services';
 import { SlashCommandBuilder } from 'discord.js';
 import {
   Lang,
@@ -6,6 +5,7 @@ import {
   InteractionUtils,
   PermLevel,
   Database,
+  AuditLogType,
 } from '@core';
 
 const AdministratorRoleCommand = new ChatInputCommand({
@@ -43,18 +43,11 @@ const AdministratorRoleCommand = new ChatInputCommand({
 
     await AdministratorRoleCommand.deferReplyInternal(interaction);
 
-    const guildSettings = await Database.Guild.resolve(interaction.guildId);
-    if (!guildSettings) {
-      await AdministratorRoleCommand.reply(
-        interaction,
-        client.embeds.error(Lang.t('general:settings.notFound')),
-      );
-      return;
-    }
+    const [guild, , user] =
+      await Database.Guild.resolveFromInteraction(interaction);
 
     if (remove) {
-      guildSettings.adminRoleId = null;
-      await Database.Guild.update({
+      const updatedGuild = await Database.Guild.update({
         where: { id: interaction.guildId },
         data: { adminRoleId: null },
       });
@@ -62,15 +55,13 @@ const AdministratorRoleCommand = new ChatInputCommand({
         interaction,
         client.embeds.success(Lang.t('commands:admin-role.removed')),
       );
-      void LoggingServices.adminLog(
-        interaction.guild,
-        client.embeds.info({
-          title: Lang.t('commands:admin-role.removedTitle'),
-          description: Lang.t('commands:admin-role.removedBy', {
-            username: interaction.user.username,
-          }),
-        }),
-      );
+      void Database.AuditLog.util({
+        client,
+        type: AuditLogType.ADMIN_ROLE_REMOVED,
+        user,
+        guild,
+        data: { before: guild, after: updatedGuild },
+      });
       return;
     }
 
@@ -81,8 +72,8 @@ const AdministratorRoleCommand = new ChatInputCommand({
           fields: [
             {
               name: Lang.t('commands:admin-role.title'),
-              value: guildSettings.adminRoleId
-                ? `<@&${guildSettings.adminRoleId}>`
+              value: guild.adminRoleId
+                ? `<@&${guild.adminRoleId}>`
                 : Lang.t('general:notSet'),
             },
           ],
@@ -91,8 +82,7 @@ const AdministratorRoleCommand = new ChatInputCommand({
       return;
     }
 
-    guildSettings.adminRoleId = role.id;
-    await Database.Guild.update({
+    const updatedGuild = await Database.Guild.update({
       where: { id: interaction.guildId },
       data: { adminRoleId: role.id },
     });
@@ -104,24 +94,13 @@ const AdministratorRoleCommand = new ChatInputCommand({
         }),
       ),
     );
-    void LoggingServices.adminLog(
-      interaction.guild,
-      client.embeds.info({
-        title: Lang.t('commands:admin-role.changedTitle'),
-        fields: [
-          {
-            name: Lang.t('general:role'),
-            value: `<@&${role.id}>`,
-            inline: true,
-          },
-          {
-            name: Lang.t('general:member'),
-            value: interaction.user.toString(),
-            inline: true,
-          },
-        ],
-      }),
-    );
+    void Database.AuditLog.util({
+      client,
+      type: AuditLogType.ADMIN_ROLE_CHANGED,
+      user,
+      guild,
+      data: { before: guild, after: updatedGuild },
+    });
     return;
   },
 });

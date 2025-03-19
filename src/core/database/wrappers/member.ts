@@ -7,6 +7,8 @@ import { DatabaseWrapper } from './wrapper';
 interface FindMemberOptions {
   userId: string;
   guildId: string;
+  resolveUser?: boolean;
+  resolveGuild?: boolean;
 }
 
 class MemberWrapper extends DatabaseWrapper<Model.Member> {
@@ -17,6 +19,8 @@ class MemberWrapper extends DatabaseWrapper<Model.Member> {
   readonly resolve = async ({
     userId,
     guildId,
+    resolveGuild = true,
+    resolveUser = true,
   }: FindMemberOptions): Promise<PopulatedMember> => {
     const member = await this.findUnique({
       GuildId_UserId: {
@@ -28,8 +32,8 @@ class MemberWrapper extends DatabaseWrapper<Model.Member> {
     if (member) return member;
 
     await Promise.all([
-      guildWrapper.resolve(guildId),
-      userWrapper.resolve(userId),
+      resolveGuild ? guildWrapper.resolve(guildId) : null,
+      resolveUser ? userWrapper.resolve(userId) : null,
     ]);
 
     return this.create({

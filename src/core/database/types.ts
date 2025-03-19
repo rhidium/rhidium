@@ -6,6 +6,7 @@ import {
   populatedGuild,
   populatedMember,
   populatedUser,
+  populatedAuditLog,
 } from './select';
 
 export const populateModelArgs = {
@@ -14,6 +15,7 @@ export const populateModelArgs = {
   Guild: populatedGuild,
   CommandCooldown: populatedCommandCooldown,
   CommandStatistics: populatedCommandStatistics,
+  AuditLog: populatedAuditLog,
 };
 
 //
@@ -26,6 +28,7 @@ export type ModelCreateArgs = {
   Guild: Prisma.GuildCreateArgs;
   CommandCooldown: Prisma.CommandCooldownCreateArgs;
   CommandStatistics: Prisma.CommandStatisticsCreateArgs;
+  AuditLog: Prisma.AuditLogCreateArgs;
 };
 
 export type ModelCreateManyArgs = {
@@ -34,6 +37,7 @@ export type ModelCreateManyArgs = {
   Guild: Prisma.GuildCreateManyArgs;
   CommandCooldown: Prisma.CommandCooldownCreateManyArgs;
   CommandStatistics: Prisma.CommandStatisticsCreateManyArgs;
+  AuditLog: Prisma.AuditLogCreateManyArgs;
 };
 
 export type ModelCreateManyAndReturnArgs = {
@@ -42,6 +46,7 @@ export type ModelCreateManyAndReturnArgs = {
   Guild: Prisma.GuildCreateManyAndReturnArgs;
   CommandCooldown: Prisma.CommandCooldownCreateManyAndReturnArgs;
   CommandStatistics: Prisma.CommandStatisticsCreateManyAndReturnArgs;
+  AuditLog: Prisma.AuditLogCreateManyAndReturnArgs;
 };
 
 //
@@ -54,6 +59,7 @@ export type ModelDeleteArgs = {
   Guild: Prisma.GuildDeleteArgs;
   CommandCooldown: Prisma.CommandCooldownDeleteArgs;
   CommandStatistics: Prisma.CommandStatisticsDeleteArgs;
+  AuditLog: Prisma.AuditLogDeleteArgs;
 };
 
 export type ModelDeleteManyArgs = {
@@ -62,6 +68,7 @@ export type ModelDeleteManyArgs = {
   Guild: Prisma.GuildDeleteManyArgs;
   CommandCooldown: Prisma.CommandCooldownDeleteManyArgs;
   CommandStatistics: Prisma.CommandStatisticsDeleteManyArgs;
+  AuditLog: Prisma.AuditLogDeleteManyArgs;
 };
 
 //
@@ -74,6 +81,7 @@ export type ModelFindFirstArgs = {
   Guild: Prisma.GuildFindFirstArgs;
   CommandCooldown: Prisma.CommandCooldownFindFirstArgs;
   CommandStatistics: Prisma.CommandStatisticsFindFirstArgs;
+  AuditLog: Prisma.AuditLogFindFirstArgs;
 };
 
 export type ModelFindManyArgs = {
@@ -82,6 +90,7 @@ export type ModelFindManyArgs = {
   Guild: Prisma.GuildFindManyArgs;
   CommandCooldown: Prisma.CommandCooldownFindManyArgs;
   CommandStatistics: Prisma.CommandStatisticsFindManyArgs;
+  AuditLog: Prisma.AuditLogFindManyArgs;
 };
 
 export type ModelFindUniqueArgs = {
@@ -90,6 +99,7 @@ export type ModelFindUniqueArgs = {
   Guild: Prisma.GuildFindUniqueArgs;
   CommandCooldown: Prisma.CommandCooldownFindUniqueArgs;
   CommandStatistics: Prisma.CommandStatisticsFindUniqueArgs;
+  AuditLog: Prisma.AuditLogFindUniqueArgs;
 };
 
 //
@@ -102,6 +112,7 @@ export type ModelGroupByArgs = {
   Guild: Prisma.GuildGroupByArgs;
   CommandCooldown: Prisma.CommandCooldownGroupByArgs;
   CommandStatistics: Prisma.CommandStatisticsGroupByArgs;
+  AuditLog: Prisma.AuditLogGroupByArgs;
 };
 
 //
@@ -114,6 +125,7 @@ export type ModelAggregateArgs = {
   Guild: Prisma.GuildAggregateArgs;
   CommandCooldown: Prisma.CommandCooldownAggregateArgs;
   CommandStatistics: Prisma.CommandStatisticsAggregateArgs;
+  AuditLog: Prisma.AuditLogAggregateArgs;
 };
 
 export type ModelCountArgs = {
@@ -122,6 +134,7 @@ export type ModelCountArgs = {
   Guild: Prisma.GuildCountArgs;
   CommandCooldown: Prisma.CommandCooldownCountArgs;
   CommandStatistics: Prisma.CommandStatisticsCountArgs;
+  AuditLog: Prisma.AuditLogCountArgs;
 };
 
 //
@@ -134,6 +147,7 @@ export type ModelUpdateArgs = {
   Guild: Prisma.GuildUpdateArgs;
   CommandCooldown: Prisma.CommandCooldownUpdateArgs;
   CommandStatistics: Prisma.CommandStatisticsUpdateArgs;
+  AuditLog: Prisma.AuditLogUpdateArgs;
 };
 
 export type ModelUpdateManyArgs = {
@@ -142,6 +156,7 @@ export type ModelUpdateManyArgs = {
   Guild: Prisma.GuildUpdateManyArgs;
   CommandCooldown: Prisma.CommandCooldownUpdateManyArgs;
   CommandStatistics: Prisma.CommandStatisticsUpdateManyArgs;
+  AuditLog: Prisma.AuditLogUpdateManyArgs;
 };
 
 export type ModelUpsertArgs = {
@@ -150,6 +165,7 @@ export type ModelUpsertArgs = {
   Guild: Prisma.GuildUpsertArgs;
   CommandCooldown: Prisma.CommandCooldownUpsertArgs;
   CommandStatistics: Prisma.CommandStatisticsUpsertArgs;
+  AuditLog: Prisma.AuditLogUpsertArgs;
 };
 
 //
@@ -182,6 +198,7 @@ export type ModelGetPayload = {
   CommandStatistics: Prisma.CommandStatisticsGetPayload<
     typeof populatedCommandStatistics
   >;
+  AuditLog: Prisma.AuditLogGetPayload<typeof populatedAuditLog>;
 };
 
 export type ModelFieldRefs = {
@@ -190,6 +207,7 @@ export type ModelFieldRefs = {
   Guild: Prisma.GuildFieldRefs;
   CommandCooldown: Prisma.CommandCooldownFieldRefs;
   CommandStatistics: Prisma.CommandStatisticsFieldRefs;
+  AuditLog: Prisma.AuditLogFieldRefs;
 };
 
 export type ModelScalarFieldEnum = {
@@ -202,6 +220,7 @@ export type ModelScalarFieldEnum = {
   CommandStatistics:
     | Prisma.CommandStatisticsScalarFieldEnum
     | Prisma.CommandStatisticsScalarFieldEnum[];
+  AuditLog: Prisma.AuditLogScalarFieldEnum | Prisma.AuditLogScalarFieldEnum[];
 };
 
 export type ModelGroupByPayload = {
@@ -216,6 +235,9 @@ export type ModelGroupByPayload = {
   CommandStatistics: Prisma.GetCommandStatisticsGroupByPayload<{
     by: ModelScalarFieldEnum['CommandStatistics'];
   }>;
+  AuditLog: Prisma.GetAuditLogGroupByPayload<{
+    by: ModelScalarFieldEnum['AuditLog'];
+  }>;
 };
 
 export type ModelAggregateResult = {
@@ -224,4 +246,5 @@ export type ModelAggregateResult = {
   Guild: Prisma.AggregateGuild;
   CommandCooldown: Prisma.AggregateCommandCooldown;
   CommandStatistics: Prisma.AggregateCommandStatistics;
+  AuditLog: Prisma.AggregateAuditLog;
 };

@@ -1,9 +1,13 @@
 import { ModerationAction } from '@prisma/client';
 import { Model } from '../models';
-import { PopulatedGuild } from '../select';
+import { PopulatedGuild, PopulatedMember, PopulatedUser } from '../select';
 import { DatabaseWrapper } from './wrapper';
 import { UnitConstants } from '../../constants';
 import { ModerationServices } from '../../../modules/moderation/services/moderation';
+import { AvailableGuildInteraction } from '../../commands';
+import { BaseInteraction } from 'discord.js';
+import { memberWrapper } from './member';
+import { userWrapper } from './user';
 
 class GuildWrapper extends DatabaseWrapper<Model.Guild> {
   constructor() {
@@ -15,7 +19,6 @@ class GuildWrapper extends DatabaseWrapper<Model.Guild> {
       where: { id },
       create: {
         id,
-        useModLogChannel: true,
         AutoModerationActions: {
           create: {
             // Note: Default moderation action for new guilds.
@@ -38,6 +41,24 @@ class GuildWrapper extends DatabaseWrapper<Model.Guild> {
       },
       update: {},
     });
+  }
+
+  async resolveFromInteraction<I extends BaseInteraction>(
+    interaction: AvailableGuildInteraction<I>,
+  ): Promise<readonly [PopulatedGuild, PopulatedMember, PopulatedUser]> {
+    const [user, guild] = await Promise.all([
+      userWrapper.resolve(interaction.user.id),
+      this.resolve(interaction.guildId),
+    ]);
+
+    const member = await memberWrapper.resolve({
+      userId: interaction.user.id,
+      guildId: interaction.guildId,
+      resolveGuild: false,
+      resolveUser: false,
+    });
+
+    return [guild, member, user];
   }
 }
 

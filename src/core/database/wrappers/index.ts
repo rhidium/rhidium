@@ -1,3 +1,4 @@
+import { auditLogWrapper } from './audit-log';
 import { commandCooldownWrapper } from './command-cooldown';
 import { commandStatisticsWrapper } from './command-statistics';
 import { guildWrapper } from './guild';
@@ -10,6 +11,8 @@ export {
   type ModelOperation,
   modelOperations,
 } from './wrapper';
+
+export { AuditLogType, type AuditLogOptions } from './audit-log';
 
 export class Database {
   private static _instance: Database;
@@ -29,4 +32,5 @@ export class Database {
   static readonly Guild = guildWrapper;
   static readonly Member = memberWrapper;
   static readonly User = userWrapper;
+  static readonly AuditLog = auditLogWrapper;
 }

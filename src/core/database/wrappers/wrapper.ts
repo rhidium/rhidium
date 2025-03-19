@@ -1,9 +1,9 @@
 import _debug from 'debug';
-import { GetBatchResult } from '@prisma/client/runtime/library';
+import type { GetBatchResult } from '@prisma/client/runtime/library';
 import { UnitConstants } from '../../constants';
 import { Model } from '../models';
 import { PopulatedPrisma } from '../populated';
-import {
+import type {
   ModelFindManyArgs,
   ModelFindUniqueArgs,
   ModelGetPayload,
@@ -15,6 +15,8 @@ import { CacheManager, PerformanceTracker } from '../../data-structures';
 // [DEV] IDs for debugging
 // [DEV] !this.useCache || !cacheResult does NOT make sense
 // [DEV] The result of the operation.
+
+// [DEV] Dynamic settings command, with PROMPTS - awesome experience if done right
 
 const debug = _debug('@repo/database:wrapper');
 
@@ -88,7 +90,7 @@ type DatabaseWrapperOptions<T extends Model> = {
 };
 
 class DatabaseWrapper<T extends Model> implements DatabaseWrapperOptions<T> {
-  private readonly debug = debug.extend(this.model);
+  protected readonly debug = debug.extend(this.model);
 
   public readonly cache: CacheManagerType<T>;
   public readonly useCache: boolean;
@@ -352,7 +354,7 @@ class DatabaseWrapper<T extends Model> implements DatabaseWrapperOptions<T> {
     this.debug('Creating a new record with data: %o', createData);
 
     const fn = () =>
-      PopulatedPrisma.create(this.model, createData).then(async (record) => {
+      PopulatedPrisma.create(this.model, createData).then((record) => {
         if (this.useCache) {
           void this.clearMutationCache();
         }
