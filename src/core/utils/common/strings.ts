@@ -1,6 +1,9 @@
 const truncate = (input: string, length: number, suffix = '...'): string =>
   input.length > length ? input.slice(0, length) + suffix : input;
 
+const pluralize = (input: string, count: number): string =>
+  count === 1 ? input : `${input}s`;
+
 const snakeCase = (input: string): string =>
   input
     .replace(/\s+/g, '_')
@@ -63,6 +66,13 @@ class StringUtils {
    * @returns The truncated string
    */
   static readonly truncate = truncate;
+  /**
+   * Pluralize a string based on a count
+   * @param input The input string
+   * @param count The count
+   * @returns The pluralized string (e.g. 'apple' -> 'apples')
+   */
+  static readonly pluralize = pluralize;
   /**
    * Convert a string to snake_case
    * @param input The input string

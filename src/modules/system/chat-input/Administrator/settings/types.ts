@@ -1,4 +1,4 @@
-import { MappedPrompt, PopulatedGuild, PromptType, PromptValue } from '@core';
+import { MappedPrompt, PopulatedGuild, PromptType } from '@core';
 
 type SettingsKey = keyof PopulatedGuild;
 
@@ -9,10 +9,6 @@ type SettingsPrompt<
   M extends boolean,
 > = MappedPrompt<T, R, M, false> & {
   accessor: K;
-  updater: (
-    guild: PopulatedGuild,
-    value: PromptValue<R, T, M, false>,
-  ) => Promise<PopulatedGuild[K]>;
 };
 
 type SettingsPromptMap<K extends SettingsKey> = {

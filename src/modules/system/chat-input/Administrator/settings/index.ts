@@ -1,27 +1,34 @@
 import { ChannelType, SlashCommandBuilder } from 'discord.js';
-import { SettingsPrompts } from './types';
+import { SettingsKey, SettingsPrompts } from './types';
 import {
   appConfig,
+  AuditLogType,
   ChatInputCommand,
+  Database,
   InteractionUtils,
+  PopulatedGuild,
   Prompts,
+  PromptType,
   PromptUtils,
+  PromptValue,
   StringUtils,
 } from '@core';
+import { testPrompts } from './test';
+
+// [DEV] Validator function, for example, check if we have permissions to post in channels, etc.
 
 export const settingsPrompts: SettingsPrompts = [
   {
-    id: 'admin-role-id',
+    id: 'admin-roles',
     type: 'role',
-    name: 'Administrator Role',
-    message: 'The role required to use administrator commands.',
-    // defaultValue: 'Administrator',
-    required: false,
-    multiple: false,
-    accessor: 'adminRoleId',
-    updater: async (guild) => {
-      return guild.adminRoleId;
-    },
+    name: 'Administrator Roles',
+    message: 'Roles that have full access to all administrative commands.',
+    required: true,
+    multiple: true,
+    minValues: 1,
+    maxValues: 5,
+    // defaultValue: 'Administrator', [DEV]
+    accessor: 'adminRoleIds',
   },
   {
     id: 'audit-log-channel-id',
@@ -31,22 +38,18 @@ export const settingsPrompts: SettingsPrompts = [
     required: false,
     multiple: false,
     channelTypes: [ChannelType.GuildText],
-    accessor: 'adminLogChannelId',
-    updater: async (guild) => {
-      return guild.adminLogChannelId;
-    },
+    accessor: 'auditLogChannelId',
   },
   {
     id: 'mod-role-id',
     type: 'role',
     name: 'Moderator Role',
-    message: 'The role required to use moderator commands.',
-    required: false,
-    multiple: false,
-    accessor: 'modRoleId',
-    updater: async (guild) => {
-      return guild.modRoleId;
-    },
+    message: 'Roles that have access to all moderation commands.',
+    required: true,
+    multiple: true,
+    minValues: 1,
+    maxValues: 5,
+    accessor: 'modRoleIds',
   },
   {
     id: 'mod-log-channel-id',
@@ -55,128 +58,50 @@ export const settingsPrompts: SettingsPrompts = [
     message: 'The channel where moderation actions are logged.',
     required: false,
     multiple: false,
-    channelTypes: [ChannelType.GuildVoice],
+    channelTypes: [ChannelType.GuildText],
     accessor: 'modLogChannelId',
-    updater: async (guild) => {
-      return guild.modLogChannelId;
-    },
   },
   {
     id: 'auto-role-ids',
     type: 'role',
     name: 'Auto Roles',
-    message: 'Roles that are automatically assigned to new members.',
+    message:
+      'Please select between 0 and 25 roles that should be automatically assigned to new members.',
     required: true,
     multiple: true,
     minValues: 0,
     maxValues: 25,
     accessor: 'autoRoleIds',
-    updater: async (guild) => {
-      return guild.autoRoleIds;
-    },
   },
-  {
-    id: 'member-join-channel-id',
-    type: 'channel',
-    name: 'Member Join Channel',
-    message: 'The channel where member join messages are sent.',
-    required: false,
-    multiple: false,
-    channelTypes: [ChannelType.GuildText],
-    accessor: 'memberJoinChannelId',
-    updater: async (guild) => {
-      return guild.memberJoinChannelId;
-    },
-  },
-  {
-    id: 'member-leave-channel-id',
-    type: 'channel',
-    name: 'Member Leave Channel',
-    message: 'The channel where member leave messages are sent.',
-    required: false,
-    multiple: false,
-    channelTypes: [ChannelType.GuildText],
-    accessor: 'memberLeaveChannelId',
-    updater: async (guild) => {
-      return guild.memberLeaveChannelId;
-    },
-  },
+  //   {
+  //     id: 'member-join-channel-id',
+  //     type: 'channel',
+  //     name: 'Member Join Channel',
+  //     message: 'The channel where member join messages are sent.',
+  //     required: false,
+  //     multiple: false,
+  //     channelTypes: [ChannelType.GuildText],
+  //     accessor: 'memberJoinChannelId',
+  //   },
+  //   {
+  //     id: 'member-leave-channel-id',
+  //     type: 'channel',
+  //     name: 'Member Leave Channel',
+  //     message: 'The channel where member leave messages are sent.',
+  //     required: false,
+  //     multiple: false,
+  //     channelTypes: [ChannelType.GuildText],
+  //     accessor: 'memberLeaveChannelId',
+  //   },
 ] as const;
 
 // [DEV] Click outside of modal before submit = BREAKS
 // [DEV] Skip button, Cancel options, etc.
 
-const testPrompts: Prompts = [
-  {
-    type: 'number',
-    id: 'number-required-single-choices',
-    name: 'Single Required Number',
-    message: 'Test',
-    multiple: false,
-    required: true,
-    defaultValue: 8,
-    // minValue: 3,
-    // maxValue: 13,
-    choices: [
-      { name: 'Test 1', value: 1 },
-      { name: 'Test 2', value: 2 },
-      { name: 'Test 3', value: 3 },
-    ],
-  },
-  {
-    type: 'role',
-    id: 'role-required-single',
-    name: 'Single Required Role',
-    message: 'Test',
-    multiple: false,
-    required: true,
-    defaultValue: 'Administrator',
-  },
-  {
-    type: 'string',
-    id: 'string-required-single',
-    name: 'Single Required String',
-    message: 'Test',
-    multiple: false,
-    required: true,
-    defaultValue: 'Default Value',
-    minLength: 3,
-    maxLength: 13,
-  },
-  {
-    type: 'string',
-    id: 'string-required-multiple',
-    name: 'Multiple Required Strings',
-    message: 'Test',
-    required: true,
-    multiple: true,
-    minValues: 1,
-    maxValues: 2,
-    minLength: 3,
-    maxLength: 15,
-    defaultValue: ['Default Value 1', 'Default Value 2'],
-  },
-  {
-    type: 'string',
-    id: 'string-required-multiple-choices',
-    name: 'Multiple Required Strings (Choices)',
-    message: 'Test',
-    required: true,
-    multiple: true,
-    defaultValue: ['test3'],
-    minValues: 1,
-    maxValues: 2,
-    choices: [
-      { name: 'Test 1', value: 'test1' },
-      { name: 'Test 2', value: 'test2' },
-      { name: 'Test 3', value: 'test3' },
-    ],
-  },
-];
-
+PromptUtils.validatePrompts(settingsPrompts);
 PromptUtils.validatePrompts(testPrompts);
 
-const isProduction = appConfig.NODE_ENV === 'production';
+const isProduction: boolean = appConfig.NODE_ENV === 'production';
 
 const SettingsCommand = new ChatInputCommand({
   data: new SlashCommandBuilder()
@@ -185,8 +110,72 @@ const SettingsCommand = new ChatInputCommand({
   run: async (client, interaction) => {
     if (!InteractionUtils.requireAvailableGuild(client, interaction)) return;
 
-    console.log(
-      await PromptUtils.handlePromptInteraction(interaction, testPrompts, {
+    let guildBefore: PopulatedGuild | null = null;
+
+    const guildUpdater = async (
+      guildId: string,
+      accessor: SettingsKey,
+      value: PromptValue<boolean, PromptType, boolean, false>,
+    ) => {
+      return Database.Guild.update({
+        where: { id: guildId },
+        data: {
+          [accessor]: value,
+        },
+      }).then(async (updatedGuild) => {
+        void Database.AuditLog.util({
+          client,
+          guild: updatedGuild,
+          type: AuditLogType.GUILD_SETTINGS_UPDATE,
+          user: interaction.user.id,
+          data: {
+            before:
+              guildBefore ??
+              (await Database.Guild.resolve(interaction.guildId).then((g) => {
+                guildBefore = g;
+
+                return g;
+              })),
+            after: updatedGuild,
+          },
+        });
+
+        return updatedGuild;
+      });
+    };
+
+    const guildSettingsPrompts = settingsPrompts.map((prompt) => ({
+      ...prompt,
+      defaultValue:
+        prompt.defaultValue ??
+        (() =>
+          Database.Guild.resolve(interaction.guildId).then((g) => {
+            guildBefore = g;
+
+            return g[prompt.accessor];
+          })),
+      onCollect:
+        prompt.onCollect ??
+        (async (value: PromptValue<boolean, PromptType, boolean, false>) => {
+          const guild = await Database.Guild.resolve(interaction.guildId);
+
+          if (
+            Array.isArray(guild[prompt.accessor]) || Array.isArray(value)
+              ? JSON.stringify(guild[prompt.accessor]) === JSON.stringify(value)
+              : guild[prompt.accessor] === value
+          ) {
+            return;
+          }
+
+          return guildUpdater(interaction.guild.id, prompt.accessor, value);
+        }),
+    }));
+
+    const t = await PromptUtils.handlePromptInteraction(
+      interaction,
+      guildSettingsPrompts as Prompts,
+      {
+        resolveResources: false,
         async onPromptError(error, i, prompt) {
           console.error(error);
           const ctx = {
@@ -215,7 +204,13 @@ const SettingsCommand = new ChatInputCommand({
           if (i.replied || i.deferred) await i.editReply(ctx);
           else await i.reply(ctx);
         },
-        contextTransformer(prompt, prompts, index, collected) {
+        contextTransformer(
+          prompt,
+          prompts,
+          index,
+          collected,
+          errorFeedbackFields,
+        ) {
           const isLast = index === prompts.length - 1;
           const remaining = prompts.length - index - 1;
           const collectedSliced = (collected?.slice(-10) ?? []).reverse();
@@ -228,6 +223,10 @@ const SettingsCommand = new ChatInputCommand({
               : ''
           }`;
 
+          const embedFn = errorFeedbackFields.length
+            ? client.embeds.error
+            : client.embeds.info;
+
           return {
             content: !isLast
               ? `Question **${index + 1}** of **${prompts.length}**, ${remaining} more question${
@@ -235,25 +234,28 @@ const SettingsCommand = new ChatInputCommand({
                 } after this`
               : 'Last question',
             embeds: [
-              client.embeds.info({
+              embedFn({
                 title: prompt.name,
                 description: prompt.message,
                 fields:
                   collected === null
-                    ? []
+                    ? [...errorFeedbackFields]
                     : [
+                        ...errorFeedbackFields,
                         {
                           name: 'Your have provided the following values so far:',
                           value: collectedString,
-                          inline: true,
+                          inline: false,
                         },
                       ],
               }),
             ],
           };
         },
-      }),
+      },
     );
+
+    console.log(t);
   },
 });
 

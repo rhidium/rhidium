@@ -71,10 +71,10 @@ model Guild {
   AuditLogs AuditLog[]                                            // A guild can have multiple audit logs
 
   // Permissions and audit
-  adminRoleId       String?                                       // The id of the admin role
-  adminLogChannelId String?                                       // The id of the admin log channel
-  modRoleId         String?                                       // The id of the moderator role
-  modLogChannelId   String?                                       // The id of the mod log channel
+  adminRoleIds      String[]                                      // Ids of roles that can perform administrative actions
+  auditLogChannelId String?                                       // The id of the channel where audit logs are sent
+  modRoleIds         String[]                                     // Ids of roles that can perform moderation actions
+  modLogChannelId   String?                                       // The id of the channel where moderation actions are logged
 
   // Moderation
   SeverityConfiguration SeverityConfiguration?                    // Custom severity configuration for the guild

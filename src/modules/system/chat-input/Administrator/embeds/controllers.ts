@@ -20,7 +20,6 @@ import {
 } from './components';
 import { Prisma } from '@prisma/client';
 import { EmbedConfigurationConstants } from './enums';
-import { LoggingServices } from '../../../services';
 import {
   Lang,
   EmbedConstants,

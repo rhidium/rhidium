@@ -1,5 +1,4 @@
 import { embedFromEmbedModel } from '../../chat-input/Administrator/embeds/helpers';
-import { LoggingServices } from '../../services';
 import { EmbedBuilder, Events, PermissionFlagsBits } from 'discord.js';
 import {
   Lang,

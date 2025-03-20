@@ -150,9 +150,9 @@ const populatedGuild = Prisma.validator<Prisma.GuildDefaultArgs>()({
     id: true,
 
     // Permissions and audit
-    adminRoleId: true,
-    adminLogChannelId: true,
-    modRoleId: true,
+    adminRoleIds: true,
+    auditLogChannelId: true,
+    modRoleIds: true,
     modLogChannelId: true,
 
     // Moderation

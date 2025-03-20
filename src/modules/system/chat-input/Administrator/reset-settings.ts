@@ -34,10 +34,14 @@ const ResetSettingsCommand = new ChatInputCommand({
       await Database.Guild.update({
         where: { id: guildId },
         data: {
-          adminLogChannelId: null,
+          auditLogChannelId: null,
           modLogChannelId: null,
-          adminRoleId: null,
-          modRoleId: null,
+          adminRoleIds: {
+            set: [],
+          },
+          modRoleIds: {
+            set: [],
+          },
           autoRoleIds: {
             set: [],
           },

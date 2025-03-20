@@ -1,4 +1,4 @@
-import type { Guild, Prisma, User } from '@prisma/client';
+import type { Guild, Prisma } from '@prisma/client';
 import type { Client } from '../../client';
 import { ObjectUtils, PermissionUtils, TimeUtils } from '../../utils';
 import { Model } from '../models';
@@ -14,6 +14,8 @@ enum AuditLogType {
   ADMIN_ROLE_REMOVED = 'ADMIN_ROLE_REMOVED',
   MEMBER_JOIN_CHANNEL_DISABLED = 'MEMBER_JOIN_CHANNEL_DISABLED',
   MEMBER_JOIN_CHANNEL_CHANGED = 'MEMBER_JOIN_CHANNEL_CHANGED',
+  GUILD_SETTINGS_UPDATE = 'GUILD_SETTINGS_UPDATE',
+  GUILD_SETTINGS_RESET = 'GUILD_SETTINGS_RESET',
 }
 
 type AuditLogOptions = {
@@ -28,7 +30,7 @@ type AuditLogOptions = {
   /**
    * The user who initiated the operation.
    */
-  readonly user: User;
+  readonly user: string;
   /**
    * The date the operation was performed, defaults to "now".
    */
@@ -121,26 +123,26 @@ class AuditLogWrapper extends DatabaseWrapper<Model.AuditLog> {
           }),
         ],
       });
-    }
-
-    await this.discordLog(client, guild, {
-      embeds: [
-        client.embeds.info({
-          title: 'Audit Logging',
-          fields: [
-            ...sharedFields,
-            {
-              name: 'Action/Operation Data',
-              value: log.data?.toString() ?? 'No data was attached.',
-              inline: false,
+    } else {
+      await this.discordLog(client, guild, {
+        embeds: [
+          client.embeds.info({
+            title: 'Audit Logging',
+            fields: [
+              ...sharedFields,
+              {
+                name: 'Action/Operation Data',
+                value: log.data?.toString() ?? 'No data was attached.',
+                inline: false,
+              },
+            ],
+            footer: {
+              text: `Audit Id: ${log.id}`,
             },
-          ],
-          footer: {
-            text: `Audit Id: ${log.id}`,
-          },
-        }),
-      ],
-    });
+          }),
+        ],
+      });
+    }
   };
 
   private readonly discordLog = async (
@@ -148,11 +150,11 @@ class AuditLogWrapper extends DatabaseWrapper<Model.AuditLog> {
     guild: Guild,
     message: string | MessagePayload | MessageCreateOptions | EmbedBuilder,
   ) => {
-    if (!guild.adminLogChannelId) return;
+    if (!guild.auditLogChannelId) return;
 
     const adminLogChannel = client.guilds.cache
       .get(guild.id)
-      ?.channels.cache.get(guild.adminLogChannelId);
+      ?.channels.cache.get(guild.auditLogChannelId);
 
     if (!adminLogChannel || !adminLogChannel.isTextBased()) return;
 
@@ -182,7 +184,7 @@ class AuditLogWrapper extends DatabaseWrapper<Model.AuditLog> {
       data: data === null ? JSON.stringify(null) : data,
       date,
       GuildId: guild?.id,
-      UserId: user.id,
+      UserId: user,
     }).then((record) => {
       void this.onCreate(options.client, record);
 

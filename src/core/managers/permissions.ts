@@ -14,15 +14,15 @@ export const permConfig: ClientPermissionLevel[] = [
     hasLevel: async (_config, member) => {
       const guildSettings = await Database.Guild.resolve(member.guild.id);
       if (!guildSettings) return false;
-      if (!guildSettings.modRoleId) {
+      if (!guildSettings.modRoleIds.length) {
         return (
           member.permissions.has(PermissionFlagsBits.KickMembers) &&
           member.permissions.has(PermissionFlagsBits.BanMembers) &&
           member.permissions.has(PermissionFlagsBits.ManageMessages)
         );
       }
-      return member.roles.cache.some(
-        (role) => guildSettings.modRoleId === role.id,
+      return member.roles.cache.some((role) =>
+        guildSettings.modRoleIds.includes(role.id),
       );
     },
   },
@@ -33,11 +33,11 @@ export const permConfig: ClientPermissionLevel[] = [
     hasLevel: async (_config, member) => {
       const guildSettings = await Database.Guild.resolve(member.guild.id);
       if (!guildSettings) return false;
-      if (!guildSettings.adminRoleId) {
+      if (!guildSettings.adminRoleIds) {
         return member.permissions.has(PermissionFlagsBits.Administrator);
       }
-      return member.roles.cache.some(
-        (role) => guildSettings.adminRoleId === role.id,
+      return member.roles.cache.some((role) =>
+        guildSettings.adminRoleIds.includes(role.id),
       );
     },
   },

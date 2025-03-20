@@ -18,12 +18,19 @@ import {
   ButtonInteraction,
   ModalSubmitInteraction,
   Guild,
+  ChannelSelectMenuBuilder,
+  RoleSelectMenuBuilder,
+  ChannelSelectMenuInteraction,
+  RoleSelectMenuInteraction,
+  APIEmbedField,
 } from 'discord.js';
 import { UnitConstants } from '../constants';
 import { AvailableGuildInteraction } from '../commands';
 import { ArrayUtils, StringUtils } from './common';
 
 type PromptInteraction = AvailableGuildInteraction<
+  | ChannelSelectMenuInteraction<CacheType>
+  | RoleSelectMenuInteraction<CacheType>
   | StringSelectMenuInteraction<CacheType>
   | ButtonInteraction<CacheType>
   | ModalSubmitInteraction<CacheType>
@@ -31,6 +38,50 @@ type PromptInteraction = AvailableGuildInteraction<
 
 type GenericInteractionOptions = InteractionReplyOptions &
   InteractionEditReplyOptions;
+
+type PromptDeferOptions = {
+  /** Should we defer the update to the interaction? Has priority over `deferReply`. */
+  deferUpdate?: boolean;
+  /** Should we defer the reply to the interaction? */
+  deferReply?: boolean;
+};
+
+type PromptInteractionOptions<
+  P extends Prompt,
+  ResolveResources extends boolean,
+> = {
+  resolveResources?: ResolveResources;
+  contextTransformer?: (
+    prompt: ResolvedPrompt<P>,
+    arr: ResolvedPrompt<P>[],
+    ind: number,
+    collected: string[] | null,
+    errorFeedbackFields: APIEmbedField[],
+  ) => GenericInteractionOptions;
+};
+
+type HandlePromptInteractionOptions<
+  P extends Prompt,
+  ResolveResources extends boolean,
+> = PromptInteractionOptions<P, ResolveResources> & {
+  onPromptError?: (
+    error: Error,
+    interaction: PromptInteraction,
+    prompt: ResolvedPrompt<P>,
+  ) => void;
+  onFinish?: (
+    promptValues: Record<
+      string,
+      ValueForPrompt<ResolvedPrompt<P>, ResolveResources>
+    >,
+    interaction: PromptInteraction,
+  ) => void;
+};
+
+type PromptsResponse<
+  P extends Prompt,
+  ResolveResources extends boolean,
+> = Record<string, ValueForPrompt<ResolvedPrompt<P>, ResolveResources>>;
 
 type PromptType = 'string' | 'number' | 'boolean' | 'channel' | 'role';
 
@@ -40,7 +91,7 @@ type PromptBase = {
   id: string;
   type: PromptType;
   name: string;
-  message: string;
+  message?: string;
   required: boolean;
 };
 
@@ -103,6 +154,12 @@ type Prompt =
   | PromptWithMultipleChoices
   | PromptWithDefaultValue;
 
+type AnyPromptValue = string | number | boolean | string[] | number[] | null;
+
+type ResolvedPrompt<P extends Prompt> = Omit<P, 'message'> & {
+  message: string;
+};
+
 type MappedPrompt<
   Type extends PromptType,
   Required extends boolean,
@@ -116,7 +173,18 @@ type MappedPrompt<
   choices?: PromptChoice<
     PromptValue<Required, Type, false, ResolveResources, CType>
   >[];
-  defaultValue?: PromptValue<Required, Type, Multiple, ResolveResources, CType>;
+  defaultValue?:
+    | PromptValue<Required, Type, Multiple, ResolveResources, CType>
+    | ((
+        guild: Guild,
+      ) =>
+        | PromptValue<Required, Type, Multiple, ResolveResources, CType>
+        | Promise<
+            PromptValue<Required, Type, Multiple, ResolveResources, CType>
+          >);
+  onCollect?: (
+    value: PromptValue<Required, Type, Multiple, ResolveResources, CType>,
+  ) => void;
 };
 
 type MappedPrompts<
@@ -254,14 +322,97 @@ class PromptUtils {
   public static readonly isPromptWithDefaultValue = (
     prompt: Prompt,
   ): prompt is Prompt & {
-    defaultValue: string | number | boolean | string[] | number[] | null;
+    defaultValue: AnyPromptValue;
   } => {
     return (
       'defaultValue' in prompt && typeof prompt.defaultValue !== 'undefined'
     );
   };
 
-  public static readonly validatePrompt = (prompt: Prompt): void => {
+  public static readonly defaultMessage = (
+    prompt: Prompt,
+    short = PromptUtils.isPromptWithChoices(prompt),
+  ): string => {
+    let base = `Please ${
+      PromptUtils.isPromptWithChoices(prompt)
+        ? 'make a selection'
+        : 'provide a value'
+    } **(${prompt.required ? 'Required' : 'Optional'})**.`;
+
+    if (short) return base;
+
+    if (
+      PromptUtils.isPromptWithMinMax(prompt) &&
+      !PromptUtils.isPromptWithChoices(prompt)
+    ) {
+      const minLength = PromptUtils.resolveMinLength(prompt);
+      const maxLength = PromptUtils.resolveMaxLength(prompt);
+      const minValue = PromptUtils.resolveMinValue(prompt);
+      const maxValue = PromptUtils.resolveMaxValue(prompt);
+
+      if (minLength !== null && maxLength !== null) {
+        base += `\n- Length must be between **${minLength}** and **${maxLength}** characters.`;
+      } else {
+        if (minLength !== null) {
+          base += `\n- Minimum length: **${minLength}**.`;
+        }
+
+        if (maxLength !== null) {
+          base += `\n- Maximum length: **${maxLength}**.`;
+        }
+      }
+
+      if (prompt.type === 'number') {
+        if (minValue !== null && maxValue !== null) {
+          base += `\n- Value must be between **${minValue}** and **${maxValue}**.`;
+        } else {
+          if (minValue !== null) {
+            base += `\n- Minimum value: **${minValue}**.`;
+          }
+
+          if (maxValue !== null) {
+            base += `\n- Maximum value: **${maxValue}**.`;
+          }
+        }
+      }
+    }
+
+    if (PromptUtils.isPromptWithMultiple(prompt)) {
+      if (
+        typeof prompt.minValues !== 'undefined' &&
+        typeof prompt.maxValues !== 'undefined'
+      ) {
+        base += `\n- Select between **${prompt.minValues}** and **${prompt.maxValues}** values.`;
+      } else {
+        if (typeof prompt.minValues !== 'undefined') {
+          base += `\n- Select at least **${prompt.minValues}** value${
+            prompt.minValues === 1 ? '' : 's'
+          }.`;
+        }
+
+        if (typeof prompt.maxValues !== 'undefined') {
+          base += `\n- Select at most **${prompt.maxValues}** value${
+            prompt.maxValues === 1 ? '' : 's'
+          }.`;
+        }
+      }
+    }
+
+    return base;
+  };
+
+  public static readonly resolvePrompt = <P extends Prompt>(
+    prompt: P,
+  ): ResolvedPrompt<P> => {
+    return {
+      ...prompt,
+      message: prompt.message ?? this.defaultMessage(prompt),
+    };
+  };
+
+  public static readonly validatePrompt = (
+    prompt: ResolvedPrompt<Prompt>,
+  ): void => {
     const stringifiedPrompt = JSON.stringify(prompt);
 
     if (prompt.id.length > 75) {
@@ -292,26 +443,50 @@ class PromptUtils {
 
       if (
         PromptUtils.isPromptWithDefaultValue(prompt) &&
-        prompt.defaultValue !== null
+        prompt.defaultValue !== null &&
+        typeof prompt.defaultValue !== 'function'
       ) {
-        if (
-          !Array.isArray(prompt.defaultValue) &&
-          prompt.defaultValue.toString().length < minLength
-        ) {
-          throw new Error(
-            `[INVALID_PROMPT] Default value must be at least the minimum length: ${stringifiedPrompt}.`,
-          );
+        const validateSnowflake = (value: string) =>
+          /^\d{17,19}$/.test(value.toString());
+
+        if (!Array.isArray(prompt.defaultValue)) {
+          if (prompt.type === 'role' || prompt.type === 'channel') {
+            if (!validateSnowflake(prompt.defaultValue.toString())) {
+              throw new Error(
+                `[INVALID_PROMPT] Default value must be a valid snowflake: ${stringifiedPrompt}.`,
+              );
+            }
+          }
+
+          if (prompt.defaultValue.toString().length < minLength) {
+            throw new Error(
+              `[INVALID_PROMPT] Default value must be at least the minimum length: ${stringifiedPrompt}.`,
+            );
+          }
         }
 
-        if (
-          Array.isArray(prompt.defaultValue) &&
-          prompt.defaultValue.some(
-            (value) => value.toString().length < minLength,
-          )
-        ) {
-          throw new Error(
-            `[INVALID_PROMPT] Default values must be at least the minimum length: ${stringifiedPrompt}.`,
-          );
+        if (Array.isArray(prompt.defaultValue)) {
+          if (prompt.type === 'role' || prompt.type === 'channel') {
+            if (
+              prompt.defaultValue.some(
+                (value) => !validateSnowflake(value.toString()),
+              )
+            ) {
+              throw new Error(
+                `[INVALID_PROMPT] Default values must be valid snowflakes: ${stringifiedPrompt}.`,
+              );
+            }
+
+            if (
+              prompt.defaultValue.some(
+                (value) => value.toString().length < minLength,
+              )
+            ) {
+              throw new Error(
+                `[INVALID_PROMPT] Default values must be at least the minimum length: ${stringifiedPrompt}.`,
+              );
+            }
+          }
         }
       }
     }
@@ -332,10 +507,12 @@ class PromptUtils {
 
       if (
         PromptUtils.isPromptWithDefaultValue(prompt) &&
-        prompt.defaultValue !== null
+        prompt.defaultValue !== null &&
+        typeof prompt.defaultValue !== 'function'
       ) {
         if (
           !Array.isArray(prompt.defaultValue) &&
+          typeof prompt.defaultValue !== 'function' &&
           prompt.defaultValue.toString().length > maxLength
         ) {
           throw new Error(
@@ -395,12 +572,12 @@ class PromptUtils {
         : null;
 
       if (
-        (typeof defaultValue === 'string' || Array.isArray(defaultValue)) &&
+        (typeof defaultValue === 'string' ||
+          typeof defaultValue === 'number' ||
+          Array.isArray(defaultValue)) &&
         !prompt.choices.some((choice) =>
           Array.isArray(defaultValue)
-            ? defaultValue
-                .map((e) => e.toString())
-                .includes(choice.value.toString())
+            ? defaultValue.map((e) => e).includes(choice.value)
             : choice.value === defaultValue,
         )
       ) {
@@ -448,10 +625,10 @@ class PromptUtils {
       for (const choice of prompt.choices) {
         if (
           typeof choice.name !== 'string' ||
-          typeof choice.value !== 'string'
+          (typeof choice.value !== 'string' && typeof choice.value !== 'number')
         ) {
           throw new Error(
-            `[INVALID_PROMPT] Choices must have a name and value: ${stringifiedPrompt}.`,
+            `[INVALID_PROMPT] Choices must have a name and string/number value: ${stringifiedPrompt}.`,
           );
         }
 
@@ -461,7 +638,7 @@ class PromptUtils {
           );
         }
 
-        if (choice.value.length > 100) {
+        if (choice.value.toString().length > 100) {
           throw new Error(
             `[INVALID_PROMPT] Choice values must be 100 characters or less: ${stringifiedPrompt}.`,
           );
@@ -481,7 +658,7 @@ class PromptUtils {
       );
     }
 
-    prompts.forEach(PromptUtils.validatePrompt);
+    return prompts.map(this.resolvePrompt).forEach(this.validatePrompt);
   };
 
   public static readonly resolveMinLength = (prompt: Prompt): number | null => {
@@ -522,13 +699,41 @@ class PromptUtils {
           : null;
   };
 
+  public static readonly resolveMinValue = (prompt: Prompt): number | null => {
+    return PromptUtils.isPromptWithChoices(prompt)
+      ? prompt.choices.reduce(
+          (acc, choice) =>
+            acc === null
+              ? Number(choice.value)
+              : Math.min(acc, Number(choice.value)),
+          null as number | null,
+        )
+      : 'minValue' in prompt && typeof prompt.minValue === 'number'
+        ? prompt.minValue
+        : null;
+  };
+
+  public static readonly resolveMaxValue = (prompt: Prompt): number | null => {
+    return PromptUtils.isPromptWithChoices(prompt)
+      ? prompt.choices.reduce(
+          (acc, choice) =>
+            acc === null
+              ? Number(choice.value)
+              : Math.max(acc, Number(choice.value)),
+          null as number | null,
+        )
+      : 'maxValue' in prompt && typeof prompt.maxValue === 'number'
+        ? prompt.maxValue
+        : null;
+  };
+
   public static validateConstraints = <
     P extends Prompt,
-    PV extends ValueForPrompt<P, false>,
+    ResolveResources extends boolean,
   >(
-    prompt: P,
-    transformedValue: PV,
-  ): PV => {
+    prompt: ResolvedPrompt<P>,
+    transformedValue: ValueForPrompt<ResolvedPrompt<P>, ResolveResources>,
+  ): ValueForPrompt<ResolvedPrompt<P>, ResolveResources> => {
     const safeArr = Array.isArray(transformedValue)
       ? transformedValue
       : [transformedValue];
@@ -581,45 +786,61 @@ class PromptUtils {
 
     const isChannel = prompt.type === 'channel';
     const isRole = prompt.type === 'role';
+    const minValue = this.resolveMinValue(prompt);
+    const maxValue = this.resolveMaxValue(prompt);
     const minLength = this.resolveMinLength(prompt);
     const maxLength = this.resolveMaxLength(prompt);
 
     // Handle min/max values (number, string, channel, role)
-    if (PromptUtils.isPromptWithMinMax(prompt) || isChannel || isRole) {
+    if (
+      PromptUtils.isPromptWithMinMax(prompt) ||
+      isChannel ||
+      isRole ||
+      minValue !== null ||
+      maxValue !== null
+    ) {
       for (const value of safeArr) {
+        const valueStr =
+          typeof value === 'object' &&
+          value !== null &&
+          'id' in value &&
+          typeof value.id === 'string'
+            ? value.id
+            : value.toString();
+
         // Handle number minValue, maxValue
         if (prompt.type === 'number' && ArrayUtils.isNumberArray(safeArr)) {
-          if ('minValue' in prompt && typeof prompt.minValue === 'number') {
-            if (prompt.minValue > value) {
+          if (minValue !== null) {
+            if (minValue > value) {
               throw new Error(
-                `A minimum value of ${prompt.minValue} is required, you provided ${value}.`,
+                `A minimum value of ${minValue} is required, you provided ${value}.`,
               );
             }
           }
-          if ('maxValue' in prompt && typeof prompt.maxValue === 'number') {
-            if (prompt.maxValue < value) {
+          if (maxValue !== null) {
+            if (maxValue < value) {
               throw new Error(
-                `A maximum value of ${prompt.maxValue} is required, you provided ${value}.`,
+                `A maximum value of ${maxValue} is required, you provided ${value}.`,
               );
             }
           }
         }
         // Handle minLength and maxLength (number, string, channel, role)
         if (minLength !== null) {
-          if (minLength > value.toString().length) {
+          if (minLength > valueStr.length) {
             throw new Error(
               `A value with at least ${minLength} character${
                 minLength === 1 ? '' : 's'
-              } is required, ${value} has ${value.toString().length}.`,
+              } is required, ${value} has ${valueStr.length}.`,
             );
           }
         }
         if (maxLength !== null) {
-          if (maxLength < value.toString().length) {
+          if (maxLength < valueStr.length) {
             throw new Error(
               `A value with at most ${maxLength} character${
                 maxLength === 1 ? '' : 's'
-              } is required, ${value} has ${value.toString().length}.`,
+              } is required, ${value} has ${valueStr.length}.`,
             );
           }
         }
@@ -631,66 +852,134 @@ class PromptUtils {
 
   public static readonly promptInteraction = async <
     P extends Prompt,
+    ResolveResources extends boolean,
     I extends RepliableInteraction | ModalSubmitInteraction,
   >(
     interaction: AvailableGuildInteraction<I>,
-    prompt: P,
-    prompts: P[],
+    prompt: ResolvedPrompt<P>,
+    prompts: ResolvedPrompt<P>[],
     {
       contextTransformer,
       deferUpdate,
       deferReply,
-    }: {
-      contextTransformer?: (
-        prompt: P,
-        arr: P[],
-        ind: number,
-        collected: string[] | null,
-      ) => GenericInteractionOptions;
-    } & {
-      /** Should we defer the update to the interaction? Has priority over `deferReply`. */
-      deferUpdate?: boolean;
-      /** Should we defer the reply to the interaction? */
-      deferReply?: boolean;
-    },
+    }: PromptDeferOptions & PromptInteractionOptions<P, ResolveResources> = {},
   ) => {
-    const collect = async (collected: string[]) => {
+    const collect = async (
+      collected: string[],
+      errorFeedbackFields?: APIEmbedField[],
+    ) => {
       const promptOptions: GenericInteractionOptions = contextTransformer?.(
         prompt,
         prompts,
-        prompts.indexOf(prompt),
+        prompts.indexOf(prompts.find((p) => p.id === prompt.id) ?? prompt),
         collected.length === 0 ? null : collected,
+        errorFeedbackFields ?? [],
       ) ?? {
         content: prompt.message,
+        embeds: errorFeedbackFields ? [{ fields: errorFeedbackFields }] : [],
       };
 
+      let hasSkipButton = false;
       let componentType: ComponentType = ComponentType.StringSelect;
 
-      // Select Menus
-      if (PromptUtils.isPromptWithChoices(prompt)) {
-        componentType = ComponentType.StringSelect;
+      const minValues = !PromptUtils.isPromptWithMultiple(prompt)
+        ? 1
+        : PromptUtils.isPromptWithChoices(prompt)
+          ? 'minValues' in prompt && typeof prompt.minValues === 'number'
+            ? prompt.minValues
+            : prompt.required
+              ? 1
+              : 0
+          : 1;
+      const maxValues = !PromptUtils.isPromptWithMultiple(prompt)
+        ? 1
+        : 'maxValues' in prompt && typeof prompt.maxValues === 'number'
+          ? prompt.maxValues
+          : PromptUtils.isPromptWithChoices(prompt)
+            ? prompt.choices.length
+            : null;
+      const defaultValues = collected.length
+        ? collected.map((c) => c.toString())
+        : PromptUtils.isPromptWithDefaultValue(prompt) &&
+            prompt.defaultValue !== null
+          ? Array.isArray(prompt.defaultValue)
+            ? prompt.defaultValue.map((e) => e.toString())
+            : [prompt.defaultValue.toString()]
+          : [];
+      const safeDefaultValues =
+        maxValues !== null && defaultValues.length > maxValues
+          ? defaultValues.slice(0, maxValues)
+          : defaultValues;
 
-        const stringSelect = new StringSelectMenuBuilder()
-          .setCustomId(`@${prompt.id}`)
-          .setDisabled(false)
-          .setPlaceholder(
-            PromptUtils.isPromptWithMultiple(prompt)
-              ? `Select between ${(prompt.minValues ?? prompt.required) ? 1 : 0} and ${
-                  prompt.maxValues ?? prompt.choices.length
-                } options...`
-              : 'Select an option...',
-          )
-          .setMinValues(
-            PromptUtils.isPromptWithMultiple(prompt)
-              ? (prompt.minValues ?? (prompt.required ? 1 : 0))
-              : 1,
-          )
-          .setMaxValues(
-            PromptUtils.isPromptWithMultiple(prompt)
-              ? (prompt.maxValues ?? prompt.choices.length)
-              : 1,
-          )
-          .addOptions(
+      // Select Menus
+      if (
+        PromptUtils.isPromptWithChoices(prompt) ||
+        prompt.type === 'channel' ||
+        prompt.type === 'role'
+      ) {
+        let selectMenu:
+          | StringSelectMenuBuilder
+          | ChannelSelectMenuBuilder
+          | RoleSelectMenuBuilder;
+
+        if (prompt.type === 'channel') {
+          componentType = ComponentType.ChannelSelect;
+          selectMenu = new ChannelSelectMenuBuilder()
+            .setCustomId(`@${prompt.id}`)
+            .setDisabled(false);
+        } else if (prompt.type === 'role') {
+          componentType = ComponentType.RoleSelect;
+          selectMenu = new RoleSelectMenuBuilder()
+            .setCustomId(`@${prompt.id}`)
+            .setDisabled(false);
+        } /* isPromptWithChoices */ else {
+          componentType = ComponentType.StringSelect;
+          selectMenu = new StringSelectMenuBuilder()
+            .setCustomId(`@${prompt.id}`)
+            .setDisabled(false);
+        }
+
+        const resource =
+          prompt.type === 'channel'
+            ? 'channel'
+            : prompt.type === 'role'
+              ? 'role'
+              : 'option';
+
+        const placeholderBase = PromptUtils.isPromptWithMultiple(prompt)
+          ? maxValues !== null
+            ? `Select between ${minValues} and ${maxValues} ${StringUtils.pluralize(resource, maxValues)}...`
+            : `Select at least ${StringUtils.pluralize(resource, minValues)}...`
+          : `Select a ${prompt.type}...`;
+
+        selectMenu.setPlaceholder(placeholderBase);
+        selectMenu.setMinValues(minValues);
+
+        console.log({
+          placeholderBase,
+          minValues,
+          maxValues,
+          safeDefaultValues,
+        });
+
+        if (maxValues !== null) {
+          selectMenu.setMaxValues(maxValues);
+        }
+
+        if (safeDefaultValues.length >= 1) {
+          if ('setDefaultChannels' in selectMenu) {
+            selectMenu.setDefaultChannels(safeDefaultValues);
+          }
+          if ('setDefaultRoles' in selectMenu) {
+            selectMenu.setDefaultRoles(safeDefaultValues);
+          }
+        }
+
+        if (
+          PromptUtils.isPromptWithChoices(prompt) &&
+          'addOptions' in selectMenu
+        ) {
+          selectMenu.addOptions(
             prompt.choices.map((choice) => ({
               label: choice.name,
               value: choice.value.toString(),
@@ -703,12 +992,46 @@ class PromptUtils {
                 : false,
             })),
           );
+        }
 
-        promptOptions.components = [
-          new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
-            stringSelect,
-          ),
+        if (
+          PromptUtils.isPromptWithChannelTypes(prompt) &&
+          'setChannelTypes' in selectMenu
+        ) {
+          selectMenu.setChannelTypes(prompt.channelTypes);
+        }
+
+        const components: ActionRowBuilder<
+          | StringSelectMenuBuilder
+          | ChannelSelectMenuBuilder
+          | RoleSelectMenuBuilder
+          | ButtonBuilder
+        >[] = [
+          new ActionRowBuilder<
+            | StringSelectMenuBuilder
+            | ChannelSelectMenuBuilder
+            | RoleSelectMenuBuilder
+          >().addComponents(selectMenu),
         ];
+
+        hasSkipButton = PromptUtils.isPromptWithMultiple(prompt)
+          ? (collected.length ? collected.length : safeDefaultValues.length) >=
+            minValues
+          : !prompt.required || safeDefaultValues.length > 0;
+
+        if (hasSkipButton) {
+          components.push(
+            new ActionRowBuilder<ButtonBuilder>().addComponents(
+              new ButtonBuilder()
+                .setCustomId(`@${prompt.id}-skip`)
+                .setLabel('Skip')
+                .setStyle(ButtonStyle.Secondary)
+                .setEmoji('⏭️'),
+            ),
+          );
+        }
+
+        promptOptions.components = components;
       }
       // Buttons to collect information via modal
       else {
@@ -763,17 +1086,27 @@ class PromptUtils {
       const msg = await replyFn(promptOptions);
 
       let response:
+        | ChannelSelectMenuInteraction<CacheType>
+        | RoleSelectMenuInteraction<CacheType>
         | StringSelectMenuInteraction<CacheType>
         | ButtonInteraction<CacheType>
-        | ModalSubmitInteraction<CacheType> = await msg.awaitMessageComponent({
-        componentType,
-        time: UnitConstants.MS_IN_ONE_MINUTE * 14,
-        filter: (i) =>
-          i.customId === `@${prompt.id}` || // Select Menu
-          i.customId === `@${prompt.id}-add` || // Buttons
-          i.customId === `@${prompt.id}-submit-value` ||
-          i.customId === `@${prompt.id}-submit-values`,
-      });
+        | ModalSubmitInteraction<CacheType> = await Promise.race([
+        msg.awaitMessageComponent({
+          componentType,
+          time: UnitConstants.MS_IN_ONE_MINUTE * 14,
+          filter: (i) =>
+            i.customId === `@${prompt.id}` || // Select Menu
+            i.customId === `@${prompt.id}-add` || // Buttons
+            i.customId === `@${prompt.id}-submit-value` ||
+            i.customId === `@${prompt.id}-submit-values`,
+        }),
+        // Skip button for select menus
+        msg.awaitMessageComponent({
+          componentType: ComponentType.Button,
+          time: UnitConstants.MS_IN_ONE_MINUTE * 14,
+          filter: (i) => i.customId === `@${prompt.id}-skip`,
+        }),
+      ]);
 
       const customId = response.customId;
 
@@ -788,7 +1121,8 @@ class PromptUtils {
         ) {
           const input = new TextInputBuilder()
             .setCustomId(`@${prompt.id}-input`)
-            .setLabel(StringUtils.truncate(prompt.message, 45))
+            .setLabel(StringUtils.truncate(prompt.name, 45))
+            // [DEV] We need a proper tooltip if message missing, minLength, value, values, etc.
             .setPlaceholder(StringUtils.truncate(prompt.message, 100))
             .setRequired(prompt.required)
             .setStyle(TextInputStyle.Short);
@@ -834,47 +1168,130 @@ class PromptUtils {
       if (deferUpdate) await response.deferUpdate();
       else if (deferReply) await response.deferReply();
 
-      if (customId === `@${prompt.id}-add` && response.isModalSubmit()) {
-        collected.push(response.fields.getField(`@${prompt.id}-input`).value);
+      if (
+        (customId === `@${prompt.id}-add` ||
+          customId === `@${prompt.id}-submit-value`) &&
+        response.isModalSubmit()
+      ) {
+        const input = response.fields.getField(`@${prompt.id}-input`).value;
 
-        return collect(collected);
+        if (prompt.type === 'number') {
+          try {
+            PromptUtils.validateConstraints(
+              prompt,
+              (PromptUtils.isPromptWithMultiple(prompt)
+                ? [Number(input)]
+                : Number(input)) as ValueForPrompt<
+                ResolvedPrompt<P>,
+                ResolveResources
+              >,
+            );
+          } catch (error) {
+            return collect(collected, [
+              {
+                name: 'Invalid information provided, please try again.',
+                value:
+                  error instanceof Error ? error.message : 'Unknown error.',
+              },
+            ]);
+          }
+        }
+
+        if (customId === `@${prompt.id}-add`) {
+          collected.push(input);
+
+          return collect(collected);
+        }
+      }
+
+      if (customId === `@${prompt.id}-skip` && !collected.length) {
+        collected.push(
+          ...(PromptUtils.isPromptWithMultiple(prompt)
+            ? safeDefaultValues
+            : ([safeDefaultValues[0]] as string[])),
+        );
       }
 
       return response as AvailableGuildInteraction<typeof response>;
     };
 
-    const _collected: string[] =
-      !PromptUtils.isPromptWithChoices(prompt) &&
-      PromptUtils.isPromptWithMultiple(prompt) &&
-      PromptUtils.isPromptWithDefaultValue(prompt) &&
-      prompt.defaultValue
-        ? Array.isArray(prompt.defaultValue)
-          ? prompt.defaultValue.map((value) => value.toString())
-          : [prompt.defaultValue.toString()]
-        : [];
+    const _collected: string[] = [];
 
     return [
       await collect(_collected),
       _collected.length === 0
         ? null
-        : this.validateConstraints(prompt, [
-            ...new Set(_collected),
-          ] as ValueForPrompt<P, false>),
+        : (() => {
+            const resolvedCollected = [
+              ...new Set(_collected),
+            ] as unknown as ValueForPrompt<ResolvedPrompt<P>, ResolveResources>;
+
+            const og = this.validateConstraints<
+              ResolvedPrompt<P>,
+              ResolveResources
+            >(
+              prompt,
+              PromptUtils.isPromptWithMultiple(prompt)
+                ? resolvedCollected
+                : ((
+                    resolvedCollected as unknown as ValueForPrompt<
+                      ResolvedPrompt<P>,
+                      ResolveResources
+                    >[]
+                  )[0] as ValueForPrompt<ResolvedPrompt<P>, ResolveResources>),
+            );
+
+            if (prompt.type === 'number') {
+              return (og as unknown as string[]).map((value) =>
+                Number(value),
+              ) as unknown as ValueForPrompt<
+                ResolvedPrompt<P>,
+                ResolveResources
+              >;
+            }
+
+            return og;
+          })(),
     ] as const;
   };
 
-  public static readonly transformPromptValue = <P extends Prompt>(
+  public static readonly transformPromptValue = <
+    P extends Prompt,
+    ResolveResources extends boolean,
+  >(
     prompt: P,
+    resolveResources: ResolveResources,
     resolvedValue: string | string[] | null,
     guild: Guild,
-  ): ValueForPrompt<P, false> => {
+  ): ValueForPrompt<P, ResolveResources> => {
     const valueTransformer = <T>(
       value: string | string[] | null,
       transformer?: (value: string) => T,
       filter?: (transformedValue: T, ind: number, arr: T[]) => boolean,
-    ): ValueForPrompt<P, false> => {
-      const castValue = (value: string | string[] | null | T | T[]) =>
-        value as ValueForPrompt<P, false>;
+    ): ValueForPrompt<P, ResolveResources> => {
+      const isRole = prompt.type === 'role';
+      const isChannel = prompt.type === 'channel';
+
+      const castValue = (value: string | string[] | null | T | T[]) => {
+        const idResolver = (_value: string | string[] | null | T | T[]) =>
+          typeof _value === 'object' &&
+          _value !== null &&
+          'id' in _value &&
+          typeof _value.id === 'string'
+            ? _value.id
+            : `${_value}`;
+
+        // Cast resource objects back to string
+        if ((isRole || isChannel) && !resolveResources) {
+          if (Array.isArray(value)) {
+            return value.map(idResolver) as ValueForPrompt<P, ResolveResources>;
+          }
+
+          return idResolver(value) as ValueForPrompt<P, ResolveResources>;
+        }
+
+        return value as ValueForPrompt<P, ResolveResources>;
+      };
 
       if (value === null) {
         return castValue(null);
@@ -965,10 +1382,12 @@ class PromptUtils {
   public static readonly handlePromptCollector = async <
     P extends Prompt,
     I extends PromptInteraction,
+    ResolveResources extends boolean = false,
   >(
-    prompt: P,
+    prompt: ResolvedPrompt<P>,
     interaction: I,
-  ): Promise<ValueForPrompt<P, false>> => {
+    resolveResources?: ResolveResources,
+  ): Promise<ValueForPrompt<ResolvedPrompt<P>, ResolveResources>> => {
     const valuesArr = interaction.isAnySelectMenu()
       ? interaction.values
       : interaction.isModalSubmit()
@@ -985,6 +1404,7 @@ class PromptUtils {
 
     const transformed = PromptUtils.transformPromptValue(
       prompt,
+      resolveResources ?? false,
       resolvedValue,
       interaction.guild,
     );
@@ -995,42 +1415,62 @@ class PromptUtils {
       transformed,
     });
 
-    return PromptUtils.validateConstraints(prompt, transformed);
+    return PromptUtils.validateConstraints<ResolvedPrompt<P>, ResolveResources>(
+      prompt,
+      transformed,
+    );
   };
 
-  public static readonly handlePromptInteraction = async <P extends Prompt>(
+  public static readonly handlePromptInteraction = async <
+    P extends Prompt,
+    ResolveResources extends boolean = false,
+  >(
     interaction: AvailableGuildInteraction<RepliableInteraction>,
-    prompts: P[],
-    {
-      onPromptError,
-      contextTransformer,
-      onFinish,
-    }: {
-      onPromptError?: (
-        error: Error,
-        interaction: PromptInteraction,
-        prompt: P,
-      ) => void;
-      contextTransformer?: (
-        prompt: P,
-        arr: P[],
-        ind: number,
-        collected: string[] | null,
-      ) => GenericInteractionOptions;
-      onFinish?: (
-        promptValues: Record<string, ValueForPrompt<P, false>>,
-        interaction: PromptInteraction,
-      ) => void;
-    } = {},
-  ): Promise<Record<string, ValueForPrompt<P, false>>> => {
-    const promptValues: Record<string, ValueForPrompt<P, false>> = {};
+    prompts: (P & {
+      /**
+       * Value is of type `any` because {@link Prompt Prompt[]} is generic,
+       * use {@link MappedPrompt mapped prompts} to implement type-safe
+       * `onCollect` functions.
+       * @param value Generic value for the prompt.
+       * @returns Nothing, promises are awaited, but the return type is ignored.
+       */
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      onCollect?: (value: any) => void | Promise<void>;
+      defaultValue?:
+        | ValueForPrompt<ResolvedPrompt<P>, ResolveResources>
+        | ((
+            guild: Guild,
+          ) =>
+            | ValueForPrompt<ResolvedPrompt<P>, ResolveResources>
+            | Promise<ValueForPrompt<ResolvedPrompt<P>, ResolveResources>>);
+    })[],
+    options?: HandlePromptInteractionOptions<P, ResolveResources>,
+  ): Promise<PromptsResponse<P, ResolveResources>> => {
+    const { onPromptError, contextTransformer, onFinish, resolveResources } =
+      options ?? {};
 
-    for await (const prompt of prompts) {
-      const isLastPrompt = prompts.indexOf(prompt) === prompts.length - 1;
+    const resolvedPrompts = prompts.map(PromptUtils.resolvePrompt);
+    const promptValues: Record<
+      string,
+      ValueForPrompt<ResolvedPrompt<P>, ResolveResources>
+    > = {};
+
+    for await (const prompt of resolvedPrompts) {
+      const isLastPrompt =
+        resolvedPrompts.indexOf(
+          resolvedPrompts.find((p) => p.id === prompt.id) ?? prompt,
+        ) ===
+        resolvedPrompts.length - 1;
+      const defaultValue =
+        typeof prompt.defaultValue === 'function'
+          ? await prompt.defaultValue(interaction.guild)
+          : prompt.defaultValue;
+      const promptWithDefault = { ...prompt, defaultValue };
+
       const [i, collected] = await PromptUtils.promptInteraction(
         interaction,
-        prompt,
-        prompts,
+        promptWithDefault,
+        resolvedPrompts,
         {
           contextTransformer,
           deferUpdate: !isLastPrompt,
@@ -1038,21 +1478,31 @@ class PromptUtils {
         },
       );
 
+      console.log('collected', collected);
+
       try {
         promptValues[prompt.id] =
           collected === null
-            ? await PromptUtils.handlePromptCollector(prompt, i)
+            ? await PromptUtils.handlePromptCollector(
+                promptWithDefault,
+                i,
+                resolveResources,
+              )
             : collected;
       } catch (error) {
         if (onPromptError) {
           onPromptError(
             error instanceof Error ? error : new Error(`${error}`),
             i,
-            prompt,
+            promptWithDefault,
           );
         } else {
           throw error;
         }
+      }
+
+      if (prompt.onCollect) {
+        await prompt.onCollect(promptValues[prompt.id]);
       }
 
       if (isLastPrompt) {
@@ -1086,6 +1536,7 @@ class PromptUtils {
 
 export {
   PromptUtils,
+  type PromptInteraction,
   type PromptType,
   type PromptChoice,
   type PromptBase,
@@ -1095,6 +1546,7 @@ export {
   type PromptWithMultipleChoices,
   type PromptWithMinMax,
   type Prompt,
+  type ResolvedPrompt,
   type MappedPrompt,
   type MappedPrompts,
   type Prompts,
