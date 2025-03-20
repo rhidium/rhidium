@@ -1,15 +1,15 @@
 import { ChannelType, SlashCommandBuilder } from 'discord.js';
-import { GuildSettingsPrompts } from './types';
+import { SettingsPrompts } from './types';
 import {
   appConfig,
   ChatInputCommand,
   InteractionUtils,
-  Prompt,
+  Prompts,
   PromptUtils,
   StringUtils,
 } from '@core';
 
-export const guildSettingsPrompts: GuildSettingsPrompts = [
+export const settingsPrompts: SettingsPrompts = [
   {
     id: 'admin-role-id',
     type: 'role',
@@ -106,14 +106,39 @@ export const guildSettingsPrompts: GuildSettingsPrompts = [
 // [DEV] Click outside of modal before submit = BREAKS
 // [DEV] Skip button, Cancel options, etc.
 
-const testPrompts: Prompt[] = [
+const testPrompts: Prompts = [
+  {
+    type: 'number',
+    id: 'number-required-single-choices',
+    name: 'Single Required Number',
+    message: 'Test',
+    multiple: false,
+    required: true,
+    defaultValue: 8,
+    // minValue: 3,
+    // maxValue: 13,
+    choices: [
+      { name: 'Test 1', value: 1 },
+      { name: 'Test 2', value: 2 },
+      { name: 'Test 3', value: 3 },
+    ],
+  },
+  {
+    type: 'role',
+    id: 'role-required-single',
+    name: 'Single Required Role',
+    message: 'Test',
+    multiple: false,
+    required: true,
+    defaultValue: 'Administrator',
+  },
   {
     type: 'string',
     id: 'string-required-single',
     name: 'Single Required String',
     message: 'Test',
-    required: true,
     multiple: false,
+    required: true,
     defaultValue: 'Default Value',
     minLength: 3,
     maxLength: 13,
@@ -138,6 +163,7 @@ const testPrompts: Prompt[] = [
     message: 'Test',
     required: true,
     multiple: true,
+    defaultValue: ['test3'],
     minValues: 1,
     maxValues: 2,
     choices: [

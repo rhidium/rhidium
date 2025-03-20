@@ -34,7 +34,7 @@ type GenericInteractionOptions = InteractionReplyOptions &
 
 type PromptType = 'string' | 'number' | 'boolean' | 'channel' | 'role';
 
-type PromptChoice = { name: string; value: string };
+type PromptChoice<Value = string> = { name: string; value: Value };
 
 type PromptBase = {
   id: string;
@@ -42,7 +42,6 @@ type PromptBase = {
   name: string;
   message: string;
   required: boolean;
-  multiple?: boolean;
 };
 
 type PromptWithChoices = PromptBase & {
@@ -57,22 +56,20 @@ type PromptWithChannelTypes = PromptBase & {
 
 type PromptWithMultiple = PromptBase & {
   multiple: true;
-  minValues: number | null;
-  maxValues: number | null;
-  // choices?: PromptChoice[];
+  minValues?: number;
+  maxValues?: number;
 };
 
 type PromptWithMultipleChoices = PromptBase & {
   type: 'string' | 'number' | 'channel' | 'role';
   multiple: true;
-  minValues: number | null;
-  maxValues: number | null;
+  minValues?: number;
+  maxValues?: number;
   choices: PromptChoice[];
 };
 
 type PromptWithDefaultValue = PromptBase & {
   type: 'string' | 'number' | 'boolean';
-  defaultValue: string | string[] | null;
 };
 
 /**
@@ -106,8 +103,40 @@ type Prompt =
   | PromptWithMultipleChoices
   | PromptWithDefaultValue;
 
+type MappedPrompt<
+  Type extends PromptType,
+  Required extends boolean,
+  Multiple extends boolean,
+  ResolveResources extends boolean = false,
+  CType extends ChannelType = ChannelType,
+> = Prompt & {
+  type: Type;
+  required: Required;
+  multiple: Multiple;
+  choices?: PromptChoice<
+    PromptValue<Required, Type, false, ResolveResources, CType>
+  >[];
+  defaultValue?: PromptValue<Required, Type, Multiple, ResolveResources, CType>;
+};
+
+type MappedPrompts<
+  ResolveResources extends boolean = false,
+  CType extends ChannelType = ChannelType,
+> = {
+  [T in PromptType]:
+    | MappedPrompt<T, true, true, ResolveResources, CType>
+    | MappedPrompt<T, true, false, ResolveResources, CType>
+    | MappedPrompt<T, false, true, ResolveResources, CType>
+    | MappedPrompt<T, false, false, ResolveResources, CType>;
+};
+
+type Prompts = {
+  [K in keyof MappedPrompts]: MappedPrompts[K];
+}[keyof MappedPrompts][];
+
 type SinglePromptValue<
   Type extends PromptType,
+  ResolveResources extends boolean = false,
   CType extends ChannelType = ChannelType,
 > = Type extends 'string'
   ? string
@@ -116,44 +145,62 @@ type SinglePromptValue<
     : Type extends 'boolean'
       ? boolean
       : Type extends 'channel'
-        ? Extract<
-            NonNullable<CommandInteractionOption<CacheType>['channel']>,
-            {
-              type: CType extends
-                | ChannelType.PublicThread
-                | ChannelType.AnnouncementThread
-                ? ChannelType.PublicThread | ChannelType.AnnouncementThread
-                : CType;
-            }
-          >
+        ? ResolveResources extends true
+          ? Extract<
+              NonNullable<CommandInteractionOption<CacheType>['channel']>,
+              {
+                type: CType extends
+                  | ChannelType.PublicThread
+                  | ChannelType.AnnouncementThread
+                  ? ChannelType.PublicThread | ChannelType.AnnouncementThread
+                  : CType;
+              }
+            >
+          : string
         : Type extends 'role'
-          ? Role
+          ? ResolveResources extends true
+            ? Role
+            : string
           : never;
 
 type PromptValueResolver<
   Type extends PromptType,
-  Multiple extends boolean = false,
+  Multiple extends boolean,
+  ResolveResources extends boolean = false,
   CType extends ChannelType = ChannelType,
 > = Multiple extends true
-  ? SinglePromptValue<Type, CType>[]
-  : SinglePromptValue<Type, CType>;
+  ? SinglePromptValue<Type, ResolveResources, CType>[]
+  : SinglePromptValue<Type, ResolveResources, CType>;
 
 type PromptValue<
   Required extends boolean,
   Type extends PromptType,
-  Multiple extends boolean = false,
+  Multiple extends boolean,
+  ResolveResources extends boolean = false,
   CType extends ChannelType = ChannelType,
 > = Required extends true
-  ? PromptValueResolver<Type, Multiple, CType>
-  : PromptValueResolver<Type, Multiple, CType> | null;
+  ? PromptValueResolver<Type, Multiple, ResolveResources, CType>
+  : PromptValueResolver<Type, Multiple, ResolveResources, CType> | null;
 
-type ValueForPrompt<P extends Prompt> = P extends {
+type ValueForPrompt<
+  P extends Prompt,
+  ResolveResources extends boolean = false,
+> = P extends {
   required: infer R;
   type: infer T extends PromptType;
   multiple?: infer M;
 }
-  ? PromptValue<R extends true ? true : false, T, M extends true ? true : false>
+  ? PromptValue<
+      R extends true ? true : false,
+      T,
+      M extends true ? true : false,
+      ResolveResources
+    >
   : never;
+
+type PromptWithUnknownChoices = Omit<PromptWithChoices, 'choices'> & {
+  choices: PromptChoice<string | number>[];
+};
 
 class PromptUtils {
   private constructor() {}
@@ -165,13 +212,15 @@ class PromptUtils {
       !PromptUtils.isPromptWithChoices(prompt) &&
       !PromptUtils.isPromptWithChannelTypes(prompt) &&
       !PromptUtils.isPromptWithMultiple(prompt) &&
-      !PromptUtils.isPromptWithMinMax(prompt)
+      !PromptUtils.isPromptWithMinMax(prompt) &&
+      !PromptUtils.isPromptWithMultipleChoices(prompt) &&
+      !PromptUtils.isPromptWithDefaultValue(prompt)
     );
   };
 
   public static readonly isPromptWithChoices = (
     prompt: Prompt,
-  ): prompt is PromptWithChoices => {
+  ): prompt is PromptWithUnknownChoices => {
     return 'choices' in prompt;
   };
 
@@ -204,8 +253,12 @@ class PromptUtils {
 
   public static readonly isPromptWithDefaultValue = (
     prompt: Prompt,
-  ): prompt is PromptWithDefaultValue => {
-    return 'defaultValue' in prompt;
+  ): prompt is Prompt & {
+    defaultValue: string | number | boolean | string[] | number[] | null;
+  } => {
+    return (
+      'defaultValue' in prompt && typeof prompt.defaultValue !== 'undefined'
+    );
   };
 
   public static readonly validatePrompt = (prompt: Prompt): void => {
@@ -237,10 +290,13 @@ class PromptUtils {
         );
       }
 
-      if ('defaultValue' in prompt) {
+      if (
+        PromptUtils.isPromptWithDefaultValue(prompt) &&
+        prompt.defaultValue !== null
+      ) {
         if (
-          typeof prompt.defaultValue === 'string' &&
-          prompt.defaultValue.length < minLength
+          !Array.isArray(prompt.defaultValue) &&
+          prompt.defaultValue.toString().length < minLength
         ) {
           throw new Error(
             `[INVALID_PROMPT] Default value must be at least the minimum length: ${stringifiedPrompt}.`,
@@ -249,7 +305,9 @@ class PromptUtils {
 
         if (
           Array.isArray(prompt.defaultValue) &&
-          prompt.defaultValue.some((value) => value.length < minLength)
+          prompt.defaultValue.some(
+            (value) => value.toString().length < minLength,
+          )
         ) {
           throw new Error(
             `[INVALID_PROMPT] Default values must be at least the minimum length: ${stringifiedPrompt}.`,
@@ -272,10 +330,13 @@ class PromptUtils {
         );
       }
 
-      if ('defaultValue' in prompt) {
+      if (
+        PromptUtils.isPromptWithDefaultValue(prompt) &&
+        prompt.defaultValue !== null
+      ) {
         if (
-          typeof prompt.defaultValue === 'string' &&
-          prompt.defaultValue.length > maxLength
+          !Array.isArray(prompt.defaultValue) &&
+          prompt.defaultValue.toString().length > maxLength
         ) {
           throw new Error(
             `[INVALID_PROMPT] Default value must be at most the maximum length: ${stringifiedPrompt}.`,
@@ -284,7 +345,9 @@ class PromptUtils {
 
         if (
           Array.isArray(prompt.defaultValue) &&
-          prompt.defaultValue.some((value) => value.length > maxLength)
+          prompt.defaultValue.some(
+            (value) => value.toString().length > maxLength,
+          )
         ) {
           throw new Error(
             `[INVALID_PROMPT] Default values must be at most the maximum length: ${stringifiedPrompt}.`,
@@ -327,13 +390,17 @@ class PromptUtils {
         );
       }
 
-      const defaultValue =
-        'defaultValue' in prompt ? prompt.defaultValue : null;
+      const defaultValue = PromptUtils.isPromptWithDefaultValue(prompt)
+        ? prompt.defaultValue
+        : null;
+
       if (
         (typeof defaultValue === 'string' || Array.isArray(defaultValue)) &&
         !prompt.choices.some((choice) =>
           Array.isArray(defaultValue)
-            ? defaultValue.includes(choice.value)
+            ? defaultValue
+                .map((e) => e.toString())
+                .includes(choice.value.toString())
             : choice.value === defaultValue,
         )
       ) {
@@ -457,7 +524,7 @@ class PromptUtils {
 
   public static validateConstraints = <
     P extends Prompt,
-    PV extends ValueForPrompt<P>,
+    PV extends ValueForPrompt<P, false>,
   >(
     prompt: P,
     transformedValue: PV,
@@ -626,13 +693,14 @@ class PromptUtils {
           .addOptions(
             prompt.choices.map((choice) => ({
               label: choice.name,
-              value: choice.value,
-              default:
-                'defaultValue' in prompt
-                  ? Array.isArray(prompt.defaultValue)
-                    ? prompt.defaultValue.includes(choice.value)
-                    : prompt.defaultValue === choice.value
-                  : false,
+              value: choice.value.toString(),
+              default: PromptUtils.isPromptWithDefaultValue(prompt)
+                ? Array.isArray(prompt.defaultValue)
+                  ? prompt.defaultValue
+                      .map((e) => e.toString())
+                      .includes(choice.value.toString())
+                  : prompt.defaultValue === choice.value
+                : false,
             })),
           );
 
@@ -737,10 +805,14 @@ class PromptUtils {
           }
 
           if (
-            'defaultValue' in prompt &&
-            typeof prompt.defaultValue === 'string'
+            PromptUtils.isPromptWithDefaultValue(prompt) &&
+            prompt.defaultValue !== null
           ) {
-            input.setValue(prompt.defaultValue);
+            input.setValue(
+              Array.isArray(prompt.defaultValue)
+                ? (prompt.defaultValue.at(0)?.toString() ?? '')
+                : prompt.defaultValue.toString(),
+            );
           }
 
           await response.showModal(
@@ -774,11 +846,11 @@ class PromptUtils {
     const _collected: string[] =
       !PromptUtils.isPromptWithChoices(prompt) &&
       PromptUtils.isPromptWithMultiple(prompt) &&
-      'defaultValue' in prompt &&
+      PromptUtils.isPromptWithDefaultValue(prompt) &&
       prompt.defaultValue
         ? Array.isArray(prompt.defaultValue)
-          ? prompt.defaultValue
-          : [prompt.defaultValue]
+          ? prompt.defaultValue.map((value) => value.toString())
+          : [prompt.defaultValue.toString()]
         : [];
 
     return [
@@ -787,7 +859,7 @@ class PromptUtils {
         ? null
         : this.validateConstraints(prompt, [
             ...new Set(_collected),
-          ] as ValueForPrompt<P>),
+          ] as ValueForPrompt<P, false>),
     ] as const;
   };
 
@@ -795,14 +867,14 @@ class PromptUtils {
     prompt: P,
     resolvedValue: string | string[] | null,
     guild: Guild,
-  ): ValueForPrompt<P> => {
+  ): ValueForPrompt<P, false> => {
     const valueTransformer = <T>(
       value: string | string[] | null,
       transformer?: (value: string) => T,
       filter?: (transformedValue: T, ind: number, arr: T[]) => boolean,
-    ): ValueForPrompt<P> => {
+    ): ValueForPrompt<P, false> => {
       const castValue = (value: string | string[] | null | T | T[]) =>
-        value as ValueForPrompt<P>;
+        value as ValueForPrompt<P, false>;
 
       if (value === null) {
         return castValue(null);
@@ -896,7 +968,7 @@ class PromptUtils {
   >(
     prompt: P,
     interaction: I,
-  ): Promise<ValueForPrompt<P>> => {
+  ): Promise<ValueForPrompt<P, false>> => {
     const valuesArr = interaction.isAnySelectMenu()
       ? interaction.values
       : interaction.isModalSubmit()
@@ -946,12 +1018,12 @@ class PromptUtils {
         collected: string[] | null,
       ) => GenericInteractionOptions;
       onFinish?: (
-        promptValues: Record<string, ValueForPrompt<P>>,
+        promptValues: Record<string, ValueForPrompt<P, false>>,
         interaction: PromptInteraction,
       ) => void;
     } = {},
-  ): Promise<Record<string, ValueForPrompt<P>>> => {
-    const promptValues: Record<string, ValueForPrompt<P>> = {};
+  ): Promise<Record<string, ValueForPrompt<P, false>>> => {
+    const promptValues: Record<string, ValueForPrompt<P, false>> = {};
 
     for await (const prompt of prompts) {
       const isLastPrompt = prompts.indexOf(prompt) === prompts.length - 1;
@@ -1023,5 +1095,11 @@ export {
   type PromptWithMultipleChoices,
   type PromptWithMinMax,
   type Prompt,
+  type MappedPrompt,
+  type MappedPrompts,
+  type Prompts,
+  type ValueForPrompt,
+  type SinglePromptValue,
+  type PromptValueResolver,
   type PromptValue,
 };

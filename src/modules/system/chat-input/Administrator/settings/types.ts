@@ -1,38 +1,35 @@
-import { PopulatedGuild, Prompt, PromptType, PromptValue } from '@core';
+import { MappedPrompt, PopulatedGuild, PromptType, PromptValue } from '@core';
 
-type GuildSettingsKey = keyof PopulatedGuild;
+type SettingsKey = keyof PopulatedGuild;
 
-type GuildSettingsPrompt<
-  K extends GuildSettingsKey,
+type SettingsPrompt<
+  K extends SettingsKey,
   T extends PromptType,
-  R extends boolean = true,
-  M extends boolean = false,
-> = Prompt & {
-  type: T;
-  required: R;
-  multiple: M;
+  R extends boolean,
+  M extends boolean,
+> = MappedPrompt<T, R, M, false> & {
   accessor: K;
   updater: (
     guild: PopulatedGuild,
-    value: PromptValue<R, T, M>,
+    value: PromptValue<R, T, M, false>,
   ) => Promise<PopulatedGuild[K]>;
 };
 
-type GuildSettingsPromptMap<K extends GuildSettingsKey> = {
+type SettingsPromptMap<K extends SettingsKey> = {
   [T in PromptType]:
-    | GuildSettingsPrompt<K, T, true, true>
-    | GuildSettingsPrompt<K, T, true, false>
-    | GuildSettingsPrompt<K, T, false, true>
-    | GuildSettingsPrompt<K, T, false, false>;
+    | SettingsPrompt<K, T, true, true>
+    | SettingsPrompt<K, T, true, false>
+    | SettingsPrompt<K, T, false, true>
+    | SettingsPrompt<K, T, false, false>;
 };
 
-type GuildSettingsPrompts = {
-  [K in GuildSettingsKey]: GuildSettingsPromptMap<K>[PromptType];
-}[GuildSettingsKey][];
+type SettingsPrompts = {
+  [K in SettingsKey]: SettingsPromptMap<K>[PromptType];
+}[SettingsKey][];
 
 export {
-  type GuildSettingsKey,
-  type GuildSettingsPrompt,
-  type GuildSettingsPromptMap,
-  type GuildSettingsPrompts,
+  type SettingsKey,
+  type SettingsPrompt,
+  type SettingsPromptMap,
+  type SettingsPrompts,
 };
