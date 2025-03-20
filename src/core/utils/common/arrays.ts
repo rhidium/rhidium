@@ -56,6 +56,17 @@ class ArrayUtils {
    * @returns The joined string
    */
   static readonly join = join;
+
+  static readonly isStringArray = (arr: unknown[]): arr is string[] =>
+    arr.every((item) => typeof item === 'string');
+  static readonly isNumberArray = (arr: unknown[]): arr is number[] =>
+    arr.every((item) => typeof item === 'number');
+  static readonly isBooleanArray = (arr: unknown[]): arr is boolean[] =>
+    arr.every((item) => typeof item === 'boolean');
+  static readonly isObjectArray = (
+    arr: unknown[],
+  ): arr is Record<string, unknown>[] =>
+    arr.every((item) => typeof item === 'object');
 }
 
 type JoinOptions = {
