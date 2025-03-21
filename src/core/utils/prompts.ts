@@ -329,6 +329,45 @@ class PromptUtils {
     );
   };
 
+  public static readonly defaultFormatter = (
+    prompt: Prompt,
+    value: AnyPromptValue,
+    arrJoin = ', ',
+  ): string => {
+    console.log({ prompt, value });
+
+    const formatter = (v: AnyPromptValue): string => {
+      if (v === null) {
+        return PromptUtils.isPromptWithMultiple(prompt)
+          ? 'None'
+          : 'Not configured';
+      }
+
+      switch (prompt.type) {
+        case 'role':
+          return `<@&${v}>`;
+        case 'channel':
+          return `<#${v}>`;
+        case 'boolean':
+          return v ? 'Enabled' : 'Disabled';
+        case 'number':
+          return v.toLocaleString();
+        default:
+          return v.toString();
+      }
+    };
+
+    if (Array.isArray(value)) {
+      if (value.length === 0) {
+        return 'None';
+      }
+
+      return value.map(formatter).join(arrJoin);
+    }
+
+    return formatter(value);
+  };
+
   public static readonly defaultMessage = (
     prompt: Prompt,
     short = PromptUtils.isPromptWithChoices(prompt),
@@ -1467,13 +1506,18 @@ class PromptUtils {
           : prompt.defaultValue;
       const promptWithDefault = { ...prompt, defaultValue };
 
+      console.log({
+        deferUpdate: !isLastPrompt || typeof onFinish === 'function',
+        deferReply: isLastPrompt && !onFinish,
+      });
+
       const [i, collected] = await PromptUtils.promptInteraction(
         interaction,
         promptWithDefault,
         resolvedPrompts,
         {
           contextTransformer,
-          deferUpdate: !isLastPrompt,
+          deferUpdate: !isLastPrompt || typeof onFinish === 'function',
           deferReply: isLastPrompt && !onFinish,
         },
       );

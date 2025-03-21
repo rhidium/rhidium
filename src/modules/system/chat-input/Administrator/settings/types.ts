@@ -1,6 +1,12 @@
 import { MappedPrompt, PopulatedGuild, PromptType } from '@core';
 
-type SettingsKey = keyof PopulatedGuild;
+type SettingsKey = Exclude<
+  keyof PopulatedGuild,
+  | 'SeverityConfiguration'
+  | 'AutoModerationActions'
+  | 'MemberJoinEmbed'
+  | 'MemberLeaveEmbed'
+>;
 
 type SettingsPrompt<
   K extends SettingsKey,
@@ -9,6 +15,8 @@ type SettingsPrompt<
   M extends boolean,
 > = MappedPrompt<T, R, M, false> & {
   accessor: K;
+  displayInline?: boolean;
+  displayCategory?: string;
 };
 
 type SettingsPromptMap<K extends SettingsKey> = {

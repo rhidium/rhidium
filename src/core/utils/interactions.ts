@@ -203,7 +203,7 @@ const paginator = async (
     });
   };
 
-  if (!interaction.replied) {
+  if (!InteractionUtils.isAcknowledged(interaction)) {
     await interaction.deferReply({
       flags: options?.ephemeral ? [MessageFlags.Ephemeral] : undefined,
     });
