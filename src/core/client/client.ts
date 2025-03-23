@@ -302,7 +302,7 @@ export class Client<
       const commandId = this.commandManager.resolveCommandId(interaction);
 
       // Resolve the command
-      let command = this.commandManager.commandById(commandId);
+      const command = this.commandManager.commandById(commandId);
 
       // At the time of writing this auto complete is the only
       // non-repliable interaction - separate handler as it
@@ -332,18 +332,6 @@ export class Client<
           ].join(' '),
         );
         return;
-      }
-
-      // Try to resolve the command from the component handler identifier
-      if (
-        !command &&
-        commandId.indexOf(Constants.EMIT_COMPONENT_HANDLER_IDENTIFIER) > 0
-      ) {
-        const [tryCommandId] = commandId.split(
-          Constants.EMIT_COMPONENT_HANDLER_IDENTIFIER,
-        ) as [string];
-        const tryCommand = this.commandManager.commandById(tryCommandId);
-        if (tryCommand) command = tryCommand;
       }
 
       // Make sure we have a command

@@ -37,7 +37,7 @@ import {
   StringUtils,
 } from '../utils';
 import { AutoCompleteOption } from '../commands/auto-complete';
-import { UnitConstants } from '../constants';
+import { Constants, UnitConstants } from '../constants';
 import { ClientEventListener } from '.';
 import { Job } from '../jobs';
 
@@ -1071,12 +1071,16 @@ export class CommandManager {
   filterByPermLevel = (
     cmd: CommandType,
     member: GuildMember | APIInteractionGuildMember | null,
-    memberPermLevel: PermLevel,
+    permLevel: PermLevel,
+    allowMaxLevel?: PermLevel,
   ): boolean => {
     if (cmd.aliasOf) return false;
     if (!member) return cmd.permLevel === PermLevel.User;
     if (cmd.permLevel === PermLevel.User) return true;
-    return memberPermLevel >= cmd.permLevel;
+    return (
+      permLevel >= cmd.permLevel &&
+      (!allowMaxLevel || cmd.permLevel <= allowMaxLevel)
+    );
   };
 
   /**
@@ -1103,12 +1107,26 @@ export class CommandManager {
   commandById = (id: string | BaseInteraction) => {
     const resolvedId = typeof id === 'string' ? id : this.resolveCommandId(id);
 
-    return (
-      this.chatInput.find((e) => e.data.name === resolvedId) ??
-      this.userContextMenus.find((e) => e.data.name === resolvedId) ??
-      this.messageContextMenus.find((e) => e.data.name === resolvedId) ??
-      this.componentCommands.find((e) => e.customId === resolvedId)
-    );
+    const tryId = (id: string) =>
+      this.chatInput.find((e) => e.data.name === id) ??
+      this.userContextMenus.find((e) => e.data.name === id) ??
+      this.messageContextMenus.find((e) => e.data.name === id) ??
+      this.componentCommands.find((e) => e.customId === id);
+
+    let initial = tryId(resolvedId);
+
+    // Try to resolve the command from the component handler identifier
+    if (
+      !initial &&
+      resolvedId.indexOf(Constants.EMIT_COMPONENT_HANDLER_IDENTIFIER) > 0
+    ) {
+      const [tryCommandId] = resolvedId.split(
+        Constants.EMIT_COMPONENT_HANDLER_IDENTIFIER,
+      ) as [string];
+      initial = tryId(tryCommandId);
+    }
+
+    return initial;
   };
 
   resolveCommandId = (interaction: BaseInteraction): string =>

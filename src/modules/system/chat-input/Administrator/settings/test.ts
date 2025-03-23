@@ -1,4 +1,4 @@
-import { Prompts } from '@core';
+import { Prompts, PromptValidation } from '@core';
 
 export const stringTestPrompts: Prompts = [
   {
@@ -92,3 +92,5 @@ export const testPrompts: Prompts = [
     // defaultValue: 'Administrator',
   },
 ];
+
+PromptValidation.validatePrompts(testPrompts);

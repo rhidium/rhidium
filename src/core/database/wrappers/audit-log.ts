@@ -16,6 +16,7 @@ enum AuditLogType {
   MEMBER_JOIN_CHANNEL_CHANGED = 'MEMBER_JOIN_CHANNEL_CHANGED',
   GUILD_SETTINGS_UPDATE = 'GUILD_SETTINGS_UPDATE',
   GUILD_SETTINGS_RESET = 'GUILD_SETTINGS_RESET',
+  GUILD_DATA_DELETED = 'GUILD_DATA_DELETED',
 }
 
 type AuditLogOptions = {
@@ -177,7 +178,13 @@ class AuditLogWrapper extends DatabaseWrapper<Model.AuditLog> {
   ): Promise<PopulatedAuditLog> => {
     const { type, user, date = new Date(), data, guild } = options;
 
-    this.debug('Creating audit log with options: %o', options);
+    this.debug('Creating audit log with options: %o', {
+      type,
+      user,
+      date,
+      data,
+      guild,
+    });
 
     return await this.create({
       type,

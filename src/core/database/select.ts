@@ -151,9 +151,11 @@ const populatedGuild = Prisma.validator<Prisma.GuildDefaultArgs>()({
 
     // Permissions and audit
     adminRoleIds: true,
+    adminUserIds: true,
     auditLogChannelId: true,
     modRoleIds: true,
     modLogChannelId: true,
+    disabledCommands: true,
 
     // Moderation
     SeverityConfiguration: populatedSeverityConfiguration,

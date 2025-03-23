@@ -1,412 +1,358 @@
 import {
-  APIEmbedField,
-  ChannelType,
-  RepliableInteraction,
+  MessageFlags,
   SlashCommandBuilder,
+  SlashCommandSubcommandBuilder,
+  SlashCommandSubcommandGroupBuilder,
 } from 'discord.js';
-import { SettingsKey, SettingsPrompts } from './types';
 import {
-  appConfig,
   AuditLogType,
   ChatInputCommand,
   Database,
+  InputUtils,
   InteractionUtils,
+  PermissionUtils,
+  PermLevel,
   PopulatedGuild,
-  Prompts,
-  PromptType,
-  PromptUtils,
-  PromptValue,
-  StringUtils,
+  prismaClient,
+  PromptValidation,
 } from '@core';
-import { testPrompts } from './test';
+import { handleSettingsUpdate, settingsEmbed } from './shared';
+import {
+  categoryIndForSetting,
+  groupedSettingsChoices,
+  hasShortSetup,
+  resettableSettingsChoices,
+  settingsAllRequired,
+  settingsPrompts,
+} from './prompts';
 
-// [DEV] Select menu option for pagination
-// [DEV] Validator function, for example, check if we have permissions to post in channels, etc.
+PromptValidation.validatePrompts(settingsPrompts);
 
-export const settingsPrompts: SettingsPrompts = [
-  {
-    id: 'admin-roles',
-    type: 'role',
-    name: 'Administrator Roles',
-    message: 'Roles that have full access to all administrative commands.',
-    required: true,
-    multiple: true,
-    minValues: 1,
-    maxValues: 5,
-    // defaultValue: 'Administrator', [DEV]
-    accessor: 'adminRoleIds',
-    displayCategory: 'Permissions',
-  },
-  {
-    id: 'audit-log-channel-id',
-    type: 'channel',
-    name: 'Audit Log Channel',
-    message: 'The channel where administrative actions are logged.',
-    required: false,
-    multiple: false,
-    channelTypes: [ChannelType.GuildText],
-    accessor: 'auditLogChannelId',
-    displayCategory: 'Logging',
-  },
-  {
-    id: 'mod-role-id',
-    type: 'role',
-    name: 'Moderator Roles',
-    message: 'Roles that have access to all moderation commands.',
-    required: true,
-    multiple: true,
-    minValues: 1,
-    maxValues: 5,
-    accessor: 'modRoleIds',
-    displayCategory: 'Permissions',
-  },
-  {
-    id: 'mod-log-channel-id',
-    type: 'channel',
-    name: 'Moderation Log Channel',
-    message: 'The channel where moderation actions are logged.',
-    required: false,
-    multiple: false,
-    channelTypes: [ChannelType.GuildText],
-    accessor: 'modLogChannelId',
-    displayCategory: 'Logging',
-  },
-  {
-    id: 'auto-role-ids',
-    type: 'role',
-    name: 'Auto Roles',
-    message:
-      'Please select between 0 and 25 roles that should be automatically assigned to new members.',
-    required: true,
-    multiple: true,
-    minValues: 0,
-    maxValues: 25,
-    accessor: 'autoRoleIds',
-    displayCategory: 'Member Management',
-  },
-  //   {
-  //     id: 'member-join-channel-id',
-  //     type: 'channel',
-  //     name: 'Member Join Channel',
-  //     message: 'The channel where member join messages are sent.',
-  //     required: false,
-  //     multiple: false,
-  //     channelTypes: [ChannelType.GuildText],
-  //     accessor: 'memberJoinChannelId',
-  //     displayCategory: 'Member Management',
-  //   },
-  //   {
-  //     id: 'member-leave-channel-id',
-  //     type: 'channel',
-  //     name: 'Member Leave Channel',
-  //     message: 'The channel where member leave messages are sent.',
-  //     required: false,
-  //     multiple: false,
-  //     channelTypes: [ChannelType.GuildText],
-  //     accessor: 'memberLeaveChannelId',
-  //     displayCategory: 'Member Management',
-  //   },
-] as const;
+const useUpdateSubcommand = false;
 
-const byDisplayCategory = (
-  a: (typeof settingsPrompts)[0],
-  b: (typeof settingsPrompts)[0],
-) =>
-  a.displayCategory === b.displayCategory
-    ? 0
-    : a.displayCategory === undefined
-      ? 1
-      : b.displayCategory === undefined
-        ? -1
-        : a.displayCategory.localeCompare(b.displayCategory);
+const updateGroup = new SlashCommandSubcommandGroupBuilder()
+  .setName('update')
+  .setDescription('Update server settings by category or individual setting.');
 
-const groupByDisplayCategory = (prompts: (typeof settingsPrompts)[0][]) => {
-  const grouped: Record<string, (typeof settingsPrompts)[0][]> = {};
+for (const prompt of settingsPrompts) {
+  updateGroup.addSubcommand((subcommand) =>
+    subcommand
+      .setName(prompt.id)
+      .setDescription(prompt.message ?? `Update the ${prompt.name} setting.`),
+  );
+}
 
-  prompts.forEach((prompt) => {
-    const category = prompt.displayCategory ?? 'Uncategorized';
+const setupSubcommand = new SlashCommandSubcommandBuilder()
+  .setName('set-up')
+  .setDescription('Set up server settings.');
 
-    if (!grouped[category]) grouped[category] = [];
+if (hasShortSetup) {
+  setupSubcommand.addBooleanOption((option) =>
+    option
+      .setName('complete')
+      .setDescription(
+        'Set up all settings at once, instead of only required ones.',
+      )
+      .setRequired(false),
+  );
+}
 
-    grouped[category].push(prompt);
+const commandData = new SlashCommandBuilder()
+  .setName('settings')
+  .setDescription('Configure server settings.')
+  .addSubcommand((subcommand) =>
+    subcommand
+      .setName('display')
+      .setDescription('Display current settings.')
+      .addStringOption((option) =>
+        option
+          .setName('category')
+          .setDescription(
+            'The category of settings to display. Leave blank to display all.',
+          )
+          .setRequired(false)
+          .addChoices(groupedSettingsChoices),
+      ),
+  )
+  .addSubcommand(setupSubcommand)
+  .addSubcommand((subcommand) =>
+    subcommand
+      .setName('reset')
+      .setDescription(
+        'Reset a server setting to its default value. Leave blank to reset all.',
+      )
+      .addStringOption((option) =>
+        option
+          .setName('setting')
+          .setDescription('The setting to reset.')
+          .setRequired(false)
+          .addChoices(resettableSettingsChoices),
+      )
+      .addBooleanOption((option) =>
+        option
+          .setName('delete-all-data')
+          .setDescription(
+            "Delete all data associated with this server and it's members.",
+          )
+          .setRequired(false),
+      ),
+  );
+
+if (useUpdateSubcommand) {
+  commandData.addSubcommandGroup(updateGroup);
+}
+
+const deleteAllGuildData = async (guild: PopulatedGuild) => {
+  const warningsDeleted = await prismaClient.warning.deleteMany({
+    where: {
+      OR: [{ MemberGuildId: guild.id }, { IssuedByGuildId: guild.id }],
+    },
   });
 
-  return grouped;
+  const [
+    membersDeleted,
+    autoModerationActionsDeleted,
+    severityConfigurationsDeleted,
+  ] = await Promise.all([
+    prismaClient.member.deleteMany({
+      where: {
+        GuildId: guild.id,
+      },
+    }),
+    prismaClient.autoModerationAction.deleteMany({
+      where: {
+        GuildId: guild.id,
+      },
+    }),
+    prismaClient.severityConfiguration.deleteMany({
+      where: {
+        GuildId: guild.id,
+      },
+    }),
+  ]);
+
+  await Database.Guild.delete({ id: guild.id });
+
+  return {
+    guild: 1,
+    members: membersDeleted.count,
+    warnings: warningsDeleted.count,
+    'auto-moderation-actions': autoModerationActionsDeleted.count,
+    'severity-configurations': severityConfigurationsDeleted.count,
+  };
 };
 
-const groupedSettingsPrompts = groupByDisplayCategory(settingsPrompts);
-
-const settingsChoices = settingsPrompts.map((prompt, ind) => ({
-  name: prompt.name,
-  value: `${ind}`,
-}));
-
-// [DEV] Click outside of modal before submit = BREAKS
-// [DEV] Skip button, Cancel options, etc.
-
-PromptUtils.validatePrompts(settingsPrompts);
-PromptUtils.validatePrompts(testPrompts);
-
-const isProduction: boolean = appConfig.NODE_ENV === 'production';
-
 const SettingsCommand = new ChatInputCommand({
-  data: new SlashCommandBuilder()
-    .setName('settings')
-    .setDescription('Configure server settings.')
-    .addSubcommand((subcommand) =>
-      subcommand
-        .setName('display')
-        .setDescription('Display current settings.')
-        .addStringOption((option) =>
-          option
-            .setName('setting')
-            .setDescription('The setting to display.')
-            .setRequired(false)
-            .addChoices(settingsChoices),
-        ),
-    )
-    .addSubcommand((subcommand) =>
-      subcommand
-        .setName('update')
-        .setDescription('Update server settings.')
-        .addStringOption((option) =>
-          option
-            .setName('setting')
-            .setDescription('The setting to update.')
-            .setRequired(false)
-            .addChoices(settingsChoices),
-        ),
-    ),
+  permLevel: PermLevel.Administrator,
+  guildOnly: true,
+  data: commandData,
+  category: 'Administrator',
   run: async (client, interaction) => {
     if (!InteractionUtils.requireAvailableGuild(client, interaction)) return;
 
     const { options } = interaction;
+    const subcommandGroup = options.getSubcommandGroup(false);
     const subcommand = options.getSubcommand(true);
 
-    const settingsEmbed = async (
-      i: RepliableInteraction,
-      guild: PopulatedGuild,
-    ) => {
-      const categories: (Omit<APIEmbedField, 'value'> & {
-        value: APIEmbedField[];
-      })[] = Object.entries(groupedSettingsPrompts)
-        .sort(([a], [b]) => a.localeCompare(b))
-        .map(([category, prompts]) => ({
-          name: category,
-          value: prompts.sort(byDisplayCategory).map((prompt) => ({
-            name: prompt.name,
-            value:
-              (prompt.message ? `-# ${prompt.message}\n` : '') +
-              '- ' +
-              PromptUtils.defaultFormatter(
-                prompt,
-                guild[prompt.accessor],
-                '\n- ',
-              ),
-            inline: prompt.displayInline ?? false,
-          })),
-          inline: false,
-        }));
+    if (subcommandGroup === 'update' || subcommand === 'set-up') {
+      const completeSetup =
+        subcommand === 'set-up' && options.getBoolean('complete', false);
+      const isShortSetup =
+        typeof completeSetup === 'boolean'
+          ? completeSetup === false
+          : settingsAllRequired;
+      const setting = subcommand === 'set-up' ? null : subcommand;
 
-      const categoriesDisplay = categories
-        .map((e) => e.name)
-        .join(' ' + appConfig.emojis.separator + ' ');
+      await handleSettingsUpdate(client, interaction, isShortSetup, setting);
 
-      await InteractionUtils.paginator(
-        `settings-${i.guildId}-${Date.now()}`,
-        client,
-        categories.map((category, ind) => ({
-          content: `Page ${ind + 1} of ${categories.length}.`,
-          embeds: [
-            client.embeds.info({
-              title: `Server Settings - ${category.name}`,
-              fields: category.value,
-              footer: {
-                text: `Categories: ${categoriesDisplay}`,
-              },
-            }),
-          ],
-        })),
-        interaction,
-      );
-    };
+      return;
+    }
 
     switch (subcommand) {
-      case 'update': {
-        const setting = options.getString('setting', false);
-        const settingIndex = setting ? parseInt(setting, 10) : null;
+      case 'reset': {
+        const deleteAllData =
+          options.getBoolean('delete-all-data', false) ?? false;
+        const settingsAccessor = options.getString('setting', false);
 
-        const guildUpdater = async (
-          guildId: string,
-          accessor: SettingsKey,
-          value: PromptValue<boolean, PromptType, boolean, false>,
-        ) => {
-          return Database.Guild.update({
-            where: { id: guildId },
-            data: {
-              [accessor]: value,
-            },
-          }).then(async (updatedGuild) => {
-            void Database.AuditLog.util({
+        if ((deleteAllData || !settingsAccessor) && interaction.guild.ownerId) {
+          const memberPermLevel =
+            await PermissionUtils.resolveMemberPermissionLevel(
               client,
-              guild: updatedGuild,
-              type: AuditLogType.GUILD_SETTINGS_UPDATE,
-              user: interaction.user.id,
-              data: {
-                before:
-                  guildBefore ??
-                  (await Database.Guild.resolve(interaction.guildId).then(
-                    (g) => {
-                      guildBefore = g;
+              interaction.member,
+              interaction.guild,
+            );
 
-                      return g;
-                    },
-                  )),
-                after: updatedGuild,
-              },
+          if (memberPermLevel < PermLevel['Server Owner']) {
+            await interaction.reply({
+              embeds: [
+                client.embeds.error({
+                  title: 'Invalid Permissions',
+                  description:
+                    "Only this server's owner can reset all settings. " +
+                    'Please contact them if you need to reset all settings.',
+                }),
+              ],
+              flags: MessageFlags.Ephemeral,
             });
+            return;
+          }
+        }
 
-            return updatedGuild;
-          });
-        };
-
-        const guildSettingsPrompts = settingsPrompts.map((prompt) => ({
-          ...prompt,
-          defaultValue:
-            prompt.defaultValue ??
-            (() =>
-              Database.Guild.resolve(interaction.guildId).then((g) => {
-                guildBefore = g;
-
-                return g[prompt.accessor];
-              })),
-          onCollect:
-            prompt.onCollect ??
-            (async (
-              value: PromptValue<boolean, PromptType, boolean, false>,
-            ) => {
-              const guild = await Database.Guild.resolve(interaction.guildId);
-
-              if (
-                Array.isArray(guild[prompt.accessor]) || Array.isArray(value)
-                  ? JSON.stringify(guild[prompt.accessor]) ===
-                    JSON.stringify(value)
-                  : guild[prompt.accessor] === value
-              ) {
-                return;
-              }
-
-              return guildUpdater(interaction.guild.id, prompt.accessor, value);
-            }),
-        }));
-
-        const guildSettingPrompt =
-          settingIndex === null ? null : guildSettingsPrompts[settingIndex];
-        const prompts = guildSettingPrompt
-          ? [guildSettingPrompt]
-          : guildSettingsPrompts;
-
-        let guildBefore: PopulatedGuild | null = null;
-
-        await PromptUtils.handlePromptInteraction(
-          interaction,
-          prompts as Prompts,
-          {
-            resolveResources: false,
-            async onFinish(_promptValues, i) {
-              await settingsEmbed(i, await Database.Guild.resolve(i.guildId));
-            },
-            async onPromptError(error, i, prompt) {
-              console.error(error);
-              const ctx = {
-                embeds: [
-                  client.embeds.error({
-                    title: 'Something went wrong',
-                    description: error.message,
-                    fields: isProduction
-                      ? []
-                      : [
-                          {
-                            name: 'Prompt',
-                            value: `\`\`\`json\n${JSON.stringify(prompt, null, 2)}\n\`\`\``,
-                            inline: true,
-                          },
-                          {
-                            name: 'Stack Trace',
-                            value: `\`\`\`js\n${error.stack}\n\`\`\``,
-                            inline: true,
-                          },
-                        ],
-                  }),
-                ],
-              };
-
-              if (i.replied || i.deferred) await i.editReply(ctx);
-              else await i.reply(ctx);
-            },
-            contextTransformer(
-              prompt,
-              prompts,
-              index,
-              collected,
-              errorFeedbackFields,
-            ) {
-              const isLast = index === prompts.length - 1;
-              const remaining = prompts.length - index - 1;
-              const collectedSliced = (collected?.slice(-10) ?? []).reverse();
-              const collectedString = `${collectedSliced
-                .map((c) => StringUtils.truncate(c, 100))
-                .map((c) => `- \`${c}\``)
-                .join('\n')}${
-                (collected?.length ?? 0) > 10
-                  ? `\n... and ${collected!.length - 10} more`
-                  : ''
-              }`;
-
-              const embedFn = errorFeedbackFields.length
-                ? client.embeds.error
-                : client.embeds.info;
-
-              return {
-                content: !isLast
-                  ? `Question **${index + 1}** of **${prompts.length}**, ${remaining} more question${
-                      remaining === 1 ? '' : 's'
-                    } after this`
-                  : 'Last question',
-                embeds: [
-                  embedFn({
-                    title: prompt.name,
-                    description: prompt.message,
-                    fields:
-                      collected === null
-                        ? [...errorFeedbackFields]
-                        : [
-                            ...errorFeedbackFields,
-                            {
-                              name: 'Your have provided the following values so far:',
-                              value: collectedString,
-                              inline: false,
-                            },
-                          ],
-                  }),
-                ],
-              };
-            },
-          },
+        const prompts = settingsPrompts.filter(
+          (prompt) =>
+            (!settingsAccessor || prompt.accessor === settingsAccessor) &&
+            typeof prompt.defaultValue !== 'undefined',
         );
+
+        if (!deleteAllData && !prompts.length) {
+          await interaction.reply({
+            embeds: [
+              client.embeds.error({
+                title: 'Invalid Setting',
+                description: 'The setting you provided is not resettable.',
+              }),
+            ],
+            flags: MessageFlags.Ephemeral,
+          });
+          return;
+        }
+
+        const defaultValues = prompts.map((prompt) => [
+          prompt.accessor,
+          prompt.defaultValue,
+        ]);
+
+        const resolvedDefaults = Object.fromEntries(
+          await Promise.all(
+            defaultValues.map(async ([accessor, defaultValue]) => [
+              accessor,
+              typeof defaultValue === 'function'
+                ? defaultValue(interaction.guild)
+                : defaultValue,
+            ]),
+          ).then((values) =>
+            values
+              .filter(([, value]) => typeof value !== 'undefined')
+              .map(([accessor, value]) => [
+                accessor,
+                Array.isArray(value) ? { set: value } : value,
+              ]),
+          ),
+        );
+
+        const [guildBefore] = await Promise.all([
+          Database.Guild.resolve(interaction.guildId),
+          interaction.deferReply({ flags: [MessageFlags.Ephemeral] }),
+        ]);
+
+        // Await confirmation
+        await InputUtils.Confirmation.promptConfirmation({
+          client,
+          interaction,
+          content: {
+            embeds: [
+              client.embeds.warning({
+                title: deleteAllData
+                  ? 'Delete All Server Data'
+                  : prompts.length === 1
+                    ? `Reset ${prompts[0]!.name} Setting`
+                    : 'Reset Settings',
+                description: deleteAllData
+                  ? 'Are you sure you want to **__delete all server data__**? This action cannot be undone.'
+                  : prompts.length === 1
+                    ? `Are you sure you want to reset the **\`${prompts[0]!.name}\`** setting to its default value?`
+                    : 'Are you sure you want to **__reset all settings__** to their default values?',
+              }),
+            ],
+          },
+          onConfirm: async (i) => {
+            if (deleteAllData) {
+              await deleteAllGuildData(guildBefore).then(
+                async (deletedData) => {
+                  void Database.AuditLog.util({
+                    client,
+                    guild: guildBefore,
+                    type: AuditLogType.GUILD_DATA_DELETED,
+                    user: interaction.user.id,
+                    data: {
+                      deleted: deletedData,
+                    },
+                  });
+
+                  await i.deferUpdate();
+                  await i.editReply({
+                    embeds: [
+                      client.embeds.success({
+                        title: 'Server Data Deleted',
+                        description:
+                          'All server data and settings have been deleted. Please see below for an overview of deleted records.',
+                        fields: Object.entries(deletedData).map(
+                          ([key, value]) => ({
+                            name: key,
+                            value: value.toLocaleString(),
+                          }),
+                        ),
+                      }),
+                    ],
+                  });
+                },
+              );
+            } else {
+              await Database.Guild.update({
+                where: { id: interaction.guildId },
+                data: {
+                  ...resolvedDefaults,
+                  SeverityConfiguration: {
+                    delete: {
+                      GuildId: interaction.guildId,
+                    },
+                  },
+                },
+              }).then(async (updatedGuild) => {
+                void Database.AuditLog.util({
+                  client,
+                  guild: updatedGuild,
+                  type: AuditLogType.GUILD_SETTINGS_RESET,
+                  user: interaction.user.id,
+                  data: {
+                    before: guildBefore,
+                    after: updatedGuild,
+                  },
+                });
+
+                await i.deferUpdate();
+                await settingsEmbed(
+                  client,
+                  i,
+                  updatedGuild,
+                  prompts.length === 1 ? categoryIndForSetting(prompts[0]!) : 0,
+                );
+              });
+            }
+          },
+        });
+
         break;
       }
+
       case 'display':
       default: {
-        const setting = options.getString('setting', false);
+        const categoryIndStr = options.getString('category', false);
 
         const [guild] = await Promise.all([
           Database.Guild.resolve(interaction.guildId),
-          interaction.deferReply(),
+          interaction.deferReply({ flags: [MessageFlags.Ephemeral] }),
         ]);
 
-        if (!setting) {
-          await settingsEmbed(interaction, guild);
+        if (!categoryIndStr) {
+          await settingsEmbed(client, interaction, guild);
+        } else {
+          await settingsEmbed(
+            client,
+            interaction,
+            guild,
+            parseInt(categoryIndStr),
+          );
         }
 
         break;

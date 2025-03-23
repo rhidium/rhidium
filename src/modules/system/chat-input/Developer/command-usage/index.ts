@@ -55,14 +55,12 @@ const CommandUsageCommand = new ChatInputCommand({
           )
         : stats.map((stat) => embedFromUsageStatistics(client, stat));
 
-      await InteractionUtils.paginator(
-        'command-usage-leaderboard',
+      await InteractionUtils.paginator({
         client,
-        allEmbeds.map((e) => ({ embeds: Array.isArray(e) ? e : [e] })),
+        pages: allEmbeds.map((e) => ({ embeds: Array.isArray(e) ? e : [e] })),
         interaction,
-        undefined,
-        { ephemeral: CommandUsageCommand.isEphemeral },
-      );
+        ephemeral: CommandUsageCommand.isEphemeral,
+      });
     } else if (subcommand === CommandUsageConstants.ITEM_SUBCOMMAND_NAME) {
       const value = await CommandStatisticOption.getValue(interaction, true);
       if (isAutoCompleteResponseType(value)) return;

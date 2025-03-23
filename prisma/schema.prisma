@@ -72,9 +72,11 @@ model Guild {
 
   // Permissions and audit
   adminRoleIds      String[]                                      // Ids of roles that can perform administrative actions
+  adminUserIds      String[]                                      // Ids of users that can perform administrative actions
   auditLogChannelId String?                                       // The id of the channel where audit logs are sent
   modRoleIds         String[]                                     // Ids of roles that can perform moderation actions
   modLogChannelId   String?                                       // The id of the channel where moderation actions are logged
+  disabledCommands  String[]                                      // List of command names that are disabled in the guild
 
   // Moderation
   SeverityConfiguration SeverityConfiguration?                    // Custom severity configuration for the guild

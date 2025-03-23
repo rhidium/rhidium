@@ -2,6 +2,7 @@ import path from 'path';
 import { CommandManagerCommandsOptions } from '@core';
 import { processUsageStatisticsMiddleware } from './middleware/process-usage-statistics';
 import { persistentCooldownMiddleware } from './middleware/persistent-cooldown';
+import { checkCommandDisabled } from './middleware/check-command-disabled';
 
 export default {
   autoCompletes: [path.resolve(__dirname, './auto-completes')],
@@ -16,6 +17,7 @@ export default {
     path.resolve(__dirname, './select-menus'),
   ],
   middleware: {
+    preRunExecution: [checkCommandDisabled],
     postRunExecution: [processUsageStatisticsMiddleware],
     preRunThrottle: [persistentCooldownMiddleware],
   },

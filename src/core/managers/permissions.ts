@@ -33,11 +33,17 @@ export const permConfig: ClientPermissionLevel[] = [
     hasLevel: async (_config, member) => {
       const guildSettings = await Database.Guild.resolve(member.guild.id);
       if (!guildSettings) return false;
-      if (!guildSettings.adminRoleIds) {
+      if (
+        !guildSettings.adminRoleIds.length &&
+        !guildSettings.adminUserIds.length
+      ) {
         return member.permissions.has(PermissionFlagsBits.Administrator);
       }
-      return member.roles.cache.some((role) =>
-        guildSettings.adminRoleIds.includes(role.id),
+      return (
+        guildSettings.adminUserIds.includes(member.id) ||
+        member.roles.cache.some((role) =>
+          guildSettings.adminRoleIds.includes(role.id),
+        )
       );
     },
   },

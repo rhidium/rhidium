@@ -1,5 +1,12 @@
 import { MappedPrompt, PopulatedGuild, PromptType } from '@core';
 
+const permissionSettings: (keyof Pick<
+  PopulatedGuild,
+  'adminRoleIds' | 'adminUserIds' | 'modRoleIds'
+>)[] = ['adminRoleIds', 'adminUserIds', 'modRoleIds'] as const;
+
+type PermissionSetting = (typeof permissionSettings)[number];
+
 type SettingsKey = Exclude<
   keyof PopulatedGuild,
   | 'SeverityConfiguration'
@@ -13,10 +20,11 @@ type SettingsPrompt<
   T extends PromptType,
   R extends boolean,
   M extends boolean,
-> = MappedPrompt<T, R, M, false> & {
+> = MappedPrompt<T, R, M> & {
   accessor: K;
   displayInline?: boolean;
   displayCategory?: string;
+  infoSuffix?: string;
 };
 
 type SettingsPromptMap<K extends SettingsKey> = {
@@ -32,6 +40,8 @@ type SettingsPrompts = {
 }[SettingsKey][];
 
 export {
+  permissionSettings,
+  type PermissionSetting,
   type SettingsKey,
   type SettingsPrompt,
   type SettingsPromptMap,
