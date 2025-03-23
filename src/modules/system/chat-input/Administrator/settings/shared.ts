@@ -28,7 +28,14 @@ import {
   MessageFlags,
   RepliableInteraction,
 } from 'discord.js';
-import { PermissionSetting, permissionSettings, SettingsKey } from './types';
+import {
+  PermissionSetting,
+  permissionSettings,
+  sendableChannelFormatter,
+  SendableChannelSetting,
+  sendableChannelSettings,
+  SettingsKey,
+} from './types';
 import {
   byDisplayCategory,
   categoryIndForSetting,
@@ -111,7 +118,7 @@ const commandChoicesFromCache = async (
 
 export const settingsEmbed = async (
   client: Client<true>,
-  i: RepliableInteraction,
+  i: AvailableGuildInteraction<RepliableInteraction>,
   guild: PopulatedGuild,
   defaultCategoryInd?: number,
 ) => {
@@ -148,6 +155,21 @@ export const settingsEmbed = async (
               prompt,
               guild[prompt.accessor],
               '\n- ',
+              {
+                error: appConfig.emojis.error,
+                success: appConfig.emojis.success,
+              },
+              sendableChannelSettings.includes(
+                prompt.accessor as SendableChannelSetting,
+              )
+                ? {
+                    channel: (value) =>
+                      sendableChannelFormatter(i.guild, prompt, value, {
+                        error: appConfig.emojis.error,
+                        success: appConfig.emojis.success,
+                      }),
+                  }
+                : undefined,
             ),
           EmbedConstants.FIELD_VALUE_MAX_LENGTH,
         ),
@@ -186,6 +208,7 @@ export const handleSettingsUpdate = async (
 ) => {
   const guildUpdater = async (
     guildId: string,
+    prompt: Prompt,
     accessor: SettingsKey,
     value: PromptValue<boolean, PromptType, boolean>,
   ) => {
@@ -201,6 +224,7 @@ export const handleSettingsUpdate = async (
         type: AuditLogType.GUILD_SETTINGS_UPDATE,
         user: interaction.user.id,
         data: {
+          prompt,
           before:
             guildBefore ??
             (await Database.Guild.resolve(interaction.guildId).then((g) => {
@@ -241,7 +265,12 @@ export const handleSettingsUpdate = async (
           await commandChoicesCache.clearByPrefix(`${interaction.guildId}:`);
         }
 
-        return guildUpdater(interaction.guild.id, prompt.accessor, value);
+        return guildUpdater(
+          interaction.guild.id,
+          prompt,
+          prompt.accessor,
+          value,
+        );
       }),
   }));
 

@@ -7,6 +7,10 @@ import {
   PopulatedAutoModerationAction,
   PopulatedGuild,
   PopulatedMember,
+  PopulatedPrisma,
+  populatedWarning,
+  PopulatedWarning,
+  Prisma,
   Severity,
   TimeUtils,
 } from '@core';
@@ -22,6 +26,11 @@ import { ModerationPermissionServices } from './permission';
 import { ModLogServices } from './mod-log';
 
 class WarnServices {
+  static readonly stringifyWarn = (warn: PopulatedWarning, format = true) =>
+    format
+      ? `**\`#${warn.caseNumber}\`** - ${warn.message}`
+      : `#${warn.caseNumber} - ${warn.message}`;
+
   static readonly resolveWarns = (
     member: PopulatedMember,
     guild: PopulatedGuild,
@@ -100,6 +109,32 @@ class WarnServices {
     };
   };
 
+  static readonly createWarn = async (
+    guild: PopulatedGuild,
+    member: PopulatedMember,
+    data: Omit<Prisma.WarningCreateWithoutMemberInput, 'caseNumber'>,
+  ): Promise<PopulatedWarning> => {
+    return PopulatedPrisma.$transaction(async (tx) => {
+      const caseNumber = await ModerationServices.caseNumberTransaction(
+        tx,
+        guild.id,
+      );
+
+      return await tx.warning.create({
+        ...populatedWarning,
+        data: {
+          ...data,
+          caseNumber,
+          Member: {
+            connect: {
+              id: member.id,
+            },
+          },
+        },
+      });
+    });
+  };
+
   static readonly warnMember = async (
     member: PopulatedMember,
     guild: PopulatedGuild,
@@ -123,39 +158,36 @@ class WarnServices {
       triggeredActions,
     } = WarnServices.resolveWarns(member, guild, severity);
 
+    const warning = await WarnServices.createWarn(guild, member, {
+      date,
+      message,
+      severity,
+      validUntil,
+      TriggeredActions: {
+        connect: triggeredActions.map((action) => ({
+          id: action.id,
+        })),
+      },
+      IssuedBy: {
+        connect: {
+          id: issuedBy.id,
+        },
+      },
+    });
+
+    // Note: Already connected, but updates the cache
     const updatedMember = await Database.Member.update({
       where: {
         id: member.id,
       },
       data: {
         ReceivedWarnings: {
-          create: {
-            date,
-            message,
-            severity,
-            validUntil,
-            TriggeredActions: {
-              connect: triggeredActions.map((action) => ({
-                id: action.id,
-              })),
-            },
-            IssuedBy: {
-              connect: {
-                id: issuedBy.id,
-              },
-            },
+          connect: {
+            id: warning.id,
           },
         },
       },
     });
-
-    const warning = updatedMember.ReceivedWarnings.find(
-      (entry) => entry.date.valueOf() === date.valueOf(),
-    );
-
-    if (!warning) {
-      throw new Error('Failed to find the newly created warning.');
-    }
 
     return {
       warning,
@@ -207,9 +239,10 @@ class WarnServices {
         targetUser,
         issuerMember,
         discordGuild,
+        guild,
       });
 
-    // Return if the target is not valid
+    // Return if the target is not valid/moderatable
     if (moderationTarget === false) return;
 
     // Process the warning
@@ -303,6 +336,9 @@ class WarnServices {
                     `**Moderator:** ${issuerMember} (${issuerMember.id})`,
                     `**Reason:** ${reason}`,
                   ].join('\n'),
+                  footer: {
+                    text: `Case: #${warning.caseNumber}`,
+                  },
                 }),
               ],
             },
@@ -336,6 +372,9 @@ class WarnServices {
                     `**Moderator:** ${issuerMember} (${issuerMember.id})`,
                     `**Overview of messages deleted by auto-moderation actions**:\n${output}`,
                   ].join('\n'),
+                  footer: {
+                    text: `Case: #${warning.caseNumber}`,
+                  },
                 }),
               ],
             },
@@ -399,7 +438,156 @@ class WarnServices {
               `**Auto-Moderation Actions:** ${actionsOutput ?? 'None'}`,
             ].join('\n'),
             footer: {
-              text: `Warning ID: ${warning.id}`,
+              text: `Case: #${warning.caseNumber}`,
+            },
+          }),
+        ],
+      },
+    });
+  };
+
+  static readonly removeWarn = async (
+    member: PopulatedMember,
+    {
+      warningId,
+      deleteWarning,
+      removedBy,
+    }: {
+      warningId: number;
+      deleteWarning: boolean;
+      removedBy: PopulatedMember;
+    },
+  ) => {
+    const warning = member.ReceivedWarnings.find(
+      (entry) => entry.id === warningId,
+    );
+
+    if (!warning) {
+      throw new Error(`Warning with ID ${warningId} not found.`);
+    }
+
+    const updatedMember = await Database.Member.update({
+      where: {
+        id: member.id,
+      },
+      data: {
+        ReceivedWarnings: {
+          delete: deleteWarning
+            ? {
+                id: warning.id,
+              }
+            : undefined,
+          update: deleteWarning
+            ? undefined
+            : {
+                where: {
+                  id: warning.id,
+                },
+                data: {
+                  removedAt: new Date(),
+                  RemovedBy: {
+                    connect: {
+                      id: removedBy.id,
+                    },
+                  },
+                },
+              },
+        },
+      },
+    });
+
+    return {
+      warning,
+      updatedMember,
+    };
+  };
+
+  static readonly handleWarnRemovalInteraction = async ({
+    client,
+    interaction,
+    discordGuild,
+    issuerMember,
+    targetUser,
+    warningId,
+    deleteWarning,
+  }: {
+    client: Client;
+    interaction: RepliableInteraction;
+    discordGuild: Guild;
+    issuerMember: GuildMember;
+    targetUser: User;
+    warningId: number;
+    deleteWarning: boolean;
+  }) => {
+    // Fetch the required data
+    const [guild, issuer, target] = await Promise.all([
+      Database.Guild.resolve(discordGuild.id),
+      Database.Member.resolve({
+        userId: issuerMember.id,
+        guildId: discordGuild.id,
+      }),
+      Database.Member.resolve({
+        userId: targetUser.id,
+        guildId: discordGuild.id,
+      }),
+    ]);
+
+    // Check if the issuer can moderate the target
+    const moderationTarget =
+      await ModerationPermissionServices.handleCanModerateTarget({
+        client,
+        interaction,
+        targetUser,
+        issuerMember,
+        discordGuild,
+        guild,
+      });
+
+    // Return if the target is not valid/moderatable
+    if (moderationTarget === false) return;
+
+    // Process the warning removal
+    const { warning, updatedMember } = await WarnServices.removeWarn(target, {
+      warningId,
+      deleteWarning,
+      removedBy: issuer,
+    });
+
+    // Prepare the output/feedback
+    const output = [
+      `Successfully ${
+        deleteWarning ? 'deleted' : 'removed'
+      } warning with case number **\`#${warning.caseNumber}\`**.`,
+    ];
+
+    // User feedback
+    await interaction.reply({
+      embeds: [client.embeds.success(output.join(' '))],
+    });
+
+    // Log the action
+    await ModLogServices.send({
+      guild,
+      discordGuild,
+      message: {
+        embeds: [
+          client.embeds.warning({
+            title: `Warning ${deleteWarning ? 'Deleted' : 'Removed'}`,
+            description: [
+              `**User:** ${moderationTarget} (${moderationTarget.id})`,
+              `**Moderator:** ${issuerMember} (${issuerMember.id})`,
+              `**Warning:** ${WarnServices.stringifyWarn(warning)}`,
+              `**Warning Message:** ${warning.message}`,
+              `**Warning Severity:** \`${warning.severity}\``,
+              `**Warning Issuer:** <@${warning.IssuedByUserId}> (\`${warning.IssuedByUserId}\`), at ${TimeUtils.discordInfoTimestamp(
+                warning.date.valueOf(),
+              )}`,
+              `**Warnings Now:** ${
+                WarnServices.resolveWarns(updatedMember, guild).after
+              }`,
+            ].join('\n'),
+            footer: {
+              text: `Case: #${warning.caseNumber}`,
             },
           }),
         ],

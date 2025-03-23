@@ -13,13 +13,18 @@ import {
 import { Client } from '../../client';
 import { InteractionUtils } from '../interactions';
 import { UnitConstants } from '../../constants';
+import { AvailableGuildInteraction } from '../../commands';
 
 type PromptConfirmationOptions = {
   client: Client;
   interaction: RepliableInteraction;
   content?: InteractionReplyOptions & InteractionEditReplyOptions;
-  onConfirm?: (interaction: ButtonInteraction) => void | Promise<void>;
-  onCancel?: (interaction: ButtonInteraction) => void | Promise<void>;
+  onConfirm?: (
+    interaction: AvailableGuildInteraction<ButtonInteraction>,
+  ) => void | Promise<void>;
+  onCancel?: (
+    interaction: AvailableGuildInteraction<ButtonInteraction>,
+  ) => void | Promise<void>;
   shouldReplyOnConfirm?: boolean;
   shouldReplyOnCancel?: boolean;
   removeComponents?: boolean;
@@ -154,7 +159,10 @@ class ConfirmationInput {
 
           if (button.customId === this.BUTTON_CONFIRM_ID) {
             if (shouldReplyOnConfirm) await button.deferUpdate();
-            if (typeof onConfirm === 'function') await onConfirm(button);
+            if (typeof onConfirm === 'function')
+              await onConfirm(
+                button as AvailableGuildInteraction<ButtonInteraction>,
+              );
             if (disableComponents)
               InteractionUtils.disableComponents(components);
             if (shouldReplyOnConfirm)
@@ -169,7 +177,10 @@ class ConfirmationInput {
 
           if (button.customId === this.BUTTON_CANCEL_ID) {
             if (shouldReplyOnCancel) await button.deferUpdate();
-            if (typeof onCancel === 'function') await onCancel(button);
+            if (typeof onCancel === 'function')
+              await onCancel(
+                button as AvailableGuildInteraction<ButtonInteraction>,
+              );
             if (disableComponents)
               InteractionUtils.disableComponents(components);
             if (shouldReplyOnCancel)

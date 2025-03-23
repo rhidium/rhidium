@@ -1,5 +1,7 @@
 const truncate = (input: string, length: number, suffix = '...'): string =>
-  input.length > length ? input.slice(0, length) + suffix : input;
+  input.length > length
+    ? input.slice(0, length - suffix.length) + suffix
+    : input;
 
 const pluralize = (input: string, count: number): string =>
   count === 1 ? input : `${input}s`;

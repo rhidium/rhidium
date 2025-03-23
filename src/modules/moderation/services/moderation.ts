@@ -1,7 +1,9 @@
 import {
   ModerationAction,
-  Severity,
-  SeverityConfiguration,
+  type Prisma,
+  type PrismaClient,
+  type Severity,
+  type SeverityConfiguration,
 } from '@prisma/client';
 import {
   ChannelUtils,
@@ -74,6 +76,34 @@ export class ModerationServices {
       default:
         throw new Error(`Unknown moderation action: ${action}`);
     }
+  };
+
+  static readonly caseNumberTransaction = async (
+    tx: Omit<
+      PrismaClient<Prisma.PrismaClientOptions, never>,
+      '$connect' | '$disconnect' | '$on' | '$transaction' | '$use' | '$extends'
+    >,
+    guildId: string,
+  ) => {
+    return await tx.guildCaseCounter
+      .upsert({
+        where: {
+          GuildId: guildId,
+        },
+        create: {
+          GuildId: guildId,
+          caseNumber: 1,
+        },
+        update: {
+          caseNumber: {
+            increment: 1,
+          },
+        },
+        select: {
+          caseNumber: true,
+        },
+      })
+      .then((result) => result.caseNumber);
   };
 
   static readonly getSeverityValue = (

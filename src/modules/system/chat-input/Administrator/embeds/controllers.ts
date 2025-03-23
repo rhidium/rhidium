@@ -11,7 +11,6 @@ import {
   ComponentType,
   EmbedBuilder,
   EmbedField,
-  escapeCodeBlock,
   resolveColor,
 } from 'discord.js';
 import {
@@ -24,16 +23,14 @@ import {
   Lang,
   EmbedConstants,
   InteractionUtils,
-  StringUtils,
   UnitConstants,
   buildPlaceholders,
   replacePlaceholdersAcrossEmbed,
   replacePlaceholders,
   Database,
   InputUtils,
+  AuditLogType,
 } from '@core';
-
-const jsonCodeBlockOffset = 12;
 
 export const configureEmbedController: EmbedController = async (
   client,
@@ -48,9 +45,6 @@ export const configureEmbedController: EmbedController = async (
 
   const settingKey = settingsKeyFromEmbedOption(embedOptionInput);
   const setting = guildSettings[settingKey];
-  const humanFriendlySettingKey = StringUtils.titleCase(
-    StringUtils.splitOnUppercase(settingKey),
-  );
 
   const nullableByNone = (value: string | null) =>
     value === 'none' ? null : (value ?? undefined);
@@ -124,16 +118,34 @@ export const configureEmbedController: EmbedController = async (
     return;
   }
 
-  const upsertId = guildSettings[`${settingKey}Id`] ?? null;
+  let upsertId = guildSettings[`${settingKey}Id`] ?? null;
   if (upsertId === null) {
-    client.logger.error(
-      "Embed configuration failed, setting id reference field couldn't be resolved!",
+    console.log(
+      settingKey,
+      `${settingKey}Id`,
+      guildSettings[`${settingKey}Id`],
     );
-    await i.update({
-      content: Lang.t('commands:embeds.missingUpsertId'),
-      components: [],
+
+    const updated = await Database.Guild.update({
+      where: { id: guildSettings.id },
+      data: {
+        [settingKey]: {
+          create: {},
+        },
+      },
     });
-    return;
+    upsertId = updated[`${settingKey}Id`];
+
+    if (!upsertId) {
+      client.logger.error(
+        "Embed configuration failed, setting id reference field couldn't be resolved!",
+      );
+      await i.update({
+        content: Lang.t('commands:embeds.missingUpsertId'),
+        components: [],
+      });
+      return;
+    }
   }
 
   await ConfigureEmbedsCommand.deferReplyInternal(i);
@@ -246,11 +258,7 @@ export const configureEmbedController: EmbedController = async (
     ? resolveColor(`#${configureEmbedData.color.replaceAll('#', '')}`)
     : null;
   const createEmbedData: Prisma.EmbedCreateInput = {
-    [settingKey]: {
-      connect: {
-        id: guildSettings.id,
-      },
-    },
+    GuildId: guildSettings.id,
     messageText: configureEmbedMessage ?? null,
     color: createEmbedColor ?? null,
     authorName: configureEmbedData.authorName ?? null,
@@ -292,36 +300,16 @@ export const configureEmbedController: EmbedController = async (
   const newEmbedData = 'embeds' in msg ? msg.embeds[0] : null;
   if (!newEmbedData) return;
 
-  const jsonOutput = escapeCodeBlock(
-    JSON.stringify(updatedEmbed, null, 2),
-  ).slice(0, EmbedConstants.FIELD_VALUE_MAX_LENGTH - jsonCodeBlockOffset);
-  void LoggingServices.adminLog(
-    interaction.guild,
-    client.embeds.info({
-      title: Lang.t('commands:embeds.configurationChanged'),
-      fields: [
-        {
-          name: Lang.t('general:member'),
-          value: interaction.user.toString(),
-          inline: true,
-        },
-        {
-          name: Lang.t('general:embed'),
-          value: `\`\`\`${humanFriendlySettingKey}\`\`\``,
-          inline: true,
-        },
-        {
-          name: Lang.t('general:fields'),
-          value: `\`\`\`${newEmbedData.fields?.length ?? 0}\`\`\``,
-          inline: true,
-        },
-        {
-          name: 'JSON',
-          value: `\`\`\`json\n${jsonOutput}\n\`\`\``,
-        },
-      ],
-    }),
-  );
+  void Database.AuditLog.util({
+    client,
+    guild: updatedGuild,
+    type: AuditLogType.EMBED_UPDATED,
+    user: interaction.user.id,
+    data: {
+      before: setting,
+      after: updatedEmbed,
+    },
+  });
 };
 
 export const manageEmbedFieldsController: EmbedFieldController = async (
@@ -337,9 +325,6 @@ export const manageEmbedFieldsController: EmbedFieldController = async (
     true,
   );
   const settingKey = settingsKeyFromEmbedOption(embedOptionInput);
-  const humanFriendlySettingKey = StringUtils.titleCase(
-    StringUtils.splitOnUppercase(settingKey),
-  );
 
   switch (subcommand) {
     case EmbedConfigurationConstants.MANAGE_FIELDS_ADD: {
@@ -411,31 +396,16 @@ export const manageEmbedFieldsController: EmbedFieldController = async (
         embeds: [embed],
       });
 
-      const jsonOutput = escapeCodeBlock(
-        JSON.stringify(newField, null, 2),
-      ).slice(0, EmbedConstants.FIELD_VALUE_MAX_LENGTH - jsonCodeBlockOffset);
-      void LoggingServices.adminLog(
-        interaction.guild,
-        client.embeds.info({
-          title: Lang.t('commands:embeds.fieldsAdded'),
-          fields: [
-            {
-              name: Lang.t('general:member'),
-              value: `\`\`\`${interaction.user.username}\`\`\``,
-              inline: true,
-            },
-            {
-              name: Lang.t('general:embed'),
-              value: `\`\`\`${humanFriendlySettingKey}\`\`\``,
-              inline: true,
-            },
-            {
-              name: Lang.t('general:field'),
-              value: `\`\`\`json\n${jsonOutput}\n\`\`\``,
-            },
-          ],
-        }),
-      );
+      void Database.AuditLog.util({
+        client,
+        guild: updatedGuild,
+        type: AuditLogType.EMBED_FIELD_ADDED,
+        user: interaction.user.id,
+        data: {
+          before: null,
+          after: newField,
+        },
+      });
 
       break;
     }
@@ -514,32 +484,16 @@ export const manageEmbedFieldsController: EmbedFieldController = async (
         embeds: [embed],
       });
 
-      const jsonOutput = escapeCodeBlock(
-        JSON.stringify(targetField, null, 2),
-      ).slice(0, EmbedConstants.FIELD_VALUE_MAX_LENGTH - jsonCodeBlockOffset);
-      void LoggingServices.adminLog(
-        interaction.guild,
-        client.embeds.info({
-          title: Lang.t('commands:embeds.fieldRemoved'),
-          fields: [
-            {
-              name: Lang.t('general:member'),
-              value: `\`\`\`${interaction.user.username}\`\`\``,
-              inline: true,
-            },
-            {
-              name: Lang.t('general:embed'),
-              value: `\`\`\`${humanFriendlySettingKey}\`\`\``,
-              inline: true,
-            },
-            {
-              name: Lang.t('general:field'),
-              value: `\`\`\`json\n${jsonOutput}\n\`\`\``,
-            },
-          ],
-        }),
-      );
-
+      void Database.AuditLog.util({
+        client,
+        guild: updatedGuild,
+        type: AuditLogType.EMBED_FIELD_REMOVED,
+        user: interaction.user.id,
+        data: {
+          before: targetField,
+          after: null,
+        },
+      });
       break;
     }
 
@@ -596,24 +550,16 @@ export const manageEmbedFieldsController: EmbedFieldController = async (
             embeds: [embed],
           });
 
-          void LoggingServices.adminLog(
-            interaction.guild,
-            client.embeds.info({
-              title: Lang.t('commands:embeds.fieldsReset'),
-              fields: [
-                {
-                  name: Lang.t('general:member'),
-                  value: `\`\`\`${interaction.user.username}\`\`\``,
-                  inline: true,
-                },
-                {
-                  name: Lang.t('general:embed'),
-                  value: `\`\`\`${humanFriendlySettingKey}\`\`\``,
-                  inline: true,
-                },
-              ],
-            }),
-          );
+          void Database.AuditLog.util({
+            client,
+            guild: updatedGuild,
+            type: AuditLogType.EMBED_FIELDS_RESET,
+            user: interaction.user.id,
+            data: {
+              before: setting.fields,
+              after: [],
+            },
+          });
         },
       });
 

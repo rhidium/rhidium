@@ -3,7 +3,6 @@ import { EmbedBuilder, Events, PermissionFlagsBits } from 'discord.js';
 import {
   Lang,
   ClientEventListener,
-  PermissionUtils,
   TimeUtils,
   buildPlaceholders,
   replacePlaceholdersAcrossEmbed,
@@ -26,46 +25,11 @@ export default new ClientEventListener({
     if (!guildSettings || !guildSettings.memberJoinChannelId) return;
 
     const channel = guild.channels.cache.get(guildSettings.memberJoinChannelId);
-    if (!channel) {
-      void LoggingServices.adminLog(
-        guild,
-        client.embeds.error({
-          title: Lang.t('commands:member-join.errorLabel'),
-          description: Lang.t('general:errors.noChannel'),
-        }),
-      );
-      return;
-    }
-
-    if (!channel.permissionsFor(client.user.id)?.has(requiredPermissions)) {
-      void LoggingServices.adminLog(
-        guild,
-        client.embeds.error({
-          title: Lang.t('commands:member-join.errorLabel'),
-          description: Lang.t('general:errors.missingPerms', {
-            permissions: PermissionUtils.displayPermissions(
-              requiredPermissions.filter(
-                (permission) =>
-                  !channel.permissionsFor(client.user.id)?.has(permission),
-              ),
-            ),
-            channel: channel.toString(),
-          }),
-        }),
-      );
-      return;
-    }
-
-    if (!channel.isTextBased()) {
-      void LoggingServices.adminLog(
-        guild,
-        client.embeds.error({
-          title: Lang.t('commands:member-join.errorLabel'),
-          description: Lang.t('general:errors.notTextChannel', {
-            channel: channel.toString(),
-          }),
-        }),
-      );
+    if (
+      !channel ||
+      !channel.permissionsFor(client.user.id)?.has(requiredPermissions) ||
+      !channel.isTextBased()
+    ) {
       return;
     }
 
@@ -114,15 +78,8 @@ export default new ClientEventListener({
       .send({ content: resolvedMessage, embeds: [embed] })
       .catch((error) => {
         logger.error(
-          'Error encountered while sending member join message, after checking permissions',
+          'Error encountered while sending member join message after checking permissions',
           error,
-        );
-        void LoggingServices.adminLog(
-          guild,
-          client.embeds.error({
-            title: Lang.t('commands:member-join.errorLabel'),
-            description: Lang.t('general:errors.errAfterPermCheck'),
-          }),
         );
       });
   },

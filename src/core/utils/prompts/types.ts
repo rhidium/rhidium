@@ -28,6 +28,7 @@ type PromptWithChannelTypes = PromptBase & {
 };
 
 type PromptWithMultiple = PromptBase & {
+  type: 'string' | 'number' | 'channel' | 'role' | 'user';
   multiple: true;
   minValues?: number;
   maxValues?: number;

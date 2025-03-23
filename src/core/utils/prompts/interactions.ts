@@ -273,9 +273,7 @@ class PromptInteractionHandler {
     collected.push(...safeDefaultValues);
 
     const shouldDisplayCollected = PromptValidation.isPromptWithMultiple(prompt)
-      ? prompt.type === 'string' ||
-        prompt.type === 'number' ||
-        prompt.type === 'boolean'
+      ? prompt.type === 'string' || prompt.type === 'number'
       : false;
 
     const selectMenuChoices: SelectMenuComponentOptionData[] | null =
@@ -529,6 +527,26 @@ class PromptInteractionHandler {
           }
 
           promptOptions.components = [row];
+        } else if (prompt.type === 'boolean') {
+          const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+            new ButtonBuilder()
+              .setCustomId(`@${prompt.id}-boolean-true`)
+              .setLabel('Yes')
+              .setStyle(ButtonStyle.Primary)
+              .setEmoji('✅'),
+            new ButtonBuilder()
+              .setCustomId(`@${prompt.id}-boolean-false`)
+              .setLabel('No')
+              .setStyle(ButtonStyle.Secondary)
+              .setEmoji('❌'),
+          );
+
+          if (allowCancel && !cancelButtonAttached) {
+            this.addCancelButton(row);
+            cancelButtonAttached = true;
+          }
+
+          promptOptions.components = [row];
         } else {
           const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
             new ButtonBuilder()
@@ -576,6 +594,8 @@ class PromptInteractionHandler {
           i.customId === `@${prompt.id}-submit-value` ||
           i.customId === `@${prompt.id}-submit-values` ||
           i.customId === `@${prompt.id}-skip` ||
+          i.customId === `@${prompt.id}-boolean-true` ||
+          i.customId === `@${prompt.id}-boolean-false` ||
           i.customId === '@cancel',
       });
 
@@ -665,6 +685,23 @@ class PromptInteractionHandler {
             }
 
             if (
+              customId === `@${prompt.id}-boolean-true` ||
+              customId === `@${prompt.id}-boolean-false`
+            ) {
+              const value = customId === `@${prompt.id}-boolean-true`;
+
+              collected.splice(0, collected.length, value.toString());
+
+              await runDefer();
+
+              componentCollector.stop();
+
+              resolve(response as AvailableGuildInteraction<typeof response>);
+
+              return;
+            }
+
+            if (
               customId === `@${prompt.id}-add` ||
               customId === `@${prompt.id}-submit-value`
             ) {
@@ -715,6 +752,7 @@ class PromptInteractionHandler {
                     interaction.customId === `@${prompt.id}`,
                 })) as AvailableGuildInteraction<ModalSubmitInteraction>;
               } catch {
+                componentCollector.stop();
                 reject(new Error('Prompt timed out.'));
                 return;
               }
@@ -739,6 +777,7 @@ class PromptInteractionHandler {
                     : Number(input)) as ValueForPrompt<ResolvedPrompt<P>>,
                 );
               } catch (error) {
+                componentCollector.stop();
                 resolve(
                   await collect(currentChoicesPage, [
                     {
@@ -760,6 +799,8 @@ class PromptInteractionHandler {
               resolve(await collect(currentChoicesPage));
             }
           }
+
+          componentCollector.stop();
 
           resolve(response as AvailableGuildInteraction<PromptInteraction>);
 
@@ -787,6 +828,8 @@ class PromptInteractionHandler {
       : response.isModalSubmit() // If we're working with a modal, we use the input field
         ? [response.fields.getField(`@${prompt.id}-input`).value]
         : collected; // Otherwise, we use our collected values
+
+    console.log(workingCollected);
 
     if (
       // Check if value has been unset/removed

@@ -1,4 +1,4 @@
-import { appConfig, Client, InteractionUtils } from '@core';
+import { appConfig, Client, Guild, InteractionUtils } from '@core';
 import {
   Guild as _Guild,
   GuildMember,
@@ -15,6 +15,7 @@ type CanModerateTargetOptions = {
   targetUser: DiscordUser;
   issuerMember: GuildMember;
   discordGuild: DiscordGuild;
+  guild: Guild;
 };
 type CanModerateTargetResult = GuildMember | [false, string];
 
@@ -27,25 +28,29 @@ class ModerationPermissionServices {
   static readonly canModerateTarget = async (
     options: CanModerateTargetOptions,
   ): Promise<CanModerateTargetResult> => {
-    const { targetUser, issuerMember, discordGuild: guild } = options;
+    const { targetUser, issuerMember, discordGuild, guild } = options;
 
     if (targetUser.bot) {
       return [false, 'The target is a bot.'];
     }
 
-    if (guild.ownerId === targetUser.id) {
+    if (discordGuild.ownerId === targetUser.id) {
       return [false, 'You cannot moderate the owner of the server.'];
     }
 
-    const target = await guild.members.fetch(targetUser.id).catch(() => null);
+    const target = await discordGuild.members
+      .fetch(targetUser.id)
+      .catch(() => null);
 
     if (target === null) {
       return [false, 'The target is not in this server.'];
     }
 
     const me =
-      guild.members.me ??
-      (await guild.members.fetch(guild.client.user.id).catch(() => null));
+      discordGuild.members.me ??
+      (await discordGuild.members
+        .fetch(discordGuild.client.user.id)
+        .catch(() => null));
 
     if (me === null) {
       return [
@@ -66,6 +71,13 @@ class ModerationPermissionServices {
           false,
           'You cannot moderate a user with a role higher than or equal to yours.',
         ];
+      }
+
+      if (
+        !guild.modsCanModerateMods &&
+        guild.modRoleIds.some((roleId) => target.roles.cache.has(roleId))
+      ) {
+        return [false, 'You cannot moderate other moderators.'];
       }
 
       if (issuerMember.roles.highest.comparePositionTo(me.roles.highest) <= 0) {

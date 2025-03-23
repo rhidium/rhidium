@@ -19,7 +19,7 @@ export type DMCommandController<
   I extends BaseInteraction,
   AdditionalParams extends unknown[] = [],
 > = Controller<
-  [Client, DMInteraction<I>, ...AdditionalParams],
+  [Client<true>, DMInteraction<I>, ...AdditionalParams],
   ReturnType<RunFunction<I>>
 >;
 
@@ -27,6 +27,6 @@ export type GuildCommandController<
   I extends BaseInteraction,
   AdditionalParams extends unknown[] = [],
 > = Controller<
-  [Client, AvailableGuildInteraction<I>, ...AdditionalParams],
+  [Client<true>, AvailableGuildInteraction<I>, ...AdditionalParams],
   ReturnType<RunFunction<I>>
 >;

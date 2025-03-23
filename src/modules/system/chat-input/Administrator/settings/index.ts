@@ -113,6 +113,8 @@ const deleteAllGuildData = async (guild: PopulatedGuild) => {
     membersDeleted,
     autoModerationActionsDeleted,
     severityConfigurationsDeleted,
+    auditLogsDeleted,
+    embedsDeleted,
   ] = await Promise.all([
     prismaClient.member.deleteMany({
       where: {
@@ -129,14 +131,44 @@ const deleteAllGuildData = async (guild: PopulatedGuild) => {
         GuildId: guild.id,
       },
     }),
+    prismaClient.auditLog.deleteMany({
+      where: {
+        GuildId: guild.id,
+      },
+    }),
+    prismaClient.embedField
+      .deleteMany({
+        where: {
+          Embed: {
+            GuildId: guild.id,
+          },
+        },
+      })
+      .then(() =>
+        prismaClient.embed.deleteMany({
+          where: {
+            GuildId: guild.id,
+          },
+        }),
+      ),
   ]);
 
   await Database.Guild.delete({ id: guild.id });
+
+  await Promise.all([
+    prismaClient.guildCaseCounter.deleteMany({
+      where: {
+        GuildId: guild.id,
+      },
+    }),
+  ]);
 
   return {
     guild: 1,
     members: membersDeleted.count,
     warnings: warningsDeleted.count,
+    embeds: embedsDeleted.count,
+    'audit-logs': auditLogsDeleted.count,
     'auto-moderation-actions': autoModerationActionsDeleted.count,
     'severity-configurations': severityConfigurationsDeleted.count,
   };

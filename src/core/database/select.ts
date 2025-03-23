@@ -33,6 +33,7 @@ type PopulatedEmbedField = Prisma.EmbedFieldGetPayload<
 const populatedEmbed = Prisma.validator<Prisma.EmbedDefaultArgs>()({
   select: {
     id: true,
+    GuildId: true,
     messageText: true,
     color: true,
     authorName: true,
@@ -94,14 +95,18 @@ type PopulatedSeverityConfiguration = Prisma.SeverityConfigurationGetPayload<
 const populatedWarning = Prisma.validator<Prisma.WarningDefaultArgs>()({
   select: {
     id: true,
+    caseNumber: true,
     severity: true,
     message: true,
     date: true,
     validUntil: true,
+    removedAt: true,
     MemberUserId: true,
     MemberGuildId: true,
     IssuedByUserId: true,
     IssuedByGuildId: true,
+    RemovedByUserId: true,
+    RemovedByGuildId: true,
     TriggeredActions: {
       select: {
         id: true,
@@ -148,6 +153,7 @@ type PopulatedMember = Prisma.MemberGetPayload<typeof populatedMember>;
 const populatedGuild = Prisma.validator<Prisma.GuildDefaultArgs>()({
   select: {
     id: true,
+    CaseCounterId: true,
 
     // Permissions and audit
     adminRoleIds: true,
@@ -156,6 +162,7 @@ const populatedGuild = Prisma.validator<Prisma.GuildDefaultArgs>()({
     modRoleIds: true,
     modLogChannelId: true,
     disabledCommands: true,
+    modsCanModerateMods: true,
 
     // Moderation
     SeverityConfiguration: populatedSeverityConfiguration,

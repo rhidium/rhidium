@@ -19,6 +19,12 @@ class GuildWrapper extends DatabaseWrapper<Model.Guild> {
       where: { id },
       create: {
         id,
+        CaseCounter: {
+          create: {
+            caseNumber: 0,
+            GuildId: id,
+          },
+        },
         AutoModerationActions: {
           create: {
             // Note: Default moderation action for new guilds.

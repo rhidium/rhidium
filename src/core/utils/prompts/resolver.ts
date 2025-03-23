@@ -1,4 +1,4 @@
-import { AnyPromptValue, Prompt, ResolvedPrompt } from './types';
+import { AnyPromptValue, Prompt, PromptType, ResolvedPrompt } from './types';
 import { PromptValidation } from './validation';
 
 class PromptResolver {
@@ -77,12 +77,25 @@ class PromptResolver {
     prompt: Prompt,
     value: AnyPromptValue,
     arrJoin = ', ',
+    emojis?: {
+      success: string;
+      error: string;
+    },
+    formatters?: Partial<Record<PromptType, (v: AnyPromptValue) => string>>,
   ): string => {
     const formatter = (v: AnyPromptValue): string => {
       if (v === null || typeof v === 'undefined') {
         return PromptValidation.isPromptWithMultiple(prompt)
           ? 'None'
           : 'Not configured';
+      }
+
+      if (
+        formatters &&
+        prompt.type in formatters &&
+        typeof formatters[prompt.type] === 'function'
+      ) {
+        return formatters[prompt.type]!(v);
       }
 
       switch (prompt.type) {
@@ -93,7 +106,13 @@ class PromptResolver {
         case 'user':
           return `<@${v}>`;
         case 'boolean':
-          return v ? 'Enabled' : 'Disabled';
+          return v
+            ? emojis?.success
+              ? emojis?.success + ' Enabled/Active'
+              : 'Enabled/Active'
+            : emojis?.error
+              ? emojis?.error + ' Disabled/Inactive'
+              : 'Enabled/Active';
         case 'number':
           return v.toLocaleString();
         default:

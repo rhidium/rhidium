@@ -57,12 +57,10 @@ model Member {
   Guild   Guild @relation(fields: [GuildId], references: [id])    // A member belongs to a single guild
 
   ReceivedWarnings Warning[] @relation("ReceivedWarnings")        // A member can receive multiple warnings
-  IssuedWarnings Warning[] @relation("IssuedWarnings")            // A member can issue multiple warnings
+  IssuedWarnings Warning[] @relation("IssuedWarnings")            // A member can issue multiple warnings\
+  RemovedWarnings Warning[] @relation("RemovedWarnings")          // A member can remove multiple warnings
 
   @@id(name: "GuildId_UserId", fields: [UserId, GuildId])         // Define a composite primary key
-  @@index([UserId, GuildId], name: "UserInd")                     // Create an index for quering members by user
-  @@index([GuildId, UserId], name: "GuildInd")                    // Create an index for quering members by guild
-  @@unique([UserId, GuildId], name: "UserGuild")                  // Require that a user can only be a member of a guild once
 }
 
 model Guild {
@@ -70,13 +68,17 @@ model Guild {
   Members Member[]                                                // A guild can have multiple members
   AuditLogs AuditLog[]                                            // A guild can have multiple audit logs
 
+  CaseCounterId Int @unique                                       // A guild has a case counter for moderation records
+  CaseCounter GuildCaseCounter @relation(fields: [CaseCounterId], references: [id])
+
   // Permissions and audit
   adminRoleIds      String[]                                      // Ids of roles that can perform administrative actions
   adminUserIds      String[]                                      // Ids of users that can perform administrative actions
   auditLogChannelId String?                                       // The id of the channel where audit logs are sent
+  disabledCommands  String[]                                      // List of command names that are disabled in the guild
   modRoleIds         String[]                                     // Ids of roles that can perform moderation actions
   modLogChannelId   String?                                       // The id of the channel where moderation actions are logged
-  disabledCommands  String[]                                      // List of command names that are disabled in the guild
+  modsCanModerateMods Boolean @default(false)                     // Whether moderators can moderate other moderators
 
   // Moderation
   SeverityConfiguration SeverityConfiguration?                    // Custom severity configuration for the guild
@@ -98,6 +100,16 @@ model Guild {
 // Start of moderation models
 // 
 
+model GuildCaseCounter {
+  id      Int   @id @default(autoincrement())                     // The unique (internal) id of the case counter
+  caseNumber  Int                                                 // Incremented for each moderation record in the guild/server
+
+  GuildId String @unique                                          // The guild this case counter belongs to
+  Guild   Guild?
+
+  @@index([GuildId], name: "GuildInd")                            // Create an index for quering case counters by guild
+}
+
 model SeverityConfiguration {
   GuildId String @id @unique                                      // The guild this configuration belongs to         
   Guild  Guild @relation(fields: [GuildId], references: [id])
@@ -107,12 +119,16 @@ model SeverityConfiguration {
 }
 
 model Warning {
-  id      Int   @id @default(autoincrement())
+  id      Int   @id @default(autoincrement())                     // The unique (internal) id of the warning
+
+  caseNumber Int                                                  // The case number of the warning, incremented for each moderation record in the guild
+  @@unique([MemberGuildId, caseNumber], name: "MemberGuildCase")  // Require that the case number is unique per guild
 
   severity Severity                                               // Determines how many warnings this warning counts as
   message String                                                  // The message/reason that was sent with the warning
   date    DateTime                                                // The date the warning was issued
   validUntil DateTime?                                            // The date the warning is valid until. If null, the warning is valid indefinitely
+  removedAt DateTime?                                             // The date the warning was removed (if any)
 
   MemberUserId  String                                            // The member that the warning is for / was issued to
   MemberGuildId String                                            // The guild the member is in
@@ -121,6 +137,10 @@ model Warning {
   IssuedByUserId String                                           // The member that issued the warning
   IssuedByGuildId String                                          // The guild the issuer is in
   IssuedBy   Member @relation("IssuedWarnings", fields: [IssuedByUserId, IssuedByGuildId], references: [UserId, GuildId])
+
+  RemovedByUserId String?                                         // The member that removed the warning
+  RemovedByGuildId String?                                        // The guild the remover is in
+  RemovedBy   Member? @relation("RemovedWarnings", fields: [RemovedByUserId, RemovedByGuildId], references: [UserId, GuildId])
 
   TriggeredActions AutoModerationAction[]                         // The (auto-moderation) actions that were triggered by this warning
 
@@ -211,6 +231,7 @@ model Embed {
   fields        EmbedField[]
 
   // Embeds can be user-customized through relations
+  GuildId String
   MemberJoinEmbed  Guild[] @relation("MemberJoinEmbed")
   MemberLeaveEmbed Guild[] @relation("MemberLeaveEmbed")
 }

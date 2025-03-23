@@ -1,11 +1,24 @@
 import type { Guild, Prisma } from '@prisma/client';
 import type { Client } from '../../client';
-import { ObjectUtils, PermissionUtils, TimeUtils } from '../../utils';
+import {
+  AnyPromptValue,
+  ObjectUtils,
+  PermissionUtils,
+  Prompt,
+  PromptResolver,
+  StringUtils,
+  TimeUtils,
+} from '../../utils';
 import { Model } from '../models';
 import type { PopulatedAuditLog } from '../select';
 import { DatabaseWrapper } from './wrapper';
 import { EmbedBuilder, MessageCreateOptions, MessagePayload } from 'discord.js';
 import { guildWrapper } from './guild';
+
+const defaultEmojis = {
+  success: '✅',
+  error: '❌',
+};
 
 enum AuditLogType {
   AUDIT_LOG_CHANNEL_DISABLED = 'AUDIT_LOG_CHANNEL_DISABLED',
@@ -17,6 +30,10 @@ enum AuditLogType {
   GUILD_SETTINGS_UPDATE = 'GUILD_SETTINGS_UPDATE',
   GUILD_SETTINGS_RESET = 'GUILD_SETTINGS_RESET',
   GUILD_DATA_DELETED = 'GUILD_DATA_DELETED',
+  EMBED_UPDATED = 'EMBED_UPDATED',
+  EMBED_FIELD_ADDED = 'EMBED_FIELD_ADDED',
+  EMBED_FIELD_REMOVED = 'EMBED_FIELD_REMOVED',
+  EMBED_FIELDS_RESET = 'EMBED_FIELDS_RESET',
 }
 
 type AuditLogOptions = {
@@ -45,8 +62,9 @@ type AuditLogOptions = {
     | Prisma.InputJsonValue
     | Prisma.JsonNullValueInput
     | {
-        before: Guild;
-        after: Guild;
+        before: unknown;
+        after: unknown;
+        prompt?: Prompt;
       };
   /**
    * The guild this operation is taking place in, if any.
@@ -65,7 +83,7 @@ class AuditLogWrapper extends DatabaseWrapper<Model.AuditLog> {
 
   public readonly isSettingsChange = (
     data: AuditLogOptions['data'],
-  ): data is { before: Guild; after: Guild } => {
+  ): data is { before: Guild; after: Guild; prompt?: Prompt } => {
     return (
       typeof data === 'object' &&
       data !== null &&
@@ -100,6 +118,7 @@ class AuditLogWrapper extends DatabaseWrapper<Model.AuditLog> {
     ];
 
     if (this.isSettingsChange(log.data)) {
+      const { prompt } = log.data;
       const diff = ObjectUtils.diffAsChanges(log.data.before, log.data.after);
 
       await this.discordLog(client, guild, {
@@ -112,7 +131,25 @@ class AuditLogWrapper extends DatabaseWrapper<Model.AuditLog> {
                 name: 'Changes',
                 value: diff
                   .map((change) => {
-                    return `- **${change.key}**: ${change.oldValue} -> ${change.newValue}`;
+                    const keyDisplay = StringUtils.titleCase(
+                      change.key.split(/(?=[A-Z])/).join(' '),
+                    );
+
+                    if (!prompt) {
+                      return `- **${keyDisplay}**: ${change.oldValue} -> ${change.newValue}`;
+                    }
+
+                    return `- **${keyDisplay}**: ${PromptResolver.defaultFormatter(
+                      prompt,
+                      change.oldValue as AnyPromptValue,
+                      undefined,
+                      defaultEmojis,
+                    )} -> ${PromptResolver.defaultFormatter(
+                      prompt,
+                      change.newValue as AnyPromptValue,
+                      undefined,
+                      defaultEmojis,
+                    )}`;
                   })
                   .join('\n'),
                 inline: false,
@@ -188,7 +225,7 @@ class AuditLogWrapper extends DatabaseWrapper<Model.AuditLog> {
 
     return await this.create({
       type,
-      data: data === null ? JSON.stringify(null) : data,
+      data: JSON.stringify(data),
       date,
       GuildId: guild?.id,
       UserId: user,
