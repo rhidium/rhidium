@@ -49,7 +49,7 @@ const safeSetTimeout = (
     throw new Error('Timeout value is negative');
   }
 
-  const isSafe = timeoutMs > NumberUtils.INT32_MAX;
+  const isSafe = timeoutMs <= NumberUtils.INT32_MAX;
 
   if (!isSafe && !scheduleOverflowInFuture) {
     throw new Error(
@@ -142,6 +142,7 @@ class RuntimeUtils {
    * @param intervalMs The interval to wait between each call
    * @param fn The function to run after each interval
    * @param onNewTimeout A callback for when a new timeout is scheduled
+   * @throws An error if the interval value is negative
    * @returns The interval object
    */
   static readonly safeSetInterval = safeSetInterval;
