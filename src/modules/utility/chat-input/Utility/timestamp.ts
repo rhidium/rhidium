@@ -55,6 +55,7 @@ const timestampStyleChoices = [
 ];
 
 const TimestampCommand = new ChatInputCommand({
+  guildOnly: false,
   data: new SlashCommandBuilder()
     .setName('timestamp')
     .setDescription(

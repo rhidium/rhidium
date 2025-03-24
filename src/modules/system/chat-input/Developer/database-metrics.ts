@@ -4,6 +4,7 @@ import {
   Database,
   ModelOperation,
   modelEntries,
+  PermLevel,
 } from '@core';
 import {
   SlashCommandBuilder,
@@ -33,6 +34,7 @@ for (const [key, value] of modelEntries) {
 }
 
 const DatabaseMetricsCommand = new ChatInputCommand({
+  permLevel: PermLevel['Bot Administrator'],
   data: new SlashCommandBuilder()
     .setName('database')
     .setDescription('View database information and metrics')
