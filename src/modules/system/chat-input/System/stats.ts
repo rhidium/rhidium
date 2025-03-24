@@ -13,6 +13,7 @@ const nodeVersionDocLink = `https://nodejs.org/docs/latest-${process.version.spl
 
 const StatsCommand = new ChatInputCommand({
   aliases: ['ping'],
+  guildOnly: false,
   data: new SlashCommandBuilder(),
   run: async (client, interaction) => {
     // Latency

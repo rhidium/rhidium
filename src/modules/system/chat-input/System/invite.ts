@@ -9,6 +9,7 @@ import {
 
 const InviteCommand = new ChatInputCommand({
   data: new SlashCommandBuilder(),
+  guildOnly: false,
   cooldown: {
     type: CommandCooldownType.Channel,
     usages: 1,

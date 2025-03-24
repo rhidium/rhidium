@@ -39,6 +39,7 @@ export const helpDescription = async (client: Client) => {
 
 const HelpCommand = new ChatInputCommand({
   isEphemeral: true,
+  guildOnly: false,
   data: new SlashCommandBuilder(),
   run: async (client, interaction) => {
     // Defer our reply internally, uses cmd#deferReply

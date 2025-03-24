@@ -1,17 +1,30 @@
-import { Lang, UserContextCommand, ArrayUtils, TimeUtils } from '@core';
-import { MessageFlags } from 'discord.js';
+import {
+  UserContextCommand,
+  ArrayUtils,
+  TimeUtils,
+  Lang,
+  Database,
+  PermLevel,
+} from '@core';
+import { ContextMenuCommandBuilder } from 'discord.js';
+import { WarnServices } from '../services/warn';
+import { stripIndents } from 'common-tags';
 
 const UserInfoCommand = new UserContextCommand({
-  disabled: process.env.NODE_ENV === 'production',
-  category: 'Developer',
+  data: new ContextMenuCommandBuilder().setName('Display User Info'),
+  guildOnly: true, // Note: User Ctx Menus currently not supported through User Install
+  disabled: false,
+  category: 'Moderation',
+  permLevel: PermLevel.Moderator,
+  isEphemeral: true,
   run: async (client, interaction) => {
     const { guild, targetUser } = interaction;
 
     if (!guild) {
-      await UserInfoCommand.reply(interaction, {
-        content: Lang.t('general:guildOnly'),
-        flags: [MessageFlags.Ephemeral],
-      });
+      await UserInfoCommand.reply(
+        interaction,
+        client.embeds.error('This command can only be used in a server.'),
+      );
       return;
     }
 
@@ -19,15 +32,18 @@ const UserInfoCommand = new UserContextCommand({
 
     const target = await guild.members.fetch(targetUser.id);
     if (!target) {
-      await UserInfoCommand.reply(interaction, {
-        content: Lang.t('commands:user-info.noMember'),
-        flags: [MessageFlags.Ephemeral],
-      });
+      await UserInfoCommand.reply(
+        interaction,
+        client.embeds.error(
+          `Unable to resolve member for ${targetUser}, please try again.`,
+        ),
+      );
       return;
     }
 
     const unknown = Lang.t('general:unknown');
     const none = Lang.t('general:none');
+
     const maxRoles = 25;
     const roles = target.roles.cache
       .filter((role) => role.id !== guild.roles.everyone.id)
@@ -46,13 +62,25 @@ const UserInfoCommand = new UserContextCommand({
     const hasServerAvatar =
       target.displayAvatarURL() !== null &&
       target.displayAvatarURL() !== targetUser.displayAvatarURL();
-    const serverAvatarOutput = hasServerAvatar
-      ? `[link](<${target.displayAvatarURL({ forceStatic: false, size: 4096 })}>)`
+
+    const [dbMember, dbGuild] = await Database.Member.resolve(
+      {
+        userId: target.id,
+        guildId: guild.id,
+      },
+      true,
+    );
+
+    const resolvedWarns = WarnServices.resolveWarns(dbMember, dbGuild);
+
+    const receivedWarnings = dbMember.ReceivedWarnings.length
+      ? ArrayUtils.truncateStringify(dbMember.ReceivedWarnings, {
+          maxItems: 20,
+          stringify: (warn) => WarnServices.stringifyWarn(warn, true, 50),
+          joinString: '\n- ',
+          prefix: '\n- ',
+        })
       : none;
-    const boostingOutput =
-      target.premiumSinceTimestamp !== null
-        ? TimeUtils.discordInfoTimestamp(target.premiumSinceTimestamp)
-        : Lang.t('commands:user-info.memberNotBoosting');
 
     const embed = client.embeds.branding({
       description: roleOutput,
@@ -62,27 +90,21 @@ const UserInfoCommand = new UserContextCommand({
       },
       fields: [
         {
-          name: Lang.t('general:discord.nickname'),
-          value: target.nickname ?? none,
-          inline: true,
-        },
-        {
-          name: Lang.t('general:discord.serverAvatar'),
-          value: serverAvatarOutput,
-        },
-        {
-          name: Lang.t('general:discord.boost'),
-          value: boostingOutput,
-          inline: false,
-        },
-        {
           name: Lang.t('general:discord.joinedServer'),
           value: joinedServer,
-          inline: false,
+          inline: true,
         },
         {
           name: Lang.t('general:discord.joinedDiscord'),
           value: joinedDiscord,
+          inline: true,
+        },
+        {
+          name: 'Moderation Cases/History',
+          value: stripIndents`
+            **Moderation Score:** ${resolvedWarns.after} (low = good, high = bad)
+            **Received Warnings:** ${receivedWarnings}
+          `,
           inline: false,
         },
       ],

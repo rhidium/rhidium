@@ -9,6 +9,7 @@ import {
 
 const SupportCommand = new ChatInputCommand({
   data: new SlashCommandBuilder().setDescription('Receive support for the bot'),
+  guildOnly: false,
   cooldown: {
     type: CommandCooldownType.Channel,
     usages: 1,

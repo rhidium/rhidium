@@ -1,5 +1,36 @@
 import { StringUtils } from './strings';
 
+const truncateStringify = <T>(
+  arr: T[],
+  options: {
+    maxItems: number;
+    stringify: (item: T) => string;
+    prefix?: string;
+    suffix?: string;
+    joinString?: string;
+  },
+): string => {
+  const {
+    prefix = '',
+    suffix = '',
+    joinString = ', ',
+    maxItems,
+    stringify,
+  } = options;
+
+  const withOptions = (_arr: string[]) =>
+    prefix + _arr.join(joinString) + suffix;
+
+  if (arr.length <= maxItems) return withOptions(arr.map(stringify));
+
+  const truncated = arr.slice(0, maxItems);
+
+  return withOptions([
+    ...truncated.map(stringify),
+    `and ${arr.length - maxItems} more...`,
+  ]);
+};
+
 const chunk = <T>(arr: T[], size: number): T[][] => {
   const result = [];
 
@@ -42,6 +73,15 @@ const join = <T extends unknown[]>(
 };
 
 class ArrayUtils {
+  /**
+   * Truncate an array of items into a string
+   * @param arr The array to truncate
+   * @param length The maximum number of items to include
+   * @param stringify The function to convert each item to a string
+   * @param joinString The string to join the items with
+   * @returns The truncated string
+   */
+  static readonly truncateStringify = truncateStringify;
   /**
    * Split an array into smaller chunks
    * @param arr The array to split

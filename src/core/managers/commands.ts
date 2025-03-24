@@ -9,6 +9,7 @@ import {
   FetchApplicationCommandOptions,
   GuildMember,
   GuildResolvable,
+  InteractionContextType,
   REST,
   RequestData,
   Routes,
@@ -251,6 +252,7 @@ export class CommandManager {
               );
               return null;
             }
+
             return Routes.applicationGuildCommands(
               this.client.applicationId,
               this.client.extendedOptions.developmentServerId,
@@ -344,10 +346,31 @@ export class CommandManager {
             options.guildId,
           );
 
+    const dmCommands = commands.filter((e) =>
+      e.contexts?.includes(InteractionContextType.BotDM),
+    );
+
     // Put command data over REST
     let data;
     try {
       data = await this.putCommands(route, commands, options.type);
+      console.log('\n\n\n', options.type, dmCommands.length, '\n\n\n');
+      if (options.type === 'development') {
+        // Register dm commands regardless
+        await this.putCommands(
+          Routes.applicationCommands(this.client.applicationId),
+          dmCommands.map(
+            (e) =>
+              ({
+                ...e,
+                contexts: (e.contexts ?? []).filter(
+                  (f) => f !== InteractionContextType.Guild,
+                ),
+              }) as APICommandData,
+          ),
+          'global',
+        );
+      }
     } catch (err) {
       this.client.logger.error(
         `Error encountered while deploying ${options.type} commands:`,

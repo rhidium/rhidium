@@ -1,5 +1,5 @@
 import { Model } from '../models';
-import { PopulatedMember } from '../select';
+import { PopulatedGuild, PopulatedMember } from '../select';
 import { guildWrapper } from './guild';
 import { userWrapper } from './user';
 import { DatabaseWrapper } from './wrapper';
@@ -16,12 +16,24 @@ class MemberWrapper extends DatabaseWrapper<Model.Member> {
     super(Model.Member);
   }
 
-  readonly resolve = async ({
-    userId,
-    guildId,
-    resolveGuild = true,
-    resolveUser = true,
-  }: FindMemberOptions): Promise<PopulatedMember> => {
+  // @ts-expect-error - Insufficient overlap for tuple type
+  readonly resolve: {
+    (options: FindMemberOptions, returnGuild?: false): Promise<PopulatedMember>;
+    (
+      options: FindMemberOptions,
+      returnGuild: true,
+    ): Promise<[PopulatedMember, PopulatedGuild]>;
+  } = async (
+    options: FindMemberOptions,
+    returnGuild = false,
+  ): Promise<PopulatedMember | [PopulatedMember, PopulatedGuild]> => {
+    const {
+      userId,
+      guildId,
+      resolveGuild = true,
+      resolveUser = true,
+    } = options;
+
     const member = await this.findUnique({
       GuildId_UserId: {
         GuildId: guildId,
@@ -29,17 +41,23 @@ class MemberWrapper extends DatabaseWrapper<Model.Member> {
       },
     });
 
-    if (member) return member;
+    const guildPromise = resolveGuild
+      ? guildWrapper.resolve(guildId)
+      : Promise.resolve(null);
+    const userPromise = resolveUser
+      ? userWrapper.resolve(userId)
+      : Promise.resolve(null);
 
-    await Promise.all([
-      resolveGuild ? guildWrapper.resolve(guildId) : null,
-      resolveUser ? userWrapper.resolve(userId) : null,
-    ]);
+    const [guild] = await Promise.all([guildPromise, userPromise]);
 
-    return this.create({
-      GuildId: guildId,
-      UserId: userId,
-    });
+    const resolvedMember =
+      member ?? (await this.create({ GuildId: guildId, UserId: userId }));
+
+    if (returnGuild) {
+      return [resolvedMember, guild ?? (await guildWrapper.resolve(guildId))]; // Enforce tuple return
+    }
+
+    return resolvedMember;
   };
 }
 

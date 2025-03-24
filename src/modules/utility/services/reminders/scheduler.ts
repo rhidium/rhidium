@@ -206,8 +206,7 @@ class ReminderScheduler {
           this.logger(`Failed to run reminder: ${currentReminder.id}`, err);
         }
       },
-      async (newTimeout) => {
-        console.log('\n\n\nNew timeout:', newTimeout, '\n\n\n');
+      async (newTimeout, isTimeoutForRunFn) => {
         const currentReminder = await Database.Reminder.findFirstResolved({
           where: {
             id: _reminder.id,
@@ -221,7 +220,7 @@ class ReminderScheduler {
           });
         } else {
           this.logger(
-            `Reminder not found when trying to reschedule: ${_reminder.id}`,
+            `Reminder not found when trying to reschedule: ${_reminder.id} (isTimeoutForRunFn: ${isTimeoutForRunFn})`,
           );
           this.cancelReminder(_reminder.id);
         }

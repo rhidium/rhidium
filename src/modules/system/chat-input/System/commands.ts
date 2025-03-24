@@ -203,6 +203,7 @@ class EmbedResolver {
 
 const CommandsHelpCommand = new ChatInputCommand({
   isEphemeral: true,
+  guildOnly: false,
   data: new SlashCommandBuilder().addStringOption(
     CommandOption.addOptionHandler,
   ),

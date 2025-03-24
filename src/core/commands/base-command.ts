@@ -6,6 +6,7 @@ import {
   Colors,
   EmbedBuilder,
   GuildMember,
+  InteractionContextType,
   InteractionReplyOptions,
   PermissionResolvable,
   PermissionsBitField,
@@ -366,6 +367,16 @@ export class BaseCommand<I extends BaseInteraction = BaseInteraction> {
           this.unInitialize();
           return false;
         }
+      }
+
+      if (this.guildOnly === true) {
+        this.data.setContexts(InteractionContextType.Guild);
+      } else {
+        this.data.setContexts(
+          InteractionContextType.Guild,
+          InteractionContextType.BotDM,
+          InteractionContextType.PrivateChannel,
+        );
       }
     }
 

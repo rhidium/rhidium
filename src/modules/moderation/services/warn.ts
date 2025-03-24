@@ -13,6 +13,7 @@ import {
   Prisma,
   Severity,
   TimeUtils,
+  StringUtils,
 } from '@core';
 import { ModerationServices } from './moderation';
 import {
@@ -26,10 +27,14 @@ import { ModerationPermissionServices } from './permission';
 import { ModLogServices } from './mod-log';
 
 class WarnServices {
-  static readonly stringifyWarn = (warn: PopulatedWarning, format = true) =>
+  static readonly stringifyWarn = (
+    warn: PopulatedWarning,
+    format = true,
+    maxMessageLength = 100,
+  ) =>
     format
-      ? `**\`#${warn.caseNumber}\`** - ${warn.message}`
-      : `#${warn.caseNumber} - ${warn.message}`;
+      ? `**\`#${warn.caseNumber}\`** - ${StringUtils.truncate(warn.message, maxMessageLength)}`
+      : `#${warn.caseNumber} - ${StringUtils.truncate(warn.message, maxMessageLength)}`;
 
   static readonly resolveWarns = (
     member: PopulatedMember,

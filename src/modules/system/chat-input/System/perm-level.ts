@@ -9,6 +9,7 @@ import {
 const PermLevelCommand = new ChatInputCommand({
   isEphemeral: true,
   aliases: ['pl'],
+  guildOnly: false,
   data: new SlashCommandBuilder().addUserOption(
     new SlashCommandUserOption()
       .setName('user')

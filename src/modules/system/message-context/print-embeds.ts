@@ -1,5 +1,6 @@
 import {
   AttachmentBuilder,
+  ContextMenuCommandBuilder,
   EmbedBuilder,
   InteractionReplyOptions,
   escapeCodeBlock,
@@ -7,8 +8,10 @@ import {
 import { Lang, EmbedConstants, MessageContextCommand } from '@core';
 
 const PrintEmbedCommand = new MessageContextCommand({
-  disabled: process.env.NODE_ENV === 'production',
+  data: new ContextMenuCommandBuilder().setName('Print Embed Data'),
+  disabled: false,
   category: 'Developer',
+  guildOnly: false,
   run: async (client, interaction) => {
     const { targetMessage } = interaction;
     const hasEmbeds = targetMessage.embeds.length > 0;
