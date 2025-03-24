@@ -1,4 +1,5 @@
 import { UnitConstants } from '../../constants';
+import { NumberUtils } from './numbers';
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -38,6 +39,47 @@ const awaitOrTimeout = <T>(promise: Promise<T>, timeout: number) => {
   });
 };
 
+const safeSetTimeout = (
+  timeoutMs: number,
+  scheduleOverflowInFuture: boolean,
+  fn: () => void,
+  onNewTimeout?: (timeout: NodeJS.Timeout) => void,
+): NodeJS.Timeout => {
+  if (timeoutMs < 0) {
+    throw new Error('Timeout value is negative');
+  }
+
+  const isSafe = timeoutMs > NumberUtils.INT32_MAX;
+
+  if (!isSafe && !scheduleOverflowInFuture) {
+    throw new Error(
+      "Timeout value is too large, as it doesn't fit in an int32",
+    );
+  }
+
+  if (isSafe) {
+    return setTimeout(fn, timeoutMs);
+  }
+
+  let timeout: NodeJS.Timeout;
+
+  const scheduleTimeout = (_timeoutMs: number): NodeJS.Timeout => {
+    if (_timeoutMs > NumberUtils.INT32_MAX) {
+      timeout = scheduleTimeout(_timeoutMs - NumberUtils.INT32_MAX);
+      onNewTimeout?.(timeout);
+    } else {
+      timeout = setTimeout(fn, _timeoutMs);
+      onNewTimeout?.(timeout);
+    }
+
+    return timeout;
+  };
+
+  timeout = scheduleTimeout(timeoutMs);
+
+  return timeout;
+};
+
 class RuntimeUtils {
   /**
    * Sleep/wait for a specified amount of time
@@ -69,6 +111,17 @@ class RuntimeUtils {
    * @throws Any error the promise may natively throw
    */
   static readonly awaitOrTimeout = awaitOrTimeout;
+  /**
+   * Safely schedule a timeout, even if the duration is too large
+   * @param timeoutMs The number of milliseconds to wait
+   * @param scheduleOverflowInFuture Whether to schedule the overflow in the future
+   * @param fn The function to run after the timeout
+   * @param onNewTimeout A callback for when a new timeout is scheduled
+   * @returns The timeout object
+   * @throws An error if the timeout value is negative
+   * @throws An error if the timeout value is too large for an int32, and `scheduleOverflowInFuture` is false
+   */
+  static readonly safeSetTimeout = safeSetTimeout;
 }
 
 export { RuntimeUtils };
