@@ -176,7 +176,10 @@ class AuditLogWrapper extends DatabaseWrapper<Model.AuditLog> {
               ...sharedFields,
               {
                 name: 'Action/Operation Data',
-                value: log.data?.toString() ?? 'No data was attached.',
+                value: StringUtils.truncate(
+                  log.data?.toString() ?? 'No data was attached.',
+                  EmbedConstants.FIELD_VALUE_MAX_LENGTH,
+                ),
                 inline: false,
               },
             ],
