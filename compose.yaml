@@ -2,23 +2,23 @@ services:
   client:
     container_name: rhidium-client
     build:
-      context: ../
-      dockerfile: ./deploy/Dockerfile
+      context: ./
+      dockerfile: ./Dockerfile
       args:
         - CI=true
     restart: unless-stopped
     depends_on:
       - database
-    env_file: ../.env
+    env_file: ./.env
     environment:
       CI: true
       DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@database:5432/${POSTGRES_DB}
     volumes:
-      - ../data:/app/data:rw
-      - ../logs:/app/logs:rw
-      - ../docs:/app/docs:rw
-      - ../config:/app/config:r
-      - ../prisma:/app/prisma:r # Prisma is included as a volume to allow for database migrations without having to rebuild the client container.
+      - ./data:/app/data:rw
+      - ./logs:/app/logs:rw
+      - ./docs:/app/docs:rw
+      - ./config:/app/config:r
+      - ./prisma:/app/prisma:r # Prisma is included as a volume to allow for database migrations without having to rebuild the client container.
     ports:
       - 9000:9000
     networks:

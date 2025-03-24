@@ -3,7 +3,6 @@
 .vscode
 config
 data
-deploy
 dist
 docs
 logs
@@ -18,6 +17,8 @@ node_modules
 .lintstagedrc.js
 .prettierrc.js
 commitlint.config.js
+compose.yaml
+Dockerfile
 LICENSE
 
 *.md
