@@ -124,6 +124,8 @@ class AuditLogWrapper extends DatabaseWrapper<Model.AuditLog> {
       const { prompt } = log.data;
       const diff = ObjectUtils.diffAsChanges(log.data.before, log.data.after);
 
+      delete log.data.prompt;
+
       await this.discordLog(client, guild, {
         embeds: [
           client.embeds.info({
@@ -243,7 +245,10 @@ class AuditLogWrapper extends DatabaseWrapper<Model.AuditLog> {
       GuildId: guild?.id,
       UserId: user,
     }).then((record) => {
-      void this.onCreate(options.client, record);
+      void this.onCreate(options.client, {
+        ...record,
+        data: record.data === null ? null : JSON.parse(record.data.toString()),
+      });
 
       if (options.onFinish) {
         options.onFinish(record);
