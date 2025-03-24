@@ -41,10 +41,10 @@ const calculateStandardDeviation = (values: number[]) => {
 };
 
 const bigIntStringifyHelper = (_: string, value: unknown) =>
-  typeof value === 'bigint'
-    ? value <= Number.MAX_SAFE_INTEGER
-      ? Number(value)
-      : value.toString()
+  typeof value === 'bigint' || typeof value === 'number'
+    ? value > Number.MAX_SAFE_INTEGER
+      ? value.toString()
+      : Number(value)
     : JSON.stringify(value);
 
 class NumberUtils {
