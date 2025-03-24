@@ -1044,7 +1044,10 @@ export class CommandManager {
         });
         // Note: Without doing this, changing alias data
         // will overwrite initial/parent data as well
-        const newData = Object.assign({ name: aliasStr }, command.data);
+        const newData = {
+          ...aliasCmd.data,
+          name: aliasStr,
+        };
         Object.defineProperty(aliasCmd, 'data', {
           value: newData,
           writable: false,
