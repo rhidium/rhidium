@@ -1,6 +1,9 @@
-import { AutoCompleteOption, Database, Reminder } from '@core';
+import { AutoCompleteOption, Database, ResolvedPopulatedReminder } from '@core';
 
-const ReminderOption = new AutoCompleteOption<Reminder>({
+// [DEV] Output if autoRoles are valid (permissions)
+// Contexts for chat input user ctx message ctx
+
+const ReminderOption = new AutoCompleteOption<ResolvedPopulatedReminder>({
   name: 'reminder',
   description: 'Select a reminder',
   required: false,

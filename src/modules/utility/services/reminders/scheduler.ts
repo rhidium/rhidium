@@ -1,5 +1,5 @@
 import _debug from 'debug';
-import { Client, Database, Reminder, TimeUtils } from '@core';
+import { Client, Database, ResolvedPopulatedReminder, TimeUtils } from '@core';
 import { ReminderServices } from '.';
 
 const defaultLogger = _debug('@repo/reminders:scheduler');
@@ -8,7 +8,7 @@ class ReminderScheduler {
   constructor(
     private readonly cache = new Map<
       number,
-      Reminder & {
+      ResolvedPopulatedReminder & {
         timeout: NodeJS.Timeout;
       }
     >(),
@@ -37,7 +37,7 @@ class ReminderScheduler {
     this.cache.delete(reminderId);
   };
 
-  async scheduleReminder(client: Client, reminder: Reminder) {
+  async scheduleReminder(client: Client, reminder: ResolvedPopulatedReminder) {
     const now = Date.now();
     const reminderDate = ReminderServices.currentReminderDate(reminder);
     const diff = reminderDate.getTime() - now;
@@ -157,7 +157,7 @@ class ReminderScheduler {
           return;
         }
 
-        await Database.Reminder.update({
+        await Database.Reminder.updateResolved({
           where: {
             id: reminder.id,
           },
@@ -185,7 +185,7 @@ class ReminderScheduler {
       } catch (err) {
         this.logger(`Failed to run reminder: ${reminder.id}`, err);
 
-        const currentReminder = await Database.Reminder.findFirst({
+        const currentReminder = await Database.Reminder.findFirstResolved({
           where: {
             id: reminder.id,
           },

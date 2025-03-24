@@ -3,7 +3,7 @@ import {
   Client,
   DiscordConstants,
   InteractionUtils,
-  Reminder,
+  ResolvedPopulatedReminder,
   StringUtils,
   TimeUtils,
   UnitConstants,
@@ -43,7 +43,9 @@ class ReminderServices {
   static readonly padId = (id: number, longestId: number) =>
     id.toString().padStart(longestId, '0');
 
-  static readonly shortReminderOverview = (reminders: Reminder[]) => {
+  static readonly shortReminderOverview = (
+    reminders: ResolvedPopulatedReminder[],
+  ) => {
     const longestId = this.resolveMaxLength(
       reminders.map((reminder) => reminder.id),
     );
@@ -56,7 +58,9 @@ class ReminderServices {
     );
   };
 
-  static readonly currentReminderDate = (reminder: Reminder) => {
+  static readonly currentReminderDate = (
+    reminder: ResolvedPopulatedReminder,
+  ) => {
     if (!reminder.repeatEvery) {
       return reminder.remindAt;
     }
@@ -78,7 +82,7 @@ class ReminderServices {
 
   static readonly createReminderEmbed = (
     client: Client,
-    reminder: Reminder,
+    reminder: ResolvedPopulatedReminder,
   ) => {
     const embed = client.embeds.info({
       footer: {

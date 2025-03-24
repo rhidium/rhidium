@@ -417,7 +417,7 @@ const RemindersCommand = new ChatInputCommand({
       }
 
       const [reminder] = await Promise.all([
-        Database.Reminder.create({
+        Database.Reminder.createResolved({
           UserId: interaction.user.id,
           channelId: shouldDM ? null : (channel?.id ?? null),
           remindAt: when,

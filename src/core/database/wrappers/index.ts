@@ -14,6 +14,7 @@ export {
 } from './wrapper';
 
 export { AuditLogType, type AuditLogOptions } from './audit-log';
+export { type ResolvedPopulatedReminder } from './reminder';
 
 export class Database {
   private static _instance: Database;

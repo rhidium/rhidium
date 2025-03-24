@@ -183,7 +183,7 @@ model Reminder {
   channelId String?                                               // The channel to send the reminder to/in
   shouldDM Boolean @default(false)                                // Whether the reminder should be sent as a DM to the user instead of using the channelId
   remindAt  DateTime                                              // When the reminder should be sent
-  repeatEvery Int?                                                // How often the reminder should repeat (in milliseconds)
+  repeatEvery BigInt?                                             // How often the reminder should repeat (in milliseconds)
   repeatUntil DateTime?                                           // When the reminder should stop repeating
 }
 
