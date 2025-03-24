@@ -33,4 +33,4 @@ RUN adduser --system --uid 1001 nodejs
 COPY --from=prod-deps --chown=nodejs:nodejs /app/node_modules /app/node_modules
 COPY --from=build --chown=nodejs:nodejs /app/dist /app/dist
 USER nodejs
-CMD  [ "node", "dist/src/client/index.js" ]
+CMD  [ "NODE_ENV=production node", "dist/src/client/index.js" ]
