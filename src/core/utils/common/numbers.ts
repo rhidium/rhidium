@@ -1,6 +1,11 @@
 const isInt = (n: number) => n % 2 === 0;
 const isFloat = (n: number) => !isInt(n);
 
+const INT32_MAX = Math.pow(2, 31) - 1;
+const INT32_MIN = -Math.pow(2, 31);
+const INT64_MAX = BigInt(2) ** BigInt(63) - BigInt(1); //
+const INT64_MIN = -(BigInt(2) ** BigInt(63));
+
 const calculateMean = (values: number[]) => {
   if (values.length === 0) return null;
   const sum = values.reduce((a, b) => a + b, 0);
@@ -50,6 +55,14 @@ const bigIntStringifyHelper = (_: string, value: unknown) =>
 class NumberUtils {
   static readonly isInt = isInt;
   static readonly isFloat = isFloat;
+  /** `2147483647` */
+  static readonly INT32_MAX = INT32_MAX;
+  /** `-2147483648` */
+  static readonly INT32_MIN = INT32_MIN;
+  /** `9223372036854775807n` */
+  static readonly INT64_MAX = INT64_MAX;
+  /** `-9223372036854775808n` */
+  static readonly INT64_MIN = INT64_MIN;
   static readonly isEven = isInt;
   static readonly isOdd = isFloat;
   /**

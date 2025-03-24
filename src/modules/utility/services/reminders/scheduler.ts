@@ -1,5 +1,11 @@
 import _debug from 'debug';
-import { Client, Database, ResolvedPopulatedReminder, TimeUtils } from '@core';
+import {
+  Client,
+  Database,
+  NumberUtils,
+  ResolvedPopulatedReminder,
+  TimeUtils,
+} from '@core';
 import { ReminderServices } from '.';
 
 const defaultLogger = _debug('@repo/reminders:scheduler');
@@ -176,6 +182,34 @@ class ReminderScheduler {
       );
 
       await runFn();
+      return;
+    }
+
+    if (diff > NumberUtils.INT32_MAX) {
+      this.logger(
+        `Reminder is too far in the future: ${reminder.id}, checking again after ${TimeUtils.humanReadableMs(
+          NumberUtils.INT32_MAX,
+        )}`,
+      );
+
+      this.cancelReminder(reminder.id);
+
+      setTimeout(async () => {
+        const currentReminder = await Database.Reminder.findFirstResolved({
+          where: {
+            id: reminder.id,
+          },
+        });
+
+        if (!currentReminder) {
+          this.logger(`Reminder not found after timeout: ${reminder.id}`);
+          return;
+        }
+
+        this.logger(`Rescheduling reminder after timeout: ${reminder.id}`);
+        await this.scheduleReminder(client, currentReminder);
+      }, NumberUtils.INT32_MAX);
+
       return;
     }
 
