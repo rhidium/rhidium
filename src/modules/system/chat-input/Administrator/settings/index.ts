@@ -192,7 +192,7 @@ const SettingsCommand = new ChatInputCommand({
       const isShortSetup =
         typeof completeSetup === 'boolean'
           ? completeSetup === false
-          : settingsAllRequired;
+          : !settingsAllRequired;
       const setting = subcommand === 'set-up' ? null : subcommand;
 
       await handleSettingsUpdate(client, interaction, isShortSetup, setting);

@@ -16,6 +16,7 @@ import { EmbedBuilder, MessageCreateOptions, MessagePayload } from 'discord.js';
 import { guildWrapper } from './guild';
 import { memberWrapper } from './member';
 import { userWrapper } from './user';
+import { EmbedConstants } from '../../constants';
 
 const defaultEmojis = {
   success: '✅',
@@ -131,29 +132,32 @@ class AuditLogWrapper extends DatabaseWrapper<Model.AuditLog> {
               ...sharedFields,
               {
                 name: 'Changes',
-                value: diff
-                  .map((change) => {
-                    const keyDisplay = StringUtils.titleCase(
-                      change.key.split(/(?=[A-Z])/).join(' '),
-                    );
+                value: StringUtils.truncate(
+                  diff
+                    .map((change) => {
+                      const keyDisplay = StringUtils.titleCase(
+                        change.key.split(/(?=[A-Z])/).join(' '),
+                      );
 
-                    if (!prompt) {
-                      return `- **${keyDisplay}**: ${change.oldValue} -> ${change.newValue}`;
-                    }
+                      if (!prompt) {
+                        return `- **${keyDisplay}**: ${change.oldValue} -> ${change.newValue}`;
+                      }
 
-                    return `- **${keyDisplay}**: ${PromptResolver.defaultFormatter(
-                      prompt,
-                      change.oldValue as AnyPromptValue,
-                      undefined,
-                      defaultEmojis,
-                    )} -> ${PromptResolver.defaultFormatter(
-                      prompt,
-                      change.newValue as AnyPromptValue,
-                      undefined,
-                      defaultEmojis,
-                    )}`;
-                  })
-                  .join('\n'),
+                      return `- **${keyDisplay}**: ${PromptResolver.defaultFormatter(
+                        prompt,
+                        change.oldValue as AnyPromptValue,
+                        undefined,
+                        defaultEmojis,
+                      )} -> ${PromptResolver.defaultFormatter(
+                        prompt,
+                        change.newValue as AnyPromptValue,
+                        undefined,
+                        defaultEmojis,
+                      )}`;
+                    })
+                    .join('\n'),
+                  EmbedConstants.FIELD_VALUE_MAX_LENGTH,
+                ),
                 inline: false,
               },
             ],
