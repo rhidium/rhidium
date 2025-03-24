@@ -2,6 +2,7 @@ import type { Guild, Prisma } from '@prisma/client';
 import type { Client } from '../../client';
 import {
   AnyPromptValue,
+  NumberUtils,
   ObjectUtils,
   PermissionUtils,
   Prompt,
@@ -240,11 +241,7 @@ class AuditLogWrapper extends DatabaseWrapper<Model.AuditLog> {
 
     return await this.create({
       type,
-      data: JSON.stringify(data, (_, value) =>
-        typeof value === 'bigint' && value <= Number.MAX_SAFE_INTEGER
-          ? Number(value)
-          : value.toString(),
-      ),
+      data: JSON.stringify(data, NumberUtils.bigIntStringifyHelper),
       date,
       GuildId: guild?.id,
       UserId: user,

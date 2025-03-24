@@ -40,6 +40,13 @@ const calculateStandardDeviation = (values: number[]) => {
   return Math.sqrt(variance);
 };
 
+const bigIntStringifyHelper = (_: string, value: unknown) =>
+  typeof value === 'bigint'
+    ? value <= Number.MAX_SAFE_INTEGER
+      ? Number(value)
+      : value.toString()
+    : JSON.stringify(value);
+
 class NumberUtils {
   static readonly isInt = isInt;
   static readonly isFloat = isFloat;
@@ -74,6 +81,13 @@ class NumberUtils {
    * @returns The standard deviation of the numbers
    */
   static readonly calculateStandardDeviation = calculateStandardDeviation;
+  /**
+   * A replacer function to handle bigints when stringifying JSON.
+   * @param key The key of the value
+   * @param value The value to stringify
+   * @returns The stringified value
+   */
+  static readonly bigIntStringifyHelper = bigIntStringifyHelper;
 }
 
 export { NumberUtils };

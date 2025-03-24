@@ -10,6 +10,7 @@ import {
   ResolvedCreateCacheOptions,
   SetCacheArguments,
 } from './types';
+import { NumberUtils } from '../../utils';
 
 export class CacheManager<T extends NonNullable<unknown>>
   implements AbstractCache<T>
@@ -142,7 +143,7 @@ export class CacheManager<T extends NonNullable<unknown>>
   async set(key: string, value: T | null, ttl?: number): Promise<T | null> {
     this.debug('[SET] Storing data in cache', key);
 
-    const jsonValue = JSON.stringify(value);
+    const jsonValue = JSON.stringify(value, NumberUtils.bigIntStringifyHelper);
 
     return await this.cache.set(key, jsonValue, ttl).then(() => {
       this.metadata.added++;
