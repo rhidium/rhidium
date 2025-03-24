@@ -61,9 +61,9 @@ const safeSetTimeout = (
     return setTimeout(fn, timeoutMs);
   }
 
-  let timeout: NodeJS.Timeout;
-
   const scheduleTimeout = (_timeoutMs: number): NodeJS.Timeout => {
+    let timeout: NodeJS.Timeout;
+
     if (_timeoutMs > NumberUtils.INT32_MAX) {
       timeout = scheduleTimeout(_timeoutMs - NumberUtils.INT32_MAX);
       onNewTimeout?.(timeout);
@@ -75,9 +75,23 @@ const safeSetTimeout = (
     return timeout;
   };
 
-  timeout = scheduleTimeout(timeoutMs);
+  return scheduleTimeout(timeoutMs);
+};
 
-  return timeout;
+const safeSetInterval = (
+  intervalMs: number,
+  fn: () => void | Promise<void>,
+  onNewTimeout?: (timeout: NodeJS.Timeout) => void,
+): NodeJS.Timeout => {
+  return safeSetTimeout(
+    intervalMs,
+    true,
+    async () => {
+      await fn();
+      safeSetInterval(intervalMs, fn, onNewTimeout);
+    },
+    onNewTimeout,
+  );
 };
 
 class RuntimeUtils {
@@ -122,6 +136,15 @@ class RuntimeUtils {
    * @throws An error if the timeout value is too large for an int32, and `scheduleOverflowInFuture` is false
    */
   static readonly safeSetTimeout = safeSetTimeout;
+  /**
+   * Safely schedule an interval, even if the duration is too large.
+   * Uses {@link safeSetTimeout} to recursively schedule timeouts
+   * @param intervalMs The interval to wait between each call
+   * @param fn The function to run after each interval
+   * @param onNewTimeout A callback for when a new timeout is scheduled
+   * @returns The interval object
+   */
+  static readonly safeSetInterval = safeSetInterval;
 }
 
 export { RuntimeUtils };
