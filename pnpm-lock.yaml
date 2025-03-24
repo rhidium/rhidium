@@ -16,6 +16,9 @@ importers:
       cache-manager:
         specifier: ^6.4.1
         version: 6.4.1
+      chrono-node:
+        specifier: ^2.7.8
+        version: 2.7.8
       colors:
         specifier: ^1.4.0
         version: 1.4.0
@@ -25,6 +28,9 @@ importers:
       cron:
         specifier: ^4.1.0
         version: 4.1.0
+      date-fns-tz:
+        specifier: ^3.2.0
+        version: 3.2.0(date-fns@4.1.0)
       debug:
         specifier: ^4.4.0
         version: 4.4.0
@@ -1412,6 +1418,13 @@ packages:
       }
     engines: { node: '>= 8.10.0' }
 
+  chrono-node@2.7.8:
+    resolution:
+      {
+        integrity: sha512-pzxemrTKu6jFVyAfkNxUckp9nlrmRFtr5lGrEJcVKyeKV9WSeGT78Oysazlzd/H0BdMv7EzACtJrw0pi2KODBQ==,
+      }
+    engines: { node: ^12.20.0 || ^14.13.1 || >=16.0.0 }
+
   ci-info@3.9.0:
     resolution:
       {
@@ -1649,6 +1662,26 @@ packages:
         integrity: sha512-wAV9QHOsNbwnWdNW2FYvE1P56wtgSbM+3SZcdGiWQILwVjACCXDCI3Ai8QlCjMDB8YK5zySiXZYBiwGmNY3lnw==,
       }
     engines: { node: '>=12' }
+
+  date-fns-tz@3.2.0:
+    resolution:
+      {
+        integrity: sha512-sg8HqoTEulcbbbVXeg84u5UnlsQa8GS5QXMqjjYIhS4abEVVKIUwe0/l/UhrZdKaL/W5eWZNlbTeEIiOXTcsBQ==,
+      }
+    peerDependencies:
+      date-fns: ^3.0.0 || ^4.0.0
+
+  date-fns@4.1.0:
+    resolution:
+      {
+        integrity: sha512-Ukq0owbQXxa/U3EGtsdVBkR1w7KOQ5gIBqdH2hkvknzZPYvBxb/aa6E8L7tmjFtkwZBu3UXBbjIgPo/Ez4xaNg==,
+      }
+
+  dayjs@1.11.13:
+    resolution:
+      {
+        integrity: sha512-oaMBel6gjolK862uaPQOVTA7q3TZhuSvuMQAAglQDOWYO9A91IrAOUJEyKVlqJlHE0vq5p5UXxzdPfMH/x6xNg==,
+      }
 
   debug@4.4.0:
     resolution:
@@ -5336,6 +5369,10 @@ snapshots:
     optionalDependencies:
       fsevents: 2.3.3
 
+  chrono-node@2.7.8:
+    dependencies:
+      dayjs: 1.11.13
+
   ci-info@3.9.0: {}
 
   cli-cursor@3.1.0:
@@ -5488,6 +5525,14 @@ snapshots:
       - typescript
 
   dargs@8.1.0: {}
+
+  date-fns-tz@3.2.0(date-fns@4.1.0):
+    dependencies:
+      date-fns: 4.1.0
+
+  date-fns@4.1.0: {}
+
+  dayjs@1.11.13: {}
 
   debug@4.4.0:
     dependencies:

@@ -1,21 +1,21 @@
 import type { Prisma } from '@prisma/client';
 import type { prismaClient } from './client';
 import {
-  populatedCommandCooldown,
-  populatedCommandStatistics,
-  populatedGuild,
-  populatedMember,
-  populatedUser,
-  populatedAuditLog,
+  populateCommandCooldown,
+  populateCommandStatistics,
+  populateGuild,
+  populateMember,
+  populateUser,
+  populateAuditLog,
 } from './select';
 
 export const populateModelArgs = {
-  User: populatedUser,
-  Member: populatedMember,
-  Guild: populatedGuild,
-  CommandCooldown: populatedCommandCooldown,
-  CommandStatistics: populatedCommandStatistics,
-  AuditLog: populatedAuditLog,
+  User: populateUser,
+  Member: populateMember,
+  Guild: populateGuild,
+  CommandCooldown: populateCommandCooldown,
+  CommandStatistics: populateCommandStatistics,
+  AuditLog: populateAuditLog,
 };
 
 //
@@ -189,16 +189,16 @@ export type PrismaModelName = Exclude<
 >;
 
 export type ModelGetPayload = {
-  User: Prisma.UserGetPayload<typeof populatedUser>;
-  Member: Prisma.MemberGetPayload<typeof populatedMember>;
-  Guild: Prisma.GuildGetPayload<typeof populatedGuild>;
+  User: Prisma.UserGetPayload<typeof populateUser>;
+  Member: Prisma.MemberGetPayload<typeof populateMember>;
+  Guild: Prisma.GuildGetPayload<typeof populateGuild>;
   CommandCooldown: Prisma.CommandCooldownGetPayload<
-    typeof populatedCommandCooldown
+    typeof populateCommandCooldown
   >;
   CommandStatistics: Prisma.CommandStatisticsGetPayload<
-    typeof populatedCommandStatistics
+    typeof populateCommandStatistics
   >;
-  AuditLog: Prisma.AuditLogGetPayload<typeof populatedAuditLog>;
+  AuditLog: Prisma.AuditLogGetPayload<typeof populateAuditLog>;
 };
 
 export type ModelFieldRefs = {

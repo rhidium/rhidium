@@ -8,7 +8,7 @@ import {
   PopulatedGuild,
   PopulatedMember,
   PopulatedPrisma,
-  populatedWarning,
+  populateWarning,
   PopulatedWarning,
   Prisma,
   Severity,
@@ -121,7 +121,7 @@ class WarnServices {
       );
 
       return await tx.warning.create({
-        ...populatedWarning,
+        ...populateWarning,
         data: {
           ...data,
           caseNumber,

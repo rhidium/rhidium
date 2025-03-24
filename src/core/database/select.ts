@@ -3,7 +3,7 @@
 import { Prisma } from '@prisma/client';
 
 // Prisma.AuditLog
-const populatedAuditLog = Prisma.validator<Prisma.AuditLogDefaultArgs>()({
+const populateAuditLog = Prisma.validator<Prisma.AuditLogDefaultArgs>()({
   select: {
     id: true,
     type: true,
@@ -13,10 +13,10 @@ const populatedAuditLog = Prisma.validator<Prisma.AuditLogDefaultArgs>()({
     UserId: true,
   },
 });
-type PopulatedAuditLog = Prisma.AuditLogGetPayload<typeof populatedAuditLog>;
+type PopulatedAuditLog = Prisma.AuditLogGetPayload<typeof populateAuditLog>;
 
 // Prisma.EmbedField
-const populatedEmbedField = Prisma.validator<Prisma.EmbedFieldDefaultArgs>()({
+const populateEmbedField = Prisma.validator<Prisma.EmbedFieldDefaultArgs>()({
   select: {
     id: true,
     EmbedId: true,
@@ -26,11 +26,11 @@ const populatedEmbedField = Prisma.validator<Prisma.EmbedFieldDefaultArgs>()({
   },
 });
 type PopulatedEmbedField = Prisma.EmbedFieldGetPayload<
-  typeof populatedEmbedField
+  typeof populateEmbedField
 >;
 
 // Prisma.Embed
-const populatedEmbed = Prisma.validator<Prisma.EmbedDefaultArgs>()({
+const populateEmbed = Prisma.validator<Prisma.EmbedDefaultArgs>()({
   select: {
     id: true,
     GuildId: true,
@@ -46,13 +46,13 @@ const populatedEmbed = Prisma.validator<Prisma.EmbedDefaultArgs>()({
     thumbnailURL: true,
     footerText: true,
     footerIconURL: true,
-    fields: populatedEmbedField,
+    fields: populateEmbedField,
   },
 });
-type PopulatedEmbed = Prisma.EmbedGetPayload<typeof populatedEmbed>;
+type PopulatedEmbed = Prisma.EmbedGetPayload<typeof populateEmbed>;
 
 // Prisma.AutoModerationAction
-const populatedAutoModerationAction =
+const populateAutoModerationAction =
   Prisma.validator<Prisma.AutoModerationActionDefaultArgs>()({
     select: {
       id: true,
@@ -74,11 +74,11 @@ const populatedAutoModerationAction =
     },
   });
 type PopulatedAutoModerationAction = Prisma.AutoModerationActionGetPayload<
-  typeof populatedAutoModerationAction
+  typeof populateAutoModerationAction
 >;
 
 // Prisma.SeverityConfiguration
-const populatedSeverityConfiguration =
+const populateSeverityConfiguration =
   Prisma.validator<Prisma.SeverityConfigurationDefaultArgs>()({
     select: {
       GuildId: true,
@@ -88,11 +88,11 @@ const populatedSeverityConfiguration =
     },
   });
 type PopulatedSeverityConfiguration = Prisma.SeverityConfigurationGetPayload<
-  typeof populatedSeverityConfiguration
+  typeof populateSeverityConfiguration
 >;
 
 // Prisma.Warning
-const populatedWarning = Prisma.validator<Prisma.WarningDefaultArgs>()({
+const populateWarning = Prisma.validator<Prisma.WarningDefaultArgs>()({
   select: {
     id: true,
     caseNumber: true,
@@ -114,12 +114,13 @@ const populatedWarning = Prisma.validator<Prisma.WarningDefaultArgs>()({
     },
   },
 });
-type PopulatedWarning = Prisma.WarningGetPayload<typeof populatedWarning>;
+type PopulatedWarning = Prisma.WarningGetPayload<typeof populateWarning>;
 
 // Prisma.User
-const populatedUser = Prisma.validator<Prisma.UserDefaultArgs>()({
+const populateUser = Prisma.validator<Prisma.UserDefaultArgs>()({
   select: {
     id: true,
+    timezone: true,
     risk: true,
     riskOriginGuildIds: true,
     _count: {
@@ -129,16 +130,16 @@ const populatedUser = Prisma.validator<Prisma.UserDefaultArgs>()({
     },
   },
 });
-type PopulatedUser = Prisma.UserGetPayload<typeof populatedUser>;
+type PopulatedUser = Prisma.UserGetPayload<typeof populateUser>;
 
 // Prisma.Member
-const populatedMember = Prisma.validator<Prisma.MemberDefaultArgs>()({
+const populateMember = Prisma.validator<Prisma.MemberDefaultArgs>()({
   select: {
     id: true,
     UserId: true,
     GuildId: true,
-    IssuedWarnings: populatedWarning,
-    ReceivedWarnings: populatedWarning,
+    IssuedWarnings: populateWarning,
+    ReceivedWarnings: populateWarning,
     _count: {
       select: {
         IssuedWarnings: true,
@@ -147,10 +148,10 @@ const populatedMember = Prisma.validator<Prisma.MemberDefaultArgs>()({
     },
   },
 });
-type PopulatedMember = Prisma.MemberGetPayload<typeof populatedMember>;
+type PopulatedMember = Prisma.MemberGetPayload<typeof populateMember>;
 
 // Prisma.Guild
-const populatedGuild = Prisma.validator<Prisma.GuildDefaultArgs>()({
+const populateGuild = Prisma.validator<Prisma.GuildDefaultArgs>()({
   select: {
     id: true,
     CaseCounterId: true,
@@ -165,8 +166,8 @@ const populatedGuild = Prisma.validator<Prisma.GuildDefaultArgs>()({
     modsCanModerateMods: true,
 
     // Moderation
-    SeverityConfiguration: populatedSeverityConfiguration,
-    AutoModerationActions: populatedAutoModerationAction,
+    SeverityConfiguration: populateSeverityConfiguration,
+    AutoModerationActions: populateAutoModerationAction,
 
     // Utility
     autoRoleIds: true,
@@ -174,16 +175,16 @@ const populatedGuild = Prisma.validator<Prisma.GuildDefaultArgs>()({
     memberLeaveChannelId: true,
 
     // Embed configuration
-    MemberJoinEmbed: populatedEmbed,
+    MemberJoinEmbed: populateEmbed,
     MemberJoinEmbedId: true,
-    MemberLeaveEmbed: populatedEmbed,
+    MemberLeaveEmbed: populateEmbed,
     MemberLeaveEmbedId: true,
   },
 });
-type PopulatedGuild = Prisma.GuildGetPayload<typeof populatedGuild>;
+type PopulatedGuild = Prisma.GuildGetPayload<typeof populateGuild>;
 
 // Prisma.CommandCooldown
-const populatedCommandCooldown =
+const populateCommandCooldown =
   Prisma.validator<Prisma.CommandCooldownDefaultArgs>()({
     select: {
       id: true,
@@ -193,11 +194,11 @@ const populatedCommandCooldown =
     },
   });
 type PopulatedCommandCooldown = Prisma.CommandCooldownGetPayload<
-  typeof populatedCommandCooldown
+  typeof populateCommandCooldown
 >;
 
 // Prisma.CommandStatistics
-const populatedCommandStatistics =
+const populateCommandStatistics =
   Prisma.validator<Prisma.CommandStatisticsDefaultArgs>()({
     select: {
       id: true,
@@ -220,30 +221,30 @@ const populatedCommandStatistics =
     },
   });
 type PopulatedCommandStatistics = Prisma.CommandStatisticsGetPayload<
-  typeof populatedCommandStatistics
+  typeof populateCommandStatistics
 >;
 
 export {
-  populatedAuditLog,
+  populateAuditLog,
   type PopulatedAuditLog,
-  populatedEmbed,
+  populateEmbed,
   type PopulatedEmbed,
-  populatedEmbedField,
+  populateEmbedField,
   type PopulatedEmbedField,
-  populatedAutoModerationAction,
+  populateAutoModerationAction,
   type PopulatedAutoModerationAction,
-  populatedSeverityConfiguration,
+  populateSeverityConfiguration,
   type PopulatedSeverityConfiguration,
-  populatedWarning,
+  populateWarning,
   type PopulatedWarning,
-  populatedUser,
+  populateUser,
   type PopulatedUser,
-  populatedMember,
+  populateMember,
   type PopulatedMember,
-  populatedGuild,
+  populateGuild,
   type PopulatedGuild,
-  populatedCommandCooldown,
+  populateCommandCooldown,
   type PopulatedCommandCooldown,
-  populatedCommandStatistics,
+  populateCommandStatistics,
   type PopulatedCommandStatistics,
 };

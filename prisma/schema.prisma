@@ -42,6 +42,7 @@ enum RiskLevel {
 
 model User {
   id      String   @id @unique                                    // The Discord id of the user
+  timezone String?                                                // The timezone of the user, used for time-based commands and input
   risk    RiskLevel @default(NONE)                                // The risk level of the user, based on their moderation history
   riskOriginGuildIds String[]                                     // The guilds where the user has been moderated, contributing to their risk level
   Members Member[]                                                // A user can be a member of multiple guilds
