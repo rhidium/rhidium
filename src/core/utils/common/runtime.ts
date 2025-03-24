@@ -43,7 +43,7 @@ const safeSetTimeout = (
   timeoutMs: number,
   scheduleOverflowInFuture: boolean,
   fn: () => void,
-  onNewTimeout?: (timeout: NodeJS.Timeout) => void,
+  onNewTimeout?: (timeout: NodeJS.Timeout, isTimeoutForRunFn: boolean) => void,
 ): NodeJS.Timeout => {
   if (timeoutMs < 0) {
     throw new Error('Timeout value is negative');
@@ -63,13 +63,21 @@ const safeSetTimeout = (
 
   const scheduleTimeout = (_timeoutMs: number): NodeJS.Timeout => {
     let timeout: NodeJS.Timeout;
+    let isTimeoutForRunFn = false;
 
     if (_timeoutMs > NumberUtils.INT32_MAX) {
-      timeout = scheduleTimeout(_timeoutMs - NumberUtils.INT32_MAX);
-      onNewTimeout?.(timeout);
+      timeout = setTimeout(() => {
+        scheduleTimeout(_timeoutMs - NumberUtils.INT32_MAX);
+      }, NumberUtils.INT32_MAX);
     } else {
-      timeout = setTimeout(fn, _timeoutMs);
-      onNewTimeout?.(timeout);
+      isTimeoutForRunFn = true;
+      timeout = setTimeout(() => {
+        fn();
+      }, _timeoutMs);
+    }
+
+    if (timeoutMs !== _timeoutMs) {
+      onNewTimeout?.(timeout, isTimeoutForRunFn);
     }
 
     return timeout;
@@ -81,7 +89,7 @@ const safeSetTimeout = (
 const safeSetInterval = (
   intervalMs: number,
   fn: () => void | Promise<void>,
-  onNewTimeout?: (timeout: NodeJS.Timeout) => void,
+  onNewTimeout?: (timeout: NodeJS.Timeout, isTimeoutForRunFn: boolean) => void,
 ): NodeJS.Timeout => {
   return safeSetTimeout(
     intervalMs,

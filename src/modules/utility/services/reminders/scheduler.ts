@@ -207,6 +207,7 @@ class ReminderScheduler {
         }
       },
       async (newTimeout) => {
+        console.log('\n\n\nNew timeout:', newTimeout, '\n\n\n');
         const currentReminder = await Database.Reminder.findFirstResolved({
           where: {
             id: _reminder.id,
