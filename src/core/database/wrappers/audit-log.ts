@@ -14,6 +14,8 @@ import type { PopulatedAuditLog } from '../select';
 import { DatabaseWrapper } from './wrapper';
 import { EmbedBuilder, MessageCreateOptions, MessagePayload } from 'discord.js';
 import { guildWrapper } from './guild';
+import { memberWrapper } from './member';
+import { userWrapper } from './user';
 
 const defaultEmojis = {
   success: '✅',
@@ -222,6 +224,10 @@ class AuditLogWrapper extends DatabaseWrapper<Model.AuditLog> {
       data,
       guild,
     });
+
+    // Make sure relations exist
+    if (guild) await memberWrapper.resolve({ userId: user, guildId: guild.id });
+    else await userWrapper.resolve(user);
 
     return await this.create({
       type,
