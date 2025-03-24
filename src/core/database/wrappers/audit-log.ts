@@ -240,7 +240,11 @@ class AuditLogWrapper extends DatabaseWrapper<Model.AuditLog> {
 
     return await this.create({
       type,
-      data: JSON.stringify(data),
+      data: JSON.stringify(data, (_, value) =>
+        typeof value === 'bigint' && value <= Number.MAX_SAFE_INTEGER
+          ? Number(value)
+          : value.toString(),
+      ),
       date,
       GuildId: guild?.id,
       UserId: user,
