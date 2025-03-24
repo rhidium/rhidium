@@ -46,7 +46,7 @@
     "setup:config": "pnpm add -D @rhidium/json-editor",
     "db:format": "prisma format",
     "db:generate": "prisma generate",
-    "db:migrate:deploy": "prisma migrate deploy",
+    "db:deploy": "prisma migrate deploy && prisma generate",
     "db:migrate:dev": "prisma migrate dev",
     "db:migrate:reset": "prisma migrate reset",
     "db:push": "prisma db push",

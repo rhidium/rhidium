@@ -27,15 +27,15 @@ services:
 
   database:
     container_name: rhidium-database
-    image: postgres
-    restart: unless-stopped
+    image: postgres:15
+    restart: always
     shm_size: 128mb
+    command: postgres -c max_connections=1 -c listen_addresses='*'
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U postgres']
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 5s
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}']
+      interval: 5s
+      timeout: 2s
+      retries: 20
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -44,6 +44,10 @@ services:
       - app-network
     volumes:
       - pg-data:/var/lib/postgresql/data
+    logging:
+      options:
+        max-size: '10m'
+        max-file: '3'
 
   # Web interface for database management
   # adminer:
