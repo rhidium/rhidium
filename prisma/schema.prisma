@@ -47,6 +47,7 @@ model User {
   riskOriginGuildIds String[]                                     // The guilds where the user has been moderated, contributing to their risk level
   Members Member[]                                                // A user can be a member of multiple guilds
   AuditLogs AuditLog[]                                            // A member can perform actions on/across multiple guilds
+  Reminders Reminder[]                                            // A user can have multiple reminders
 }
 
 model Member {
@@ -166,6 +167,26 @@ model AutoModerationAction {
   @@index([GuildId])
   @@unique([GuildId, action, triggerThreshold], name: "GuildId_Action")
 }
+
+// 
+// Start of User models/relations
+// 
+
+model Reminder {
+  id  Int    @id @default(autoincrement())                        // The unique (internal) id of the reminder
+
+  UserId  String                                                  // The user that created the reminder
+  User  User @relation(fields: [UserId], references: [id])        // The user that created the reminder
+  GuildId String?                                                 // The guild the reminder was created in, if applicable
+
+  message String                                                  // The message to send in the reminder
+  channelId String?                                               // The channel to send the reminder to/in
+  shouldDM Boolean @default(false)                                // Whether the reminder should be sent as a DM to the user instead of using the channelId
+  remindAt  DateTime                                              // When the reminder should be sent
+  repeatEvery Int?                                                // How often the reminder should repeat (in milliseconds)
+  repeatUntil DateTime?                                           // When the reminder should stop repeating
+}
+
 
 // 
 // Start of internal/core models

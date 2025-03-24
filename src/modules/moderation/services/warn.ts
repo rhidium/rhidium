@@ -276,7 +276,7 @@ class WarnServices {
       : 'This warn did not trigger any auto-moderation actions.';
     const previousWarnOutput = updatedTarget.ReceivedWarnings.length
       ? `__This user has received a total of **${updatedTarget.ReceivedWarnings.length}** warnings:__` +
-        `\n\n${updatedTarget.ReceivedWarnings.map((w) => `**\`${w.id}\`** - ${w.message}`).join('\n')}`
+        `\n\n${updatedTarget.ReceivedWarnings.map((w) => `**\`${w.caseNumber}\`** - ${w.message}`).join('\n')}`
       : 'This user has not received any warnings before.';
 
     const includePreviousWarnsInOutput =

@@ -31,7 +31,7 @@
     "pretest": "npm run build",
     "posttest": "npm run lint",
     "start": "node --enable-source-maps dist/src/client/index.js",
-    "start:dev": "DEBUG=@repo/database:* ts-node-dev -r tsconfig-paths/register --respawn --notify --transpile-only src/client/index.ts",
+    "start:dev": "DEBUG=@repo/database:*,@repo/reminders:* ts-node-dev -r tsconfig-paths/register --respawn --notify --transpile-only src/client/index.ts",
     "test": "mocha dist/test/**/*.js",
     "test:dev": "ts-mocha test/**/*.spec.ts -w --watch-files '**/*.ts'",
     "typecheck": "tsc --noEmit",

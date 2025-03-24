@@ -3,6 +3,7 @@ import { commandCooldownWrapper } from './command-cooldown';
 import { commandStatisticsWrapper } from './command-statistics';
 import { guildWrapper } from './guild';
 import { memberWrapper } from './member';
+import { reminderWrapper } from './reminder';
 import { userWrapper } from './user';
 
 export {
@@ -33,4 +34,5 @@ export class Database {
   static readonly Member = memberWrapper;
   static readonly User = userWrapper;
   static readonly AuditLog = auditLogWrapper;
+  static readonly Reminder = reminderWrapper;
 }

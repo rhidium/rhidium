@@ -100,13 +100,24 @@ export class AutoCompleteOption<T = undefined> {
   trimQuery = true;
   lowercaseQuery = true;
   suppressUnknownInteractionErrors = false;
-  addOptionHandler = (i: SlashCommandStringOption) => {
+  addOptionHandler = (
+    i: SlashCommandStringOption,
+    options?: {
+      required?: boolean;
+      name?: string;
+      description?: string;
+      minLength?: number;
+      maxLength?: number;
+    },
+  ) => {
     i.setAutocomplete(true)
-      .setName(this.name)
-      .setDescription(this.data.description)
-      .setRequired(this.data.required);
-    if (this.data.min_length) i.setMinLength(this.data.min_length);
-    if (this.data.max_length) i.setMaxLength(this.data.max_length);
+      .setName(options?.name ?? this.name)
+      .setDescription(options?.description ?? this.data.description)
+      .setRequired(options?.required ?? this.data.required);
+    const minLength = options?.minLength ?? this.data.min_length;
+    const maxLength = options?.maxLength ?? this.data.max_length;
+    if (minLength) i.setMinLength(minLength);
+    if (maxLength) i.setMaxLength(maxLength);
     return i;
   };
   constructor(options: AutoCompleteOptions<T>, client?: Client<true>) {

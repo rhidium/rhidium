@@ -224,6 +224,22 @@ type PopulatedCommandStatistics = Prisma.CommandStatisticsGetPayload<
   typeof populateCommandStatistics
 >;
 
+// Prisma.Reminder
+const populateReminder = Prisma.validator<Prisma.ReminderDefaultArgs>()({
+  select: {
+    id: true,
+    GuildId: true,
+    channelId: true,
+    message: true,
+    remindAt: true,
+    repeatEvery: true,
+    repeatUntil: true,
+    shouldDM: true,
+    UserId: true,
+  },
+});
+type PopulatedReminder = Prisma.ReminderGetPayload<typeof populateReminder>;
+
 export {
   populateAuditLog,
   type PopulatedAuditLog,
@@ -247,4 +263,6 @@ export {
   type PopulatedCommandCooldown,
   populateCommandStatistics,
   type PopulatedCommandStatistics,
+  populateReminder,
+  type PopulatedReminder,
 };

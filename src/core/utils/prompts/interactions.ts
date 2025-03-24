@@ -829,8 +829,6 @@ class PromptInteractionHandler {
         ? [response.fields.getField(`@${prompt.id}-input`).value]
         : collected; // Otherwise, we use our collected values
 
-    console.log(workingCollected);
-
     if (
       // Check if value has been unset/removed
       Array.isArray(collected) &&

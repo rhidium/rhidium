@@ -120,12 +120,6 @@ export const configureEmbedController: EmbedController = async (
 
   let upsertId = guildSettings[`${settingKey}Id`] ?? null;
   if (upsertId === null) {
-    console.log(
-      settingKey,
-      `${settingKey}Id`,
-      guildSettings[`${settingKey}Id`],
-    );
-
     const updated = await Database.Guild.update({
       where: { id: guildSettings.id },
       data: {

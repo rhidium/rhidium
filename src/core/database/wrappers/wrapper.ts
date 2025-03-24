@@ -16,8 +16,6 @@ import { CacheManager, PerformanceTracker } from '../../data-structures';
 // [DEV] !this.useCache || !cacheResult does NOT make sense
 // [DEV] The result of the operation.
 
-// [DEV] Dynamic settings command, with PROMPTS - awesome experience if done right
-
 const debug = _debug('@repo/database:wrapper');
 
 const defaultCache = CacheManager.fromStore<ThenArg<ModelGetPayload[Model]>>({

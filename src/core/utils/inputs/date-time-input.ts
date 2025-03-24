@@ -1,6 +1,7 @@
 import * as chrono from 'chrono-node';
 import { toZonedTime, fromZonedTime } from 'date-fns-tz';
 import { AutoCompleteOption } from '../../commands';
+import { SlashCommandStringOption } from 'discord.js';
 
 type HumanDateTimeInputOptions = {
   /**
@@ -108,6 +109,36 @@ class DateTimeInput {
       ],
     ] as const;
   };
+
+  static readonly formatSuffixShort = ' (e.g. at 2pm)';
+  static readonly formatSuffix =
+    ' (e.g. tomorrow at 2pm, next week, in 2 hours)';
+  static readonly withFormatSuffix = (
+    input: string,
+    omitSuffix: boolean | 'short' = false,
+  ) =>
+    omitSuffix === true
+      ? input
+      : `${input}${omitSuffix === 'short' ? this.formatSuffixShort : this.formatSuffix}`;
+
+  static readonly addOptionHandler = (
+    i: SlashCommandStringOption,
+    options?: {
+      required?: boolean;
+      name?: string;
+      description?: string;
+      omitSuffix?: boolean;
+      shortSuffix?: boolean;
+    },
+  ) =>
+    i
+      .setName(options?.name ?? 'date')
+      .setDescription(
+        `${this.withFormatSuffix(options?.description ?? 'The date', options?.shortSuffix ? 'short' : options?.omitSuffix)}.`,
+      )
+      .setRequired(options?.required ?? false)
+      .setMinLength(1)
+      .setMaxLength(100);
 }
 
 export {

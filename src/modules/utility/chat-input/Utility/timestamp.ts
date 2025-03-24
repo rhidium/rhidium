@@ -162,7 +162,7 @@ const TimestampCommand = new ChatInputCommand({
                 client.embeds.error({
                   title: 'No Timezone Set',
                   description: stripIndents`
-                    You have not set a timezone in your profile. Please set a timezone using ${await client.commandManager.commandLink('timestamp', 'timezone')}, or provide a timezone while using the command.
+                    You have not configured a timezone. Please set a timezone using ${await client.commandManager.commandLink('timestamp', 'timezone')}, or provide a timezone while using the command.
                   `,
                 }),
               ],
