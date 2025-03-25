@@ -1,15 +1,16 @@
 import { createHash } from 'crypto';
 import {
   APIInteractionGuildMember,
-  BaseInteraction,
+  RepliableInteraction,
   Collection,
   Colors,
   EmbedBuilder,
   GuildMember,
   InteractionContextType,
-  InteractionReplyOptions,
+  MessageFlags,
   PermissionResolvable,
   PermissionsBitField,
+  InteractionReplyOptions,
 } from 'discord.js';
 import path from 'path';
 import {
@@ -38,8 +39,8 @@ import {
 } from '../middleware';
 import { CommandManager, PermLevel } from '../managers';
 import {
+  DynamicContent,
   FileUtils,
-  InteractionReplyDynamicOptions,
   InteractionUtils,
   PermissionUtils,
   TimeUtils,
@@ -80,18 +81,19 @@ export const isDataBasedCommand = (item: unknown): item is APICommandType =>
 
 export const DEFAULT_SOURCE_FILE_STRING = 'uninitialized/ghost command';
 
-export type RunFunction<I extends BaseInteraction = BaseInteraction> = (
-  /** The client that received this interaction */
-  client: Client<true>,
-  /** The interaction that triggered this command#run */
-  interaction: I,
-) => Promise<unknown> | unknown;
+export type RunFunction<I extends RepliableInteraction = RepliableInteraction> =
+  (
+    /** The client that received this interaction */
+    client: Client<true>,
+    /** The interaction that triggered this command#run */
+    interaction: I,
+  ) => Promise<unknown> | unknown;
 
 /**
  * Represents a client command configuration object
  */
 export interface BaseCommandOptions<
-  I extends BaseInteraction = BaseInteraction,
+  I extends RepliableInteraction = RepliableInteraction,
 > {
   /**
    * The permission level required to use the command
@@ -164,7 +166,8 @@ export interface BaseCommandOptions<
    */
   isEphemeral?: boolean;
   /**
-   * Defers the reply to `run` interactions internally if possible
+   * Defers the reply to `run` interactions internally if possible.
+   * Generally should be used if the command is using asyncronous middleware.
    */
   deferReply?: boolean;
   /**
@@ -229,7 +232,9 @@ export interface ComponentCommandData {
 /**
  * Represents the base class used for all our commands & components
  * */
-export class BaseCommand<I extends BaseInteraction = BaseInteraction> {
+export class BaseCommand<
+  I extends RepliableInteraction = RepliableInteraction,
+> {
   client?: Client;
   collection?: Collection<string, CommandType>;
   manager?: CommandManager;
@@ -446,49 +451,51 @@ export class BaseCommand<I extends BaseInteraction = BaseInteraction> {
   };
 
   /**
-   * Defers the reply to `run` interactions internally if possible
+   * Defers the reply to `run` interactions internally if possible.
+   * Generally should be used if the command is using asyncronous middleware.
    */
-  deferReplyInternal = async (interaction: BaseInteraction) => {
+  deferReplyInternal = async (interaction: RepliableInteraction) => {
     if (
       interaction.isRepliable() &&
       !interaction.replied &&
       !interaction.deferred
     )
-      await interaction.deferReply({});
+      await interaction.deferReply({
+        flags: this.isEphemeral ? [MessageFlags.Ephemeral] : [],
+      });
   };
 
   /**
-   * Convenience method to reply to an interaction and set
-   * ephemeral state dynamically - it's nice not having to
-   * boilerplate import everywhere
+   * Reply to an interaction with a message, dynamically resolving
+   * which reply function to use depending on wether or not the
+   * interaction has been acknowledged. `ephemeral` is resolved from
+   * `this#isEphemeral` if not overriden.
+   *
+   * Please note that using {@link MessageFlags} in the `content` is not supported
+   * with a dynamic function like this. If you need specific flags, use `reply`,
+   * `editReply`, `followUp`, etc. directly, instead of using this convenience method.
    */
-  reply = async (
+  reply = <
+    I extends RepliableInteraction,
+    WithResponse extends boolean = false,
+  >(
     interaction: I,
-    content: InteractionReplyOptions | EmbedBuilder | string,
-    options: InteractionReplyDynamicOptions = {},
-  ) => {
-    if (!this.client) {
-      throw new Error(
-        `Command ${this.data.name} has no client, but is trying to reply to an interaction`,
-      );
-    }
-
-    const resolvedContent =
-      content instanceof EmbedBuilder
-        ? { embeds: [content] }
-        : typeof content === 'string'
-          ? { content }
-          : content;
-
-    return InteractionUtils.replyEphemeral(interaction, {
-      ...resolvedContent,
-      ...options,
-    });
-  };
+    content: WithResponse extends true
+      ? InteractionReplyOptions
+      : DynamicContent,
+    withResponse?: WithResponse,
+    ephemeral?: boolean,
+  ) =>
+    InteractionUtils.replyDynamic(
+      interaction,
+      content,
+      ephemeral ?? this.isEphemeral,
+      withResponse,
+    );
 
   matchEnabledConstraints = (interaction: I, client: Client): boolean => {
     if (this.disabled) {
-      void InteractionUtils.replyEphemeral(interaction, {
+      void InteractionUtils.replyDynamic(interaction, {
         content: client.I18N.t('core:commands.commandDisabledTitle'),
       });
       return false;
@@ -521,7 +528,7 @@ export class BaseCommand<I extends BaseInteraction = BaseInteraction> {
 
     // Restrict DM usage if applicable
     if (!interaction.inGuild() && this.guildOnly) {
-      void InteractionUtils.replyEphemeral(interaction, {
+      void InteractionUtils.replyDynamic(interaction, {
         content: client.I18N.t('core:commands.notAvailableInDMs'),
       });
       return false;
@@ -542,7 +549,7 @@ export class BaseCommand<I extends BaseInteraction = BaseInteraction> {
     // we can't determine if the command should execute
     // so we shouldn't allow it
     if (!channel) {
-      void InteractionUtils.replyEphemeral(interaction, {
+      void InteractionUtils.replyDynamic(interaction, {
         content: client.I18N.t('core:commands.noChannelForPermissionCheck'),
       });
       return false;
@@ -561,7 +568,7 @@ export class BaseCommand<I extends BaseInteraction = BaseInteraction> {
       const msg = isClient
         ? client.I18N.t('core:commands.clientMissingPermissions')
         : client.I18N.t('core:commands.userMissingPermissions');
-      void InteractionUtils.replyEphemeral(interaction, {
+      void InteractionUtils.replyDynamic(interaction, {
         content: msg,
         embeds: [
           new EmbedBuilder()
@@ -591,7 +598,7 @@ export class BaseCommand<I extends BaseInteraction = BaseInteraction> {
       this.isUserComponent &&
       !this.hasAccessToUserComponent(interaction)
     ) {
-      void InteractionUtils.replyEphemeral(interaction, {
+      void InteractionUtils.replyDynamic(interaction, {
         embeds: [
           client.embeds.error({
             title: client.I18N.t('core:invalidUser'),
@@ -614,7 +621,7 @@ export class BaseCommand<I extends BaseInteraction = BaseInteraction> {
       interaction.guild,
     );
     if (permLevel < this.permLevel) {
-      void InteractionUtils.replyEphemeral(interaction, {
+      void InteractionUtils.replyDynamic(interaction, {
         content: client.I18N.t('core:commands.permLevelTooLow'),
       });
       return false;
@@ -631,7 +638,7 @@ export class BaseCommand<I extends BaseInteraction = BaseInteraction> {
     // determine if the command should execute, so
     // we shouldn't allow it
     if (!channel) {
-      void InteractionUtils.replyEphemeral(interaction, {
+      void InteractionUtils.replyDynamic(interaction, {
         content: client.I18N.t('core:commands.noChannelForNSFWCheck'),
       });
       return false;
@@ -640,7 +647,7 @@ export class BaseCommand<I extends BaseInteraction = BaseInteraction> {
     // In DM's, there's no option to make chats NSFW
     // They'll always open without warning, so deny
     if (channel.isDMBased()) {
-      void InteractionUtils.replyEphemeral(interaction, {
+      void InteractionUtils.replyDynamic(interaction, {
         content: client.I18N.t('core:commands.noNSFWInDM'),
       });
       return false;
@@ -648,7 +655,7 @@ export class BaseCommand<I extends BaseInteraction = BaseInteraction> {
 
     // Threads can NOT be marked as NSFW
     if (channel.isThread()) {
-      void InteractionUtils.replyEphemeral(interaction, {
+      void InteractionUtils.replyDynamic(interaction, {
         content: client.I18N.t('core:commands.noNSFWInThread'),
       });
       return false;
@@ -656,7 +663,7 @@ export class BaseCommand<I extends BaseInteraction = BaseInteraction> {
 
     // If the channel is not NSFW, deny execution
     if (!channel.nsfw) {
-      void InteractionUtils.replyEphemeral(interaction, {
+      void InteractionUtils.replyDynamic(interaction, {
         content: client.I18N.t('core:commands.noNSFWInSFWChannel'),
       });
       return false;
@@ -697,7 +704,7 @@ export class BaseCommand<I extends BaseInteraction = BaseInteraction> {
       // Make sure we have a client member reference
       const me = interaction.guild.members.me;
       if (!me) {
-        void InteractionUtils.replyEphemeral(interaction, {
+        void InteractionUtils.replyDynamic(interaction, {
           content: `${client.I18N.t('core:commands.clientMissingPermissions')}\n\n${this.clientPerms
             .map(
               (e) =>
@@ -814,8 +821,7 @@ export class BaseCommand<I extends BaseInteraction = BaseInteraction> {
     };
 
     // Allow opt-in to defer reply internally consistently
-    // Should be called before any middleware to account
-    // for asynchronous middleware
+    // Should be called before any middleware to account for asynchronous middleware
     if (this.deferReply) await this.deferReplyInternal(interaction);
 
     // Pre-run middleware
@@ -936,7 +942,7 @@ export class BaseCommand<I extends BaseInteraction = BaseInteraction> {
       const remaining = firstUsageExpires.valueOf() - now;
       const expiresIn = TimeUtils.humanReadableMs(remaining);
       const relativeOutput = expiresIn === '0 seconds' ? '1 second' : expiresIn;
-      void InteractionUtils.replyEphemeral(interaction, {
+      void InteractionUtils.replyDynamic(interaction, {
         content: client.I18N.t('core:commands.onCooldown', {
           type: CommandCooldownType[cooldown.type],
           expiresIn: relativeOutput,

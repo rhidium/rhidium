@@ -1,4 +1,4 @@
-import { MessageFlags, SlashCommandBuilder } from 'discord.js';
+import { SlashCommandBuilder } from 'discord.js';
 import {
   ChatInputCommand,
   PermLevel,
@@ -18,13 +18,12 @@ import CommandOption from '../../auto-completes/command';
 const ReloadCommand = new ChatInputCommand({
   disabled: process.env.NODE_ENV !== 'production',
   permLevel: PermLevel['Bot Administrator'],
+  isEphemeral: true,
   data: new SlashCommandBuilder()
     .setDescription('Reloads a command')
     .addStringOption(CommandOption.addOptionHandler),
   run: async (client, interaction) => {
-    await interaction.deferReply({
-      flags: ReloadCommand.isEphemeral ? [MessageFlags.Ephemeral] : [],
-    });
+    await ReloadCommand.deferReplyInternal(interaction);
 
     const command = await CommandOption.getValue(interaction, true);
     if (isAutoCompleteResponseType(command)) return;

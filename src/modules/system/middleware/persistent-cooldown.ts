@@ -25,7 +25,9 @@ export const persistentCooldownMiddleware: CommandMiddlewareFunction = async ({
   )
     return next();
 
-  await command.deferReplyInternal(interaction);
+  if (interaction.isRepliable()) {
+    await command.deferReplyInternal(interaction);
+  }
 
   const now = Date.now();
   const { cooldown } = command;
@@ -55,12 +57,14 @@ export const persistentCooldownMiddleware: CommandMiddlewareFunction = async ({
     const remaining = firstUsageExpires.valueOf() - now;
     const expiresIn = TimeUtils.humanReadableMs(remaining);
     const relativeOutput = expiresIn === '0 seconds' ? '1 second' : expiresIn;
-    await InteractionUtils.replyEphemeral(interaction, {
-      content: Lang.t('core:commands.onCooldown', {
-        type: CommandCooldownType[cooldown.type],
-        expiresIn: relativeOutput,
-      }),
-    });
+    if (interaction.isRepliable()) {
+      await InteractionUtils.replyDynamic(interaction, {
+        content: Lang.t('core:commands.onCooldown', {
+          type: CommandCooldownType[cooldown.type],
+          expiresIn: relativeOutput,
+        }),
+      });
+    }
     // Don't go next =)
     // Doesn't continue to next middleware, command is not executed
     return;

@@ -21,6 +21,8 @@ import { ModLogServices } from '../../services/mod-log';
 const PurgeCommand = new ChatInputCommand({
   guildOnly: true,
   permLevel: PermLevel.Moderator,
+  isEphemeral: true,
+  deferReply: true,
   data: new SlashCommandBuilder()
     .setName('purge')
     .setDescription(
@@ -81,7 +83,7 @@ const PurgeCommand = new ChatInputCommand({
       amount === null &&
       !since
     ) {
-      await interaction.reply({
+      await PurgeCommand.reply(interaction, {
         embeds: [
           client.embeds.error(
             'You must specify a `user`, `channel`, an `amount` of messages to delete, a time to delete messages `since`, or enable bots only.',
@@ -92,7 +94,7 @@ const PurgeCommand = new ChatInputCommand({
     }
 
     if (!targetChannel && !since) {
-      await interaction.reply({
+      await PurgeCommand.reply(interaction, {
         embeds: [
           client.embeds.error(
             'You must specify a `channel` or a time to delete messages `since` to narrow down the search.',
@@ -157,7 +159,7 @@ const PurgeCommand = new ChatInputCommand({
         () => !globalConditions(),
       ),
       setInterval(async () => {
-        await interaction.editReply({
+        await PurgeCommand.reply(interaction, {
           embeds: [
             client.embeds.waiting(
               `Fetching messages, this may take a while... (${matched} matched across ${
@@ -171,7 +173,7 @@ const PurgeCommand = new ChatInputCommand({
           ],
         });
       }, UnitConstants.MS_IN_ONE_SECOND * 5),
-      interaction.reply({
+      PurgeCommand.reply(interaction, {
         embeds: [
           client.embeds.waiting('Fetching messages, this may take a while...'),
         ],
@@ -181,7 +183,7 @@ const PurgeCommand = new ChatInputCommand({
     clearInterval(interval);
 
     if (matched === 0) {
-      await interaction.editReply({
+      await PurgeCommand.reply(interaction, {
         embeds: [client.embeds.warning('No messages matched the criteria.')],
       });
       return;
@@ -264,7 +266,7 @@ const PurgeCommand = new ChatInputCommand({
           : [],
       },
       async onCancel(interaction) {
-        await interaction.editReply({
+        await PurgeCommand.reply(interaction, {
           content: '',
           components: [],
           embeds: [client.embeds.info('Purge cancelled.')],

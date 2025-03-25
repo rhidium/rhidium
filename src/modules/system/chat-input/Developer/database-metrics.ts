@@ -113,7 +113,6 @@ const DatabaseMetricsCommand = new ChatInputCommand({
                   ),
                 }),
               ],
-              ephemeral: true,
             });
             break;
           }
@@ -121,7 +120,6 @@ const DatabaseMetricsCommand = new ChatInputCommand({
           default: {
             await DatabaseMetricsCommand.reply(interaction, {
               content: 'Invalid subcommand',
-              ephemeral: true,
             });
             break;
           }
@@ -137,7 +135,6 @@ const DatabaseMetricsCommand = new ChatInputCommand({
         if (!model) {
           await DatabaseMetricsCommand.reply(interaction, {
             content: 'Invalid model',
-            ephemeral: true,
           });
           return;
         }
@@ -162,7 +159,6 @@ const DatabaseMetricsCommand = new ChatInputCommand({
               description: `- Records: ${count}\n- Metrics:\n${metrics}`,
             }),
           ],
-          ephemeral: true,
         });
         break;
       }
@@ -170,7 +166,6 @@ const DatabaseMetricsCommand = new ChatInputCommand({
       default: {
         await DatabaseMetricsCommand.reply(interaction, {
           content: 'Invalid subcommand group',
-          ephemeral: true,
         });
         break;
       }

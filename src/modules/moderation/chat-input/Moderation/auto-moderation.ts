@@ -15,6 +15,7 @@ import { ModerationServices } from '../../services/moderation';
 const AutoModerationCommand = new ChatInputCommand({
   guildOnly: true,
   permLevel: PermLevel.Administrator,
+  isEphemeral: true,
   data: new SlashCommandBuilder()
     .setName('auto-moderation')
     .setDescription(
@@ -91,7 +92,7 @@ const AutoModerationCommand = new ChatInputCommand({
 
     const [guild] = await Promise.all([
       Database.Guild.resolve(discordGuild.id),
-      interaction.deferReply(),
+      AutoModerationCommand.deferReplyInternal(interaction),
     ]);
 
     switch (subcommand) {
@@ -99,7 +100,7 @@ const AutoModerationCommand = new ChatInputCommand({
         const actions = guild.AutoModerationActions;
 
         if (!actions.length) {
-          await interaction.editReply({
+          await AutoModerationCommand.reply(interaction, {
             embeds: [
               client.embeds.error(
                 'No auto-moderation actions have been configured.',
@@ -116,7 +117,7 @@ const AutoModerationCommand = new ChatInputCommand({
             )}`,
         );
 
-        await interaction.editReply({
+        await AutoModerationCommand.reply(interaction, {
           embeds: [
             client.embeds.info({
               title: 'Auto-Moderation Actions',
@@ -156,7 +157,7 @@ const AutoModerationCommand = new ChatInputCommand({
               );
 
         if (usesDuration && !durationAllowed) {
-          await interaction.editReply({
+          await AutoModerationCommand.reply(interaction, {
             embeds: [
               client.embeds.error(
                 'You can only specify a duration for actions that are not permanent.',
@@ -171,7 +172,7 @@ const AutoModerationCommand = new ChatInputCommand({
             (a) => a.action === action && a.triggerThreshold === threshold,
           )
         ) {
-          await interaction.editReply({
+          await AutoModerationCommand.reply(interaction, {
             embeds: [
               client.embeds.error(
                 'An action with the same threshold and type/action already exists.',
@@ -199,7 +200,7 @@ const AutoModerationCommand = new ChatInputCommand({
           },
         });
 
-        await interaction.editReply({
+        await AutoModerationCommand.reply(interaction, {
           embeds: [
             client.embeds.success(
               'Successfully added the auto-moderation action.',
@@ -277,7 +278,7 @@ const AutoModerationCommand = new ChatInputCommand({
 
       default: {
         client.logger.warn(`Unrecognized subcommand: ${subcommand}`);
-        await interaction.editReply({
+        await AutoModerationCommand.reply(interaction, {
           embeds: [client.embeds.error('Unrecognized subcommand.')],
         });
         break;

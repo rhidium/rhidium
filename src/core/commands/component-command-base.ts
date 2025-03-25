@@ -1,4 +1,4 @@
-import { BaseInteraction } from 'discord.js';
+import { RepliableInteraction } from 'discord.js';
 import { BaseCommand, BaseCommandOptions } from './base-command';
 import { ButtonCommand, ModalCommand, SelectMenuCommand } from '.';
 
@@ -21,7 +21,7 @@ export const isComponentCommand = (item: unknown): item is ComponentCommand =>
   item instanceof SelectMenuCommand;
 
 export interface ComponentCommandOptions<
-  I extends BaseInteraction = BaseInteraction,
+  I extends RepliableInteraction = RepliableInteraction,
 > extends BaseCommandOptions<I>,
     ComponentCommandDataOptions {
   /**
@@ -40,7 +40,9 @@ export interface ComponentCommandDataOptions {
 /**
  * Represents a command that is executed through a component, a button, modal, select-menu, etc.
  */
-export class ComponentCommandBase<I extends BaseInteraction = BaseInteraction>
+export class ComponentCommandBase<
+    I extends RepliableInteraction = RepliableInteraction,
+  >
   extends BaseCommand<I>
   implements ComponentCommandOptions<I>
 {

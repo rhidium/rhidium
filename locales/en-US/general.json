@@ -47,8 +47,9 @@
   "system": {
     "label": "System",
     "latency": "Latency",
+    "websocketLatency": "Websocket Latency",
     "apiLatency": "API Latency",
-    "fullCircleLatency": "Full Circle Latency",
+    "roundTripLatency": "Round Trip Latency",
     "memory": "Memory",
     "memoryUsage": "Memory Usage",
     "cacheSize": "Cache Size",

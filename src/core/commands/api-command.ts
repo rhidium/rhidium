@@ -1,5 +1,5 @@
 import {
-  BaseInteraction,
+  RepliableInteraction,
   ContextMenuCommandBuilder,
   SlashCommandBuilder,
   SlashCommandOptionsOnlyBuilder,
@@ -27,8 +27,9 @@ export type APISlashCommandData =
 
 export type APICommandData = APISlashCommandData | ContextMenuCommandBuilder;
 
-export interface APICommandOptions<I extends BaseInteraction = BaseInteraction>
-  extends BaseCommandOptions<I> {
+export interface APICommandOptions<
+  I extends RepliableInteraction = RepliableInteraction,
+> extends BaseCommandOptions<I> {
   /**
    * Indicates if this command is available globally. If
    * NODE_ENV is `production` it will default to `true`. If NODE_ENV
@@ -40,7 +41,7 @@ export interface APICommandOptions<I extends BaseInteraction = BaseInteraction>
 /**
  * Represents a Discord API Command, chat-input commands, user- and message-context commands, etc.
  */
-export class APICommand<I extends BaseInteraction = BaseInteraction>
+export class APICommand<I extends RepliableInteraction = RepliableInteraction>
   extends BaseCommand<I>
   implements APICommandOptions<I>
 {

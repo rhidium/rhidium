@@ -1,4 +1,4 @@
-import { BaseInteraction, Snowflake } from 'discord.js';
+import { RepliableInteraction, Snowflake } from 'discord.js';
 import { Client } from '../../client';
 import { InteractionUtils } from '../../utils';
 
@@ -10,7 +10,7 @@ export interface IRequiredResources {
   categories: Snowflake[];
 }
 
-export class RequiredResources<I extends BaseInteraction>
+export class RequiredResources<I extends RepliableInteraction>
   implements IRequiredResources
 {
   guilds: Snowflake[];
@@ -36,7 +36,7 @@ export class RequiredResources<I extends BaseInteraction>
       this.guilds.some((id) => id === interaction.guildId);
     if (!match) {
       if (handleInteraction) {
-        await InteractionUtils.replyEphemeral(interaction, {
+        await InteractionUtils.replyDynamic(interaction, {
           content: client.I18N.t('core:commands.notAvailableInCurrentServer'),
         });
       }
@@ -55,7 +55,7 @@ export class RequiredResources<I extends BaseInteraction>
       this.channels.some((id) => id === interaction.channelId);
     if (!match) {
       if (handleInteraction) {
-        await InteractionUtils.replyEphemeral(interaction, {
+        await InteractionUtils.replyDynamic(interaction, {
           content: client.I18N.t('core:commands.notAvailableInCurrentChannel'),
         });
       }
@@ -75,7 +75,7 @@ export class RequiredResources<I extends BaseInteraction>
       // the roles are required - and the member does NOT have the roles
       // in this DM channel
       if (handleInteraction) {
-        await InteractionUtils.replyEphemeral(interaction, {
+        await InteractionUtils.replyDynamic(interaction, {
           content: client.I18N.t('core:commands.notAvailableInDMs'),
         });
       }
@@ -85,7 +85,7 @@ export class RequiredResources<I extends BaseInteraction>
       // Return false early if this is an uncached guild
       // Never matches until we **can** check if this matches
       if (handleInteraction) {
-        await InteractionUtils.replyEphemeral(interaction, {
+        await InteractionUtils.replyDynamic(interaction, {
           content: client.I18N.t('core:commands.requiredRolesMissingServer'),
         });
       }
@@ -97,7 +97,7 @@ export class RequiredResources<I extends BaseInteraction>
     );
     if (!match) {
       if (handleInteraction) {
-        await InteractionUtils.replyEphemeral(interaction, {
+        await InteractionUtils.replyDynamic(interaction, {
           content: client.I18N.t('core:commands.requiredRolesMissing'),
         });
       }
@@ -116,7 +116,7 @@ export class RequiredResources<I extends BaseInteraction>
       this.users.length === 0 || this.users.some((id) => id === interaction.id);
     if (!match) {
       if (handleInteraction) {
-        await InteractionUtils.replyEphemeral(interaction, {
+        await InteractionUtils.replyDynamic(interaction, {
           content: client.I18N.t('core:commands.requiredUsersMissing'),
         });
       }
@@ -137,7 +137,7 @@ export class RequiredResources<I extends BaseInteraction>
 
     if (!match) {
       if (handleInteraction) {
-        await InteractionUtils.replyEphemeral(interaction, {
+        await InteractionUtils.replyDynamic(interaction, {
           content: client.I18N.t('core:commands.requiredCategoryMissing'),
         });
       }

@@ -1,4 +1,4 @@
-import { BaseInteraction } from 'discord.js';
+import { RepliableInteraction } from 'discord.js';
 import { RunFunction } from '../base-command';
 import { Client } from '../../client';
 import { AvailableGuildInteraction, DMInteraction } from './interactions';
@@ -8,7 +8,7 @@ export type Controller<Params extends unknown[] = [], ReturnType = void> = (
 ) => ReturnType;
 
 export type CommandController<
-  I extends BaseInteraction,
+  I extends RepliableInteraction,
   AdditionalParams extends unknown[] = [],
 > = Controller<
   [...Parameters<RunFunction<I>>, ...AdditionalParams],
@@ -16,7 +16,7 @@ export type CommandController<
 >;
 
 export type DMCommandController<
-  I extends BaseInteraction,
+  I extends RepliableInteraction,
   AdditionalParams extends unknown[] = [],
 > = Controller<
   [Client<true>, DMInteraction<I>, ...AdditionalParams],
@@ -24,7 +24,7 @@ export type DMCommandController<
 >;
 
 export type GuildCommandController<
-  I extends BaseInteraction,
+  I extends RepliableInteraction,
   AdditionalParams extends unknown[] = [],
 > = Controller<
   [Client<true>, AvailableGuildInteraction<I>, ...AdditionalParams],

@@ -48,8 +48,9 @@
   "system": {
     "label": "Systeem",
     "latency": "Vertraging",
+    "websocketLatency": "Websocket-vertraging",
     "apiLatency": "API-vertraging",
-    "fullCircleLatency": "Volledige cirkelvertraging",
+    "roundTripLatency": "Heen-en-weer-vertraging",
     "memory": "Geheugen",
     "memoryUsage": "Geheugenverbruik",
     "cacheSize": "Cache-grootte",

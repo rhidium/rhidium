@@ -10,6 +10,7 @@ import {
 
 const ExecCommand = new ChatInputCommand({
   permLevel: PermLevel['Bot Administrator'],
+  isEphemeral: true,
   data: new SlashCommandBuilder()
     .setDescription(
       'Execute a console/terminal command, rejects after 15 minutes',

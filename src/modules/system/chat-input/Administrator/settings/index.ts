@@ -1,5 +1,4 @@
 import {
-  MessageFlags,
   SlashCommandBuilder,
   SlashCommandSubcommandBuilder,
   SlashCommandSubcommandGroupBuilder,
@@ -215,7 +214,7 @@ const SettingsCommand = new ChatInputCommand({
             );
 
           if (memberPermLevel < PermLevel['Server Owner']) {
-            await interaction.reply({
+            await SettingsCommand.reply(interaction, {
               embeds: [
                 client.embeds.error({
                   title: 'Invalid Permissions',
@@ -224,7 +223,6 @@ const SettingsCommand = new ChatInputCommand({
                     'Please contact them if you need to reset all settings.',
                 }),
               ],
-              flags: MessageFlags.Ephemeral,
             });
             return;
           }
@@ -237,14 +235,13 @@ const SettingsCommand = new ChatInputCommand({
         );
 
         if (!deleteAllData && !prompts.length) {
-          await interaction.reply({
+          await SettingsCommand.reply(interaction, {
             embeds: [
               client.embeds.error({
                 title: 'Invalid Setting',
                 description: 'The setting you provided is not resettable.',
               }),
             ],
-            flags: MessageFlags.Ephemeral,
           });
           return;
         }
@@ -274,7 +271,7 @@ const SettingsCommand = new ChatInputCommand({
 
         const [guildBefore] = await Promise.all([
           Database.Guild.resolve(interaction.guildId),
-          interaction.deferReply({ flags: [MessageFlags.Ephemeral] }),
+          SettingsCommand.deferReplyInternal(interaction),
         ]);
 
         // Await confirmation
@@ -373,7 +370,7 @@ const SettingsCommand = new ChatInputCommand({
 
         const [guild] = await Promise.all([
           Database.Guild.resolve(interaction.guildId),
-          interaction.deferReply({ flags: [MessageFlags.Ephemeral] }),
+          SettingsCommand.deferReplyInternal(interaction),
         ]);
 
         if (!categoryIndStr) {

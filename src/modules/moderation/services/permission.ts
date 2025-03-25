@@ -100,7 +100,7 @@ class ModerationPermissionServices {
     if (Array.isArray(result)) {
       const [, message] = result;
 
-      await InteractionUtils.replyEphemeral(interaction, {
+      await InteractionUtils.replyDynamic(interaction, {
         embeds: [client.embeds.error(message)],
       });
 

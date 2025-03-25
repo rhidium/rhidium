@@ -17,12 +17,18 @@ const StatsCommand = new ChatInputCommand({
   data: new SlashCommandBuilder(),
   run: async (client, interaction) => {
     // Latency
-    const reply = await interaction.reply({
-      content: Lang.t('commands:stats.pinging'),
-      withResponse: true,
-    });
-    const fullCircleLatency =
-      reply.interaction.createdTimestamp - interaction.createdTimestamp;
+    const now = Date.now();
+    const reply = await StatsCommand.reply(
+      interaction,
+      {
+        content: Lang.t('commands:stats.pinging'),
+      },
+      true,
+    );
+    const roundTripLatency = reply.interaction.createdTimestamp - now;
+    const apiLatency =
+      (reply.resource?.message?.createdTimestamp ?? now) -
+      reply.interaction.createdTimestamp;
     const latencyEmoji = (ms: number) => {
       let emoji;
       if (ms < 150) emoji = '🟢';
@@ -58,8 +64,9 @@ const StatsCommand = new ChatInputCommand({
       UnitConstants.BYTES_IN_KIB /
       UnitConstants.BYTES_IN_KIB;
 
+    const websocketLatencyStr = Lang.t('general:system.websocketLatency');
     const apiLatencyStr = Lang.t('general:system.apiLatency');
-    const fullCircleLatencyStr = Lang.t('general:system.fullCircleLatency');
+    const roundTripLatencyStr = Lang.t('general:system.roundTripLatency');
     const memoryUsageStr = Lang.t('general:system.memoryUsage');
     const cacheSizeStr = Lang.t('general:system.cacheSize');
 
@@ -70,8 +77,9 @@ const StatsCommand = new ChatInputCommand({
         {
           name: Lang.t('general:system.latency'),
           value: stripIndents`
-          ${latencyEmoji(Math.round(client.ws.ping))} **${apiLatencyStr}:** ${Math.round(client.ws.ping)}ms
-          ${latencyEmoji(fullCircleLatency)} **${fullCircleLatencyStr}:** ${Math.round(fullCircleLatency)}ms
+          ${latencyEmoji(Math.round(client.ws.ping))} **${websocketLatencyStr}:** ${Math.round(client.ws.ping)}ms
+          ${latencyEmoji(Math.round(apiLatency))} **${apiLatencyStr}:** ${Math.round(apiLatency)}ms
+          ${latencyEmoji(roundTripLatency)} **${roundTripLatencyStr}:** ${Math.round(roundTripLatency)}ms
         `,
           inline: true,
         },

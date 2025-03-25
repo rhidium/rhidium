@@ -2,7 +2,6 @@ import {
   AttachmentBuilder,
   ContextMenuCommandBuilder,
   EmbedBuilder,
-  InteractionReplyOptions,
   escapeCodeBlock,
 } from 'discord.js';
 import { Lang, EmbedConstants, MessageContextCommand } from '@core';
@@ -27,12 +26,12 @@ const PrintEmbedCommand = new MessageContextCommand({
 
     const { embeds } = targetMessage;
     const codeblockFormattingLength = 10;
-    const context: Omit<InteractionReplyOptions, 'embeds'> & {
-      files: AttachmentBuilder[];
-      embeds: EmbedBuilder[];
-    } = {
+    const context = {
       embeds: [],
       files: [],
+    } as {
+      embeds: EmbedBuilder[];
+      files: AttachmentBuilder[];
     };
 
     for (const embed of embeds) {

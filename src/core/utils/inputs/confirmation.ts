@@ -65,7 +65,7 @@ class ConfirmationInput {
   ): boolean => {
     const value = interaction.options.getBoolean(this.chatInputOptionName);
     if (!value) {
-      void InteractionUtils.replyEphemeral(interaction, {
+      void InteractionUtils.replyDynamic(interaction, {
         content: client.I18N.t('core:commands.confirmationRequired'),
       });
       return false;
@@ -133,10 +133,10 @@ class ConfirmationInput {
       withResponse: false,
     };
 
-    const message = await InteractionUtils.replyEphemeral(interaction, ctx);
+    const message = await InteractionUtils.replyDynamic(interaction, ctx);
 
     if (!message) {
-      void InteractionUtils.replyEphemeral(interaction, {
+      void InteractionUtils.replyDynamic(interaction, {
         content: client.I18N.t('core:commands.missingInitialReply'),
       });
       return false;
@@ -151,7 +151,7 @@ class ConfirmationInput {
       (resolve) => {
         collector.on('collect', async (button) => {
           if (button.user.id !== interaction.user.id) {
-            void InteractionUtils.replyEphemeral(interaction, {
+            void InteractionUtils.replyDynamic(interaction, {
               content: client.I18N.t('core:commands.isNotComponentUser'),
             });
             return;
@@ -166,7 +166,7 @@ class ConfirmationInput {
             if (disableComponents)
               InteractionUtils.disableComponents(components);
             if (shouldReplyOnConfirm)
-              await InteractionUtils.replyEphemeral(button, {
+              await InteractionUtils.replyDynamic(button, {
                 content: client.I18N.t('core:commands.confirmationAccepted'),
                 embeds: newEmbeds,
                 files: newFiles,
@@ -184,7 +184,7 @@ class ConfirmationInput {
             if (disableComponents)
               InteractionUtils.disableComponents(components);
             if (shouldReplyOnCancel)
-              await InteractionUtils.replyEphemeral(button, {
+              await InteractionUtils.replyDynamic(button, {
                 content: client.I18N.t('core:commands.confirmationCancelled'),
                 embeds: newEmbeds,
                 files: newFiles,
@@ -197,7 +197,7 @@ class ConfirmationInput {
         collector.on('end', async (collected) => {
           if (collected.size) return;
           InteractionUtils.disableComponents(components);
-          await InteractionUtils.replyEphemeral(interaction, {
+          await InteractionUtils.replyDynamic(interaction, {
             content: client.I18N.t('core:commands.confirmationExpired'),
             embeds: newEmbeds,
             files: newFiles,

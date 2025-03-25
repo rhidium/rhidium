@@ -6,6 +6,7 @@ const SettingsUpdateCommand = new ButtonCommand({
   customId: 'settings-update',
   guildOnly: true,
   permLevel: PermLevel.Administrator,
+  isEphemeral: true,
   run: async (client, interaction) => {
     if (!InteractionUtils.requireAvailableGuild(client, interaction)) return;
 
@@ -14,7 +15,7 @@ const SettingsUpdateCommand = new ButtonCommand({
     const prompt = settingsPrompts.find((p) => p.id === promptId);
 
     if (!promptId || !prompt) {
-      await interaction.reply({
+      await SettingsUpdateCommand.reply(interaction, {
         embeds: [client.embeds.error('Unable to parse setting identifier.')],
       });
       return;

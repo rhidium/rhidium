@@ -14,12 +14,14 @@ import {
   Severity,
   TimeUtils,
   StringUtils,
+  InteractionUtils,
 } from '@core';
 import { ModerationServices } from './moderation';
 import {
   AttachmentBuilder,
   Guild,
   GuildMember,
+  MessageFlags,
   RepliableInteraction,
   User,
 } from 'discord.js';
@@ -212,6 +214,7 @@ class WarnServices {
     reason,
     severity,
     validUntil,
+    ephemeral,
   }: {
     client: Client;
     interaction: RepliableInteraction;
@@ -221,6 +224,7 @@ class WarnServices {
     reason: string;
     severity: Severity;
     validUntil: Date | null;
+    ephemeral?: boolean;
   }) => {
     // Fetch the required data
     const [guild, issuer, target] = await Promise.all([
@@ -233,7 +237,9 @@ class WarnServices {
         userId: targetUser.id,
         guildId: discordGuild.id,
       }),
-      interaction.deferReply(),
+      interaction.deferReply({
+        flags: ephemeral ? [MessageFlags.Ephemeral] : [],
+      }),
     ]);
 
     // Check if the issuer can moderate the target
@@ -290,7 +296,7 @@ class WarnServices {
       previousWarnOutput.length < EmbedConstants.DESCRIPTION_MAX_LENGTH - 500;
 
     // User feedback
-    await interaction.editReply({
+    await InteractionUtils.replyDynamic(interaction, {
       embeds: [
         client.embeds.success(
           [
@@ -566,7 +572,7 @@ class WarnServices {
     ];
 
     // User feedback
-    await interaction.reply({
+    await InteractionUtils.replyDynamic(interaction, {
       embeds: [client.embeds.success(output.join(' '))],
     });
 

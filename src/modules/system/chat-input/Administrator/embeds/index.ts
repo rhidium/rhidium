@@ -21,6 +21,7 @@ import {
 const ConfigureEmbedsCommand = new ChatInputCommand({
   permLevel: PermLevel.Administrator,
   guildOnly: true,
+  isEphemeral: true,
   data: new SlashCommandBuilder()
     .addSubcommand(showEmbedSubcommand)
     .addSubcommand(configureEmbedSubcommand())

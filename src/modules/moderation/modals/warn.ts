@@ -66,7 +66,7 @@ const WarnModalCommand = new ModalCommand({
       : null;
 
     if (!targetMember) {
-      await InteractionUtils.replyEphemeral(interaction, {
+      await InteractionUtils.replyDynamic(interaction, {
         embeds: [
           client.embeds.error(
             'The target user is no longer in the server, the warning cannot be issued.',
@@ -97,7 +97,7 @@ const WarnModalCommand = new ModalCommand({
         .map((s) => s.toLowerCase())
         .includes(severity.value.toLowerCase())
     ) {
-      await InteractionUtils.replyEphemeral(interaction, {
+      await InteractionUtils.replyDynamic(interaction, {
         embeds: [
           client.embeds.error(
             `Invalid severity, please choose from: ${ModerationInputServices.displaySeverity}`,

@@ -427,9 +427,7 @@ const RemindersCommand = new ChatInputCommand({
           repeatUntil: repeatUntil ?? null,
           GuildId: interaction.guildId,
         }),
-        collected
-          ? collected.deferReply({ ephemeral: true })
-          : interaction.deferReply({ ephemeral: true }),
+        RemindersCommand.deferReplyInternal(collected ?? interaction),
       ]);
 
       await ReminderScheduler.scheduleReminder(client, reminder);

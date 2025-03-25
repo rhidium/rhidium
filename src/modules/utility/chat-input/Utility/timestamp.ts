@@ -1,9 +1,5 @@
 import { ChatInputCommand, Database, InputUtils, UnitConstants } from '@core';
-import {
-  MessageFlags,
-  SlashCommandBuilder,
-  TimestampStylesString,
-} from 'discord.js';
+import { SlashCommandBuilder, TimestampStylesString } from 'discord.js';
 import TimezoneOption from '../../auto-completes/timezone';
 import { stripIndents } from 'common-tags';
 
@@ -103,11 +99,11 @@ const TimestampCommand = new ChatInputCommand({
         const [user, timezone] = await Promise.all([
           Database.User.resolve(interaction.user.id),
           TimezoneOption.getValue(interaction, false),
-          interaction.deferReply({ flags: [MessageFlags.Ephemeral] }),
+          TimestampCommand.deferReplyInternal(interaction),
         ]);
 
         if (timezone === null) {
-          await interaction.editReply({
+          await TimestampCommand.reply(interaction, {
             embeds: [
               client.embeds.info({
                 title: 'Timezone',
@@ -132,7 +128,7 @@ const TimestampCommand = new ChatInputCommand({
             where: { id: interaction.user.id },
             data: { timezone },
           }),
-          interaction.editReply({
+          TimestampCommand.reply(interaction, {
             embeds: [
               client.embeds.success({
                 title: 'Timezone Set',
@@ -150,7 +146,7 @@ const TimestampCommand = new ChatInputCommand({
         const date = options.getString('date') ?? 'now';
         let [timezone] = await Promise.all([
           TimezoneOption.getValue(interaction, false),
-          interaction.deferReply({ flags: [MessageFlags.Ephemeral] }),
+          TimestampCommand.deferReplyInternal(interaction),
         ]);
         const type = (options.getString('type') ?? 'full') as TimestampType;
 
@@ -158,7 +154,7 @@ const TimestampCommand = new ChatInputCommand({
           const user = await Database.User.resolve(interaction.user.id);
 
           if (!user.timezone) {
-            await interaction.editReply({
+            await TimestampCommand.reply(interaction, {
               embeds: [
                 client.embeds.error({
                   title: 'No Timezone Set',
@@ -181,7 +177,7 @@ const TimestampCommand = new ChatInputCommand({
         });
 
         if (typeof resolved === 'undefined' || !resolved.length) {
-          await interaction.editReply({
+          await TimestampCommand.reply(interaction, {
             embeds: [
               client.embeds.error({
                 title: 'Invalid Date',
@@ -219,7 +215,7 @@ const TimestampCommand = new ChatInputCommand({
           outputString += `\n\n${formatted}`;
         }
 
-        await interaction.editReply({
+        await TimestampCommand.reply(interaction, {
           embeds: [
             client.embeds.success({
               title: 'Timestamp Conversion',
@@ -248,7 +244,7 @@ const TimestampCommand = new ChatInputCommand({
 
       case 'info':
       default: {
-        await interaction.reply({
+        await TimestampCommand.reply(interaction, {
           embeds: [
             client.embeds.info({
               title: 'Timestamp Command',
@@ -269,7 +265,6 @@ const TimestampCommand = new ChatInputCommand({
             `,
             }),
           ],
-          ephemeral: true,
         });
         break;
       }

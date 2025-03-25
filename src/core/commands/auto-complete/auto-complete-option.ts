@@ -216,7 +216,7 @@ export class AutoCompleteOption<T = undefined> {
     );
     if (!resolvedValue && handleMissingWhenRequired === true) {
       if (interaction.isChatInputCommand())
-        await InteractionUtils.replyEphemeral(interaction, {
+        await InteractionUtils.replyDynamic(interaction, {
           embeds: [
             this.client.embeds.error({
               title: this.client.I18N.t(

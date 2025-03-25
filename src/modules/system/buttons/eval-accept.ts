@@ -19,6 +19,7 @@ import {
 const EvalAcceptCommand = new ButtonCommand({
   customId: InteractionConstants.EVAL_ACCEPT_CODE_EVALUATION,
   permLevel: PermLevel['Bot Administrator'],
+  isEphemeral: true,
   run: async (client, interaction) => {
     const evalEmbed = interaction.message.embeds[0];
     if (!evalEmbed) {

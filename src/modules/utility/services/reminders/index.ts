@@ -153,7 +153,7 @@ class ReminderServices {
     const message = interaction.fields.getField('message').value;
 
     if (message.length > DiscordConstants.MESSAGE_CONTENT_MAX_LENGTH) {
-      await InteractionUtils.replyEphemeral(interaction, {
+      await InteractionUtils.replyDynamic(interaction, {
         embeds: [
           client.embeds.error(
             `The message is too long, it must be less than ${DiscordConstants.MESSAGE_CONTENT_MAX_LENGTH} characters, you entered ${message.length}.` +

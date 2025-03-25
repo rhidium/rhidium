@@ -11,6 +11,7 @@ import { ModerationServices } from '../../services/moderation';
 
 const SeverityCommand = new ChatInputCommand({
   guildOnly: true,
+  isEphemeral: true,
   permLevel: PermLevel.Administrator,
   data: new SlashCommandBuilder()
     .setName('severity')
@@ -39,7 +40,7 @@ const SeverityCommand = new ChatInputCommand({
 
     const [guild] = await Promise.all([
       Database.Guild.resolve(discordGuild.id),
-      interaction.deferReply(),
+      SeverityCommand.deferReplyInternal(interaction),
     ]);
 
     const valueBefore = ModerationServices.getSeverityValue(
@@ -57,7 +58,7 @@ const SeverityCommand = new ChatInputCommand({
     });
 
     if (valueBefore === valueAfter) {
-      await interaction.editReply({
+      await SeverityCommand.reply(interaction, {
         embeds: [
           client.embeds.error(
             `The severity level **\`${severity}\`** is already worth **${valueAfter}** warnings.`,
@@ -87,7 +88,7 @@ const SeverityCommand = new ChatInputCommand({
       },
     });
 
-    await interaction.editReply({
+    await SeverityCommand.reply(interaction, {
       embeds: [
         client.embeds.success(
           `The severity level **\`${severity}\`** is now worth **${valueAfter}** warnings.`,

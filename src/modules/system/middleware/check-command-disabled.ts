@@ -34,13 +34,15 @@ export const checkCommandDisabled: CommandMiddlewareFunction = async ({
 
   const guild = await Database.Guild.resolve(interaction.guildId);
   if (guild.disabledCommands.includes(command.data.name)) {
-    await InteractionUtils.replyEphemeral(interaction, {
-      embeds: [
-        client.embeds.error(
-          `The command **\`${command.data.name}\`** has been disabled by an administrator, and cannot be used in this server.`,
-        ),
-      ],
-    });
+    if (interaction.isRepliable()) {
+      await InteractionUtils.replyDynamic(interaction, {
+        embeds: [
+          client.embeds.error(
+            `The command **\`${command.data.name}\`** has been disabled by an administrator, and cannot be used in this server.`,
+          ),
+        ],
+      });
+    }
     return; // We don't call next, and therefor don't continue to the command
   }
 

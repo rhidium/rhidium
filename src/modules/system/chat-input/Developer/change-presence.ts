@@ -25,6 +25,7 @@ const ChangeStatusCommand = new ChatInputCommand({
     type: CommandCooldownType.Global,
     persistent: true,
   },
+  isEphemeral: true,
   permLevel: PermLevel['Bot Administrator'],
   data: new SlashCommandBuilder()
     .setDescription("Change the bot's status")

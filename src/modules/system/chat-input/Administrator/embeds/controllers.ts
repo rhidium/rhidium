@@ -78,12 +78,15 @@ export const configureEmbedController: EmbedController = async (
     : null;
 
   const messageSuffix = resolvedMessage ? `\n\n${resolvedMessage}` : '';
-  const msg = await ConfigureEmbedsCommand.reply(interaction, {
-    content: `${Lang.t('commands:embeds.previewPrompt')}${messageSuffix}`,
-    embeds: [embed],
-    components: [configureEmbedControlRow],
-    withResponse: true,
-  });
+  const msg = await ConfigureEmbedsCommand.reply(
+    interaction,
+    {
+      content: `${Lang.t('commands:embeds.previewPrompt')}${messageSuffix}`,
+      embeds: [embed],
+      components: [configureEmbedControlRow],
+    },
+    true,
+  );
 
   if (!msg) {
     await ConfigureEmbedsCommand.reply(
@@ -93,9 +96,17 @@ export const configureEmbedController: EmbedController = async (
     return;
   }
 
+  if (!msg.resource?.message?.awaitMessageComponent) {
+    await ConfigureEmbedsCommand.reply(
+      interaction,
+      client.embeds.error(Lang.t('commands:embeds.previewFailed')),
+    );
+    return;
+  }
+
   let i;
   try {
-    i = await msg.awaitMessageComponent({
+    i = await msg.resource.message.awaitMessageComponent({
       componentType: ComponentType.Button,
       time: UnitConstants.MS_IN_ONE_MINUTE * 5,
       filter: (i) =>
@@ -242,7 +253,7 @@ export const configureEmbedController: EmbedController = async (
         max: EmbedConstants.MAX_FIELDS_LENGTH,
       }),
     );
-    await interaction.editReply({
+    await InteractionUtils.replyDynamic(interaction, {
       components: [configureEmbedAcceptedRow],
     });
     return;
@@ -285,13 +296,13 @@ export const configureEmbedController: EmbedController = async (
   const updatedEmbed = updatedGuild[settingKey];
 
   await i.deleteReply();
-  await interaction.editReply({
+  await InteractionUtils.replyDynamic(interaction, {
     content: `${Lang.t('commands:embeds.configurationSaved')}${messageSuffix}`,
     components: [configureEmbedAcceptedRow],
     allowedMentions: { parse: [] },
   });
 
-  const newEmbedData = 'embeds' in msg ? msg.embeds[0] : null;
+  const newEmbedData = 'embeds' in msg ? msg.resource.message.embeds[0] : null;
   if (!newEmbedData) return;
 
   void Database.AuditLog.util({
@@ -539,7 +550,7 @@ export const manageEmbedFieldsController: EmbedFieldController = async (
             : null;
           const messageSuffix = resolvedMessage ? `\n\n${resolvedMessage}` : '';
 
-          await InteractionUtils.replyEphemeral(i, {
+          await InteractionUtils.replyDynamic(i, {
             content: `${Lang.t('commands:embeds.fieldsResetSuccess')}${messageSuffix}`,
             embeds: [embed],
           });

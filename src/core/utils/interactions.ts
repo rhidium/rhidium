@@ -27,6 +27,12 @@ import {
   TextInputBuilder,
   UserSelectMenuBuilder,
   RepliableInteraction,
+  EmbedBuilder,
+  BitFieldResolvable,
+  MessageFlagsString,
+  InteractionCallbackResponse,
+  Message,
+  InteractionResponse,
 } from 'discord.js';
 import { UnitConstants } from '../constants';
 import { Client } from '../client';
@@ -34,34 +40,92 @@ import { AvailableGuildInteraction } from '../commands/controllers'; // [DEV] Lo
 import { EmojiUtils } from './emojis';
 import { StringUtils } from './common';
 
-const isAcknowledged = <T extends BaseInteraction>(interaction: T) =>
+type DynamicInteractionFlags =
+  | BitFieldResolvable<
+      Extract<MessageFlagsString, 'SuppressEmbeds'>,
+      MessageFlags.SuppressEmbeds
+    >
+  | undefined;
+
+type InternalDynamicContent = Omit<
+  InteractionReplyOptions & InteractionEditReplyOptions,
+  'flags'
+> & {
+  flags?: DynamicInteractionFlags;
+  /**
+   * Whether to prefer follow-up messages over other types of replies.
+   * If set to true, and the interaction is a message component interaction,
+   * the interaction will be updated instead of replied to.
+   */
+  preferUpdate?: boolean;
+};
+
+type DynamicContent = string | EmbedBuilder | InternalDynamicContent;
+
+const isAcknowledged = <T extends RepliableInteraction>(interaction: T) =>
   interaction.isRepliable() && (interaction.replied || interaction.deferred);
 
-const replyEphemeral = <I extends BaseInteraction>(
+const replyDynamic = async <
+  I extends RepliableInteraction,
+  WithResponse extends boolean = false,
+>(
   interaction: I,
-  content:
-    | string
-    | (Omit<InteractionReplyOptions & InteractionEditReplyOptions, 'flags'> &
-        InteractionReplyDynamicOptions),
-) => {
-  if (!interaction.isRepliable()) return;
+  content: WithResponse extends true ? InteractionReplyOptions : DynamicContent,
+  ephemeral = true,
+  withResponse?: WithResponse,
+): Promise<
+  WithResponse extends true
+    ? InteractionCallbackResponse
+    : Message | InteractionResponse
+> => {
+  const castResponse = (
+    response: Promise<
+      Message | InteractionResponse | InteractionCallbackResponse
+    >,
+  ) =>
+    response as Promise<
+      WithResponse extends true
+        ? InteractionCallbackResponse
+        : Message | InteractionResponse
+    >;
 
-  if (InteractionUtils.isAcknowledged(interaction)) {
-    if (typeof content !== 'string' && content.preferFollowUp) {
-      if (interaction.type === InteractionType.MessageComponent) {
-        return interaction.update(content);
-      }
-
-      return interaction.followUp(content);
-    }
-
-    return interaction.editReply(content);
+  if (withResponse) {
+    return castResponse(
+      interaction.reply({
+        ...(content as InteractionReplyOptions),
+        flags: ephemeral ? [MessageFlags.Ephemeral] : [],
+        withResponse: true,
+      }),
+    );
   }
 
-  return interaction.reply({
-    ...(typeof content === 'string' ? { content } : content),
-    flags: [MessageFlags.Ephemeral],
-  });
+  const castContent = content as DynamicContent;
+
+  const resolvedContent: InternalDynamicContent =
+    typeof castContent === 'string'
+      ? { content: castContent }
+      : castContent instanceof EmbedBuilder
+        ? { embeds: [castContent] }
+        : castContent;
+
+  if (InteractionUtils.isAcknowledged(interaction)) {
+    if (
+      resolvedContent.preferUpdate &&
+      interaction.type === InteractionType.MessageComponent
+    ) {
+      return castResponse(interaction.update(resolvedContent));
+    }
+
+    return castResponse(interaction.editReply(resolvedContent));
+  }
+
+  return castResponse(
+    interaction.reply({
+      ...resolvedContent,
+      flags: ephemeral ? [MessageFlags.Ephemeral] : [],
+      withResponse: false,
+    }),
+  );
 };
 
 const resolveRowsFromComponents = (
@@ -125,23 +189,29 @@ const requireAvailableGuild = <I extends BaseInteraction>(
   interaction: I,
 ): interaction is AvailableGuildInteraction<I> => {
   if (!interaction.inGuild()) {
-    void InteractionUtils.replyEphemeral(interaction, {
-      content: client.I18N.t('core:commands.notAvailableInDMs'),
-    });
+    if (interaction.isRepliable()) {
+      void InteractionUtils.replyDynamic(interaction, {
+        content: client.I18N.t('core:commands.notAvailableInDMs'),
+      });
+    }
     return false;
   }
 
   if (!interaction.inCachedGuild()) {
-    void InteractionUtils.replyEphemeral(interaction, {
-      content: client.I18N.t('core:commands.missingCachedServer'),
-    });
+    if (interaction.isRepliable()) {
+      void InteractionUtils.replyDynamic(interaction, {
+        content: client.I18N.t('core:commands.missingCachedServer'),
+      });
+    }
     return false;
   }
 
   if (!interaction.guild.available) {
-    void InteractionUtils.replyEphemeral(interaction, {
-      content: client.I18N.t('core:commands.serverUnavailable'),
-    });
+    if (interaction.isRepliable()) {
+      void InteractionUtils.replyDynamic(interaction, {
+        content: client.I18N.t('core:commands.serverUnavailable'),
+      });
+    }
     return false;
   }
 
@@ -163,7 +233,6 @@ type PaginationOptions = {
   duration?: number;
   defaultPage?: number;
   ephemeral?: boolean;
-  preferFollowUp?: boolean;
   handleResponses?: boolean;
 };
 
@@ -277,7 +346,7 @@ const pagination = async (_options: PaginationOptions) => {
   if (!handleResponses) return;
 
   if (!initialReply) {
-    void InteractionUtils.replyEphemeral(interaction, {
+    void InteractionUtils.replyDynamic(interaction, {
       content: client.I18N.t('core:commands.missingInitialReply'),
     });
     return;
@@ -291,7 +360,7 @@ const pagination = async (_options: PaginationOptions) => {
 
   collector.on('collect', async (i) => {
     if (i.user.id !== interaction.user.id) {
-      void InteractionUtils.replyEphemeral(interaction, {
+      void InteractionUtils.replyDynamic(interaction, {
         content: client.I18N.t('core:commands.isNotComponentUser'),
       });
       return;
@@ -360,15 +429,6 @@ const disableComponents = (
     return component;
   });
 
-interface InteractionReplyDynamicOptions {
-  /**
-   * Whether to prefer follow-up messages over other types of replies.
-   * If set to true, and the interaction is a message component interaction,
-   * the interaction will be updated instead of replied to.
-   */
-  preferFollowUp?: boolean;
-}
-
 class InteractionUtils {
   /**
    * Check if an interaction has been acknowledged
@@ -377,11 +437,18 @@ class InteractionUtils {
    */
   static readonly isAcknowledged = isAcknowledged;
   /**
-   * (try to) Reply to an interaction with an ephemeral message
+   * Reply to an interaction with a message, dynamically resolving
+   * which reply function to use depending on wether or not the
+   * interaction has been acknowledged.
+   *
+   * Please note that using {@link MessageFlags} in the `content` is not supported
+   * with a dynamic function like this. If you need specific flags, use `reply`,
+   * `editReply`, `followUp`, etc. directly, instead of using this convenience method.
    * @param interaction The interaction to reply to
    * @param content The content to reply with
+   * @param ephemeral Should we (try to) reply using the {@link MessageFlags.Ephemeral} flag
    */
-  static readonly replyEphemeral = replyEphemeral;
+  static readonly replyDynamic = replyDynamic;
   /**
    * Resolves the (discord.js) rows from an array of components
    * @param components The components to resolve rows from
@@ -421,7 +488,8 @@ class InteractionUtils {
 
 export {
   InteractionUtils,
-  type InteractionReplyDynamicOptions,
+  type DynamicInteractionFlags,
+  type DynamicContent,
   type PaginationOptions,
   type PaginationPage,
   type PaginationType,
