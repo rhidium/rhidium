@@ -1,13 +1,7 @@
 {
-  "$schema": "./config.schema.json",
   "client": {
     "id": "835856785512464436",
     "token": "YOUR_BOT_TOKEN",
-    "refuse_unknown_command_interactions": false,
-    "suppress_unknown_interaction_warnings": false,
-    "development_server_id": "FOR_DEVELOPERS_ONLY",
-    "command_usage_channel_id": "",
-    "error_channel_id": "",
     "presence": {
       "active": true,
       "status": "online",
@@ -22,17 +16,9 @@
   },
   "permissions": {
     "owner_id": "1148597817498140774",
-    "developer_ids": [
-      "1148597817498140774"
-    ],
-    "system_administrator_ids": [
-      "1148597817498140774"
-    ],
+    "developer_ids": ["1148597817498140774"],
+    "system_administrator_ids": ["1148597817498140774"],
     "default_lock_member_permissions": false
-  },
-  "api": {
-    "enabled": true,
-    "port": 9000
   },
   "cooldown": {
     "default_cooldown_enabled": true,
@@ -71,16 +57,6 @@
     "debug": "🐛",
     "waiting": "⏳",
     "separator": "•"
-  },
-  "debug": {
-    "debug_mode_enabled": true,
-    "chat_input_command_api_data": true,
-    "interactions": true,
-    "autocomplete_execution_time": true,
-    "modal_submit_execution_time": true,
-    "command_throttling": true,
-    "localizations": false,
-    "command_data": true
   },
   "urls": {
     "github": "https://github.com/rhidium/rhidium",
