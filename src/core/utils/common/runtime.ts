@@ -88,7 +88,23 @@ const safeSetTimeout = (
 
 const safeSetInterval = (
   intervalMs: number,
-  fn: () => void | Promise<void>,
+  fn: () => void | void,
+  onNewTimeout?: (timeout: NodeJS.Timeout, isTimeoutForRunFn: boolean) => void,
+): NodeJS.Timeout => {
+  return safeSetTimeout(
+    intervalMs,
+    true,
+    () => {
+      fn();
+      safeSetInterval(intervalMs, fn, onNewTimeout);
+    },
+    onNewTimeout,
+  );
+};
+
+const safeSetAsyncInterval = (
+  intervalMs: number,
+  fn: () => Promise<void>,
   onNewTimeout?: (timeout: NodeJS.Timeout, isTimeoutForRunFn: boolean) => void,
 ): NodeJS.Timeout => {
   return safeSetTimeout(
@@ -96,7 +112,7 @@ const safeSetInterval = (
     true,
     async () => {
       await fn();
-      safeSetInterval(intervalMs, fn, onNewTimeout);
+      safeSetAsyncInterval(intervalMs, fn, onNewTimeout);
     },
     onNewTimeout,
   );
@@ -154,6 +170,17 @@ class RuntimeUtils {
    * @returns The interval object
    */
   static readonly safeSetInterval = safeSetInterval;
+  /**
+   * Safely schedule an async interval, even if the duration is too large.
+   * Same as {@link safeSetInterval}, but async promises are awaited, after
+   * which the next interval is scheduled
+   * @param intervalMs The interval to wait between each call
+   * @param fn The async function to run after each interval
+   * @param onNewTimeout A callback for when a new timeout is scheduled
+   * @throws An error if the interval value is negative
+   * @returns The interval object
+   */
+  static readonly safeSetAsyncInterval = safeSetAsyncInterval;
 }
 
 export { RuntimeUtils };

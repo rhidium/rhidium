@@ -5,6 +5,8 @@ import {
   Lang,
   Database,
   PermLevel,
+  StringUtils,
+  EmbedConstants,
 } from '@core';
 import { ContextMenuCommandBuilder } from 'discord.js';
 import { WarnServices } from '../services/warn';
@@ -72,15 +74,17 @@ const UserInfoCommand = new UserContextCommand({
     );
 
     const resolvedWarns = WarnServices.resolveWarns(dbMember, dbGuild);
-
-    const receivedWarnings = dbMember.ReceivedWarnings.length
-      ? ArrayUtils.truncateStringify(dbMember.ReceivedWarnings, {
-          maxItems: 20,
-          stringify: (warn) => WarnServices.stringifyWarn(warn, true, 50),
-          joinString: '\n- ',
-          prefix: '\n- ',
-        })
-      : none;
+    const receivedWarningsString = StringUtils.displayArray(
+      dbMember.ReceivedWarnings,
+      {
+        emptyOutput: none,
+        maxItems: 20,
+        maxTotalLength: EmbedConstants.FIELD_VALUE_MAX_LENGTH - 50,
+        stringify: (warn) => WarnServices.stringifyWarn(warn, true, 50),
+        joinString: '\n- ',
+        prefix: '\n- ',
+      },
+    );
 
     const embed = client.embeds.branding({
       description: roleOutput,
@@ -103,7 +107,7 @@ const UserInfoCommand = new UserContextCommand({
           name: 'Moderation Cases/History',
           value: stripIndents`
             **Moderation Score:** ${resolvedWarns.after} (low = good, high = bad)
-            **Received Warnings:** ${receivedWarnings}
+            **Received Warnings:** ${receivedWarningsString}
           `,
           inline: false,
         },

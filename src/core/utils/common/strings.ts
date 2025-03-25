@@ -1,7 +1,105 @@
+type StringifyArrayOptions<T> = {
+  maxItems: number;
+  maxItemLength?: number;
+  maxTotalLength?: number;
+  stringify: (item: T) => string;
+  prefix?: string;
+  suffix?: string;
+  joinString?: string;
+};
+
 const truncate = (input: string, length: number, suffix = '...'): string =>
   input.length > length
     ? input.slice(0, length - suffix.length) + suffix
     : input;
+
+const stringifyArray = <T>(
+  arr: T[],
+  options: StringifyArrayOptions<T>,
+): {
+  result: string;
+  truncatedItems: number;
+} => {
+  const {
+    prefix = '',
+    suffix = '',
+    maxItemLength,
+    maxTotalLength,
+    joinString = ', ',
+    maxItems,
+    stringify,
+  } = options;
+  const reservedLength = prefix.length + suffix.length;
+
+  const withOptions = (_arr: string[]) =>
+    prefix + _arr.join(joinString) + suffix;
+
+  const processArray = (
+    _arr: T[],
+  ): {
+    result: string[];
+    truncatedItems: number;
+  } => {
+    const processItem = (item: T) => {
+      const itemStr = stringify(item);
+
+      if (
+        typeof maxItemLength === 'undefined' ||
+        itemStr.length <= maxItemLength
+      ) {
+        return itemStr;
+      }
+
+      return truncate(itemStr, maxItemLength);
+    };
+
+    if (typeof maxTotalLength === 'undefined')
+      return {
+        result: _arr.map(processItem),
+        truncatedItems: 0,
+      };
+
+    let totalLength = 0;
+    const result: string[] = [];
+
+    for (const item of _arr) {
+      const itemStr = processItem(item);
+
+      totalLength += itemStr.length;
+
+      if (totalLength > maxTotalLength - reservedLength) break;
+
+      result.push(itemStr);
+    }
+
+    return {
+      result,
+      truncatedItems: _arr.length - result.length,
+    };
+  };
+
+  const processed = processArray(arr.slice(0, maxItems));
+
+  return {
+    result: withOptions(processed.result),
+    truncatedItems: processed.truncatedItems,
+  };
+};
+
+const displayArray = <T>(
+  arr: T[],
+  options: StringifyArrayOptions<T> & {
+    emptyOutput: string;
+  },
+): string => {
+  if (arr.length === 0) return options.emptyOutput;
+
+  const { result, truncatedItems } = stringifyArray(arr, options);
+
+  return `${result}${
+    truncatedItems > 0 ? `\n...and ${truncatedItems} more...` : ''
+  }`;
+};
 
 const pluralize = (input: string, count: number): string =>
   count === 1 ? input : `${input}s`;
@@ -69,6 +167,23 @@ class StringUtils {
    */
   static readonly truncate = truncate;
   /**
+   * Truncate an array of items into a string
+   * @param arr The array to truncate
+   * @param length The maximum number of items to include
+   * @param stringify The function to convert each item to a string
+   * @param joinString The string to join the items with
+   * @returns The truncated string
+   */
+  static readonly stringifyArray = stringifyArray;
+  /**
+   * Utility wrapper for {@link stringifyArray} that handles empty arrays
+   * and displaying the number of truncated items
+   * @param arr The array to display
+   * @param options The options to use
+   * @returns The displayed string
+   */
+  static readonly displayArray = displayArray;
+  /**
    * Pluralize a string based on a count
    * @param input The input string
    * @param count The count
@@ -127,4 +242,4 @@ class StringUtils {
   static readonly isUrl = isUrl;
 }
 
-export { StringUtils };
+export { StringUtils, type StringifyArrayOptions };
