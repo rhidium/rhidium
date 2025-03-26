@@ -31,7 +31,7 @@
     "pretest": "npm run build",
     "posttest": "npm run lint",
     "start": "node --enable-source-maps dist/src/client/index.js",
-    "start:dev": "DEBUG=@repo/database:*,@repo/reminders:* ts-node-dev -r tsconfig-paths/register --respawn --notify --transpile-only src/client/index.ts",
+    "start:dev": "DEBUG=app:*,@repo/database:*,@repo/reminders:* ts-node-dev -r tsconfig-paths/register --respawn --notify --transpile-only src/client/index.ts",
     "test": "mocha dist/test/**/*.js",
     "test:dev": "ts-mocha test/**/*.spec.ts -w --watch-files '**/*.ts'",
     "typecheck": "tsc --noEmit",
@@ -64,12 +64,21 @@
   },
   "dependencies": {
     "@prisma/client": "6.4.1",
-    "debug": "^4.4.0"
+    "cache-manager": "^6.4.1",
+    "colors": "^1.4.0",
+    "debug": "^4.4.0",
+    "deep-object-diff": "^1.1.9",
+    "discord.js": "^14.18.0",
+    "keyv": "^5.3.2",
+    "lru-cache": "^11.1.0",
+    "module-alias": "^2.2.3"
   },
   "devDependencies": {
     "@changesets/cli": "^2.28.1",
     "@commitlint/cli": "^19.8.0",
     "@commitlint/config-conventional": "^19.8.0",
+    "@types/debug": "^4.1.12",
+    "@types/module-alias": "^2.0.4",
     "@types/node": "^22.13.13",
     "commitizen": "^4.3.1",
     "cz-conventional-changelog": "^3.3.0",
@@ -81,6 +90,7 @@
     "ts-json-schema-generator": "^2.3.0",
     "ts-node-dev": "^2.0.0",
     "tsconfig-paths": "^4.2.0",
+    "tslib": "^2.8.1",
     "typedoc": "^0.27.9",
     "typescript": "^5.8.2"
   },
