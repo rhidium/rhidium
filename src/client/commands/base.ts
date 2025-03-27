@@ -8,13 +8,16 @@ import {
 } from './types';
 import debug, { type Debugger } from '@client/debug';
 import {
+  ApplicationIntegrationType,
   ContextMenuCommandBuilder,
+  InteractionContextType,
   MessageFlags,
   RepliableInteraction,
   SlashCommandBuilder,
 } from 'discord.js';
 import commandDefaults from './defaults';
 import type {
+  CommandControllerOptions,
   CommandEnabledOptions,
   CommandInteractionOptions,
   CommandOptions,
@@ -28,6 +31,7 @@ import {
   InteractionUtils,
   WithResponseContent,
 } from '@client/utils/interaction';
+import { CommandController } from './controllers';
 
 const isStringArray = (value: unknown): value is string[] =>
   Array.isArray(value) && value.every((item) => typeof item === 'string');
@@ -52,6 +56,13 @@ class CommandBase<
   public readonly enabled: CommandEnabledOptions<GuildOnly>;
   public readonly interactions: CommandInteractionOptions<RefuseUncached>;
   public readonly throttle: CommandThrottleOptions;
+  public readonly controllers: Record<
+    string,
+    CommandController<
+      ReturnType,
+      CommandInteraction<Type, CacheTypeResolver<GuildOnly, RefuseUncached>>
+    >
+  >;
 
   public toString(): string {
     return `Command<${this.type}, ${this.data.name}>`;
@@ -61,7 +72,8 @@ class CommandBase<
 
   protected constructor(
     config: RequiredCommandOptions<Type, GuildOnly, RefuseUncached, ReturnType>,
-    public readonly options: PartialCommandOptions<GuildOnly, RefuseUncached>,
+    public readonly options: PartialCommandOptions<GuildOnly, RefuseUncached> &
+      CommandControllerOptions<Type, GuildOnly, RefuseUncached, ReturnType>,
   ) {
     this.id = config.data.name;
     this.type = config.type;
@@ -80,6 +92,36 @@ class CommandBase<
       options.interactions,
     ) as CommandInteractionOptions<RefuseUncached>;
     this.throttle = Object.assign(Command.defaults.throttle, options.throttle);
+
+    const parseControllers = (): Record<
+      string,
+      CommandController<
+        ReturnType,
+        CommandInteraction<Type, CacheTypeResolver<GuildOnly, RefuseUncached>>
+      >
+    > => {
+      const controllers = this.options.controllers ?? {};
+
+      return Object.fromEntries(
+        Object.entries(controllers)
+          .filter(
+            ([, controller]) =>
+              typeof controller === 'function' ||
+              typeof controller === 'object',
+          )
+          .flatMap(([name, controller]) =>
+            typeof controller === 'function'
+              ? [[name, controller.bind(this)]]
+              : Object.entries(controller).map(([subname, subcontroller]) => [
+                  `${name}.${subname}`,
+                  subcontroller.bind(this),
+                ]),
+          ),
+      );
+    };
+
+    // Assign controllers to the class instance
+    this.controllers = parseControllers();
   }
 
   protected static readonly defaults = commandDefaults;
@@ -120,6 +162,82 @@ class CommandBase<
       ephemeral ?? this.interactions.replyEphemeral,
       withResponse,
     );
+
+  public static readonly getContexts = (
+    command: AnyCommand,
+  ): InteractionContextType[] => {
+    if (!command.data.contexts?.length) {
+      const contexts: InteractionContextType[] = [];
+
+      if (command.enabled.guildOnly === true) {
+        contexts.push(InteractionContextType.Guild);
+      } else {
+        if ('dm' in command.enabled && command.enabled.dm === true) {
+          contexts.push(InteractionContextType.BotDM);
+        }
+        if (
+          'privateChannel' in command.enabled &&
+          command.enabled.privateChannel === true
+        ) {
+          contexts.push(InteractionContextType.PrivateChannel);
+        }
+        if (
+          ('guilds' in command.enabled && command.enabled.guilds === true) ||
+          (Array.isArray(command.enabled.guilds) &&
+            command.enabled.guilds.length > 0)
+        ) {
+          contexts.push(InteractionContextType.Guild);
+        }
+      }
+
+      return contexts;
+    }
+
+    return command.data.contexts;
+  };
+
+  public static readonly getIntegrationTypes = (
+    command: AnyCommand,
+    contexts: InteractionContextType[],
+  ): ApplicationIntegrationType[] => {
+    if (!command.data.integration_types?.length) {
+      const integrationTypes: ApplicationIntegrationType[] = [];
+
+      if (contexts.includes(InteractionContextType.Guild)) {
+        integrationTypes.push(ApplicationIntegrationType.GuildInstall);
+      }
+
+      if (contexts.includes(InteractionContextType.BotDM)) {
+        integrationTypes.push(ApplicationIntegrationType.UserInstall);
+      }
+
+      return integrationTypes;
+    }
+
+    return command.data.integration_types;
+  };
+
+  public static readonly buildApiCommand = (command: AnyCommand) => {
+    const contexts = CommandBase.getContexts(command);
+    const integrationTypes = CommandBase.getIntegrationTypes(command, contexts);
+
+    command.data.setContexts(contexts);
+    command.data.setIntegrationTypes(integrationTypes);
+
+    if (typeof command.data.default_member_permissions === 'undefined') {
+      command.data.setDefaultMemberPermissions(
+        command.permissions.defaultMemberPermissions,
+      );
+    }
+
+    if (command.data instanceof SlashCommandBuilder) {
+      if (typeof command.data.nsfw === 'undefined') {
+        command.data.setNSFW(command.enabled.nsfw);
+      }
+    }
+
+    return command;
+  };
 
   protected static readonly dataResolver = <Type extends CommandTypeValue>(
     type: Type,
@@ -350,7 +468,8 @@ class Command<
     data,
     run,
     ...options
-  }: CommandOptions<Type, GuildOnly, RefuseUncached, ReturnType>) {
+  }: CommandOptions<Type, GuildOnly, RefuseUncached, ReturnType> &
+    CommandControllerOptions<Type, GuildOnly, RefuseUncached, ReturnType>) {
     super(
       {
         type,

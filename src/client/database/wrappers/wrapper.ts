@@ -16,7 +16,7 @@ import { CacheManager, PerformanceTracker } from '@client/data-structures';
 // [DEV] !this.useCache || !cacheResult does NOT make sense
 // [DEV] The result of the operation.
 
-const debug = _debug('@repo/database:wrapper');
+const debug = _debug('app:database:wrapper');
 
 const defaultCache = CacheManager.fromStore<ThenArg<ModelGetPayload[Model]>>({
   max: 500,

@@ -69,6 +69,7 @@ model Guild {
   id      String   @id @unique                                    // The Discord id of the guild (server)
   Members Member[]                                                // A guild can have multiple members
   AuditLogs AuditLog[]                                            // A guild can have multiple audit logs
+  Commands Command[]                                              // A guild can have multiple commands
 
   CaseCounterId Int @unique                                       // A guild has a case counter for moderation records
   CaseCounter GuildCaseCounter @relation(fields: [CaseCounterId], references: [id])
@@ -266,4 +267,16 @@ model EmbedField {
   name    String
   value   String
   inline  Boolean
+}
+
+model Command {
+  id          String  @id @unique
+  data        Json
+  GuildId     String?
+  Guild       Guild? @relation(fields: [GuildId], references: [id])
+}
+
+model Settings {
+  key  String @id @default("singleton")
+  @@unique([key])
 }

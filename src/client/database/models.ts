@@ -1,5 +1,6 @@
 import type {
   AuditLog,
+  Command,
   CommandCooldown,
   CommandStatistics,
   Guild,
@@ -16,6 +17,7 @@ import type {
   PopulatedCommandStatistics,
   PopulatedAuditLog,
   PopulatedReminder,
+  PopulatedCommand,
 } from './select';
 
 enum Model {
@@ -26,6 +28,7 @@ enum Model {
   CommandStatistics = 'CommandStatistics',
   AuditLog = 'AuditLog',
   Reminder = 'Reminder',
+  Command = 'Command',
 }
 
 const seenModels = new Set<string>();
@@ -53,7 +56,8 @@ type ModelUnion =
   | CommandCooldown
   | CommandStatistics
   | AuditLog
-  | Reminder;
+  | Reminder
+  | Command;
 
 type PopulatedModelUnion =
   | PopulatedUser
@@ -62,7 +66,8 @@ type PopulatedModelUnion =
   | PopulatedCommandCooldown
   | PopulatedCommandStatistics
   | PopulatedAuditLog
-  | PopulatedReminder;
+  | PopulatedReminder
+  | PopulatedCommand;
 
 type Models = {
   User: User;
@@ -72,6 +77,7 @@ type Models = {
   CommandStatistics: CommandStatistics;
   AuditLog: AuditLog;
   Reminder: Reminder;
+  Command: Command;
 };
 
 export {

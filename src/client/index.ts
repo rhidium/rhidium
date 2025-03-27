@@ -24,7 +24,11 @@ const main = async () => {
     Logger.info(`Client ready and logged in as ${c.user.username}`);
 
     manager.initialize(c);
-    void manager.syncCommands(c, appConfig.client.development_server_id);
+    manager.REST;
+    void manager.REST.syncCommands(
+      appConfig.client.development_server_id,
+      true,
+    );
   });
 };
 

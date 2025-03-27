@@ -48,30 +48,40 @@ const TestChatInput = new Command({
               ),
           ),
       ),
-  async run(client, interaction) {
-    Logger.debug(
-      client.user.username,
-      this.data.name,
-      TestChatInput.permissions.whitelist.guilds,
+  controllers: {
+    group: {
+      subcommand: async (client, interaction) => {
+        Logger.debug(
+          client.user.username,
+          TestChatInput.data.name,
+          TestChatInput.permissions.whitelist.guilds,
+        );
+
+        await TestChatInput.reply(interaction, Embeds.primary('Test command'));
+
+        Logger.debug(interaction.inGuild());
+
+        interaction.guild;
+        if (interaction.inGuild() && interaction.inCachedGuild()) {
+          interaction.guild.afkChannel;
+          interaction.channel;
+        }
+        if (!interaction.inGuild()) {
+          // interaction.channel;
+        }
+
+        return ['TEST'] as const;
+      },
+    },
+  },
+  async run(_client, interaction) {
+    await TestChatInput.reply(
+      interaction,
+      Embeds.primary('Unknown (sub)command, please try again'),
     );
-
-    await TestChatInput.reply(interaction, Embeds.primary('Test command'));
-
-    Logger.debug(interaction.inGuild());
-
-    interaction.guild;
-    if (interaction.inGuild() && interaction.inCachedGuild()) {
-      interaction.guild.afkChannel;
-      interaction.channel;
-    }
-    if (!interaction.inGuild()) {
-      // interaction.channel;
-    }
 
     return ['TEST'] as const;
   },
 });
 
 export default TestChatInput;
-
-Logger.debug(TestChatInput);

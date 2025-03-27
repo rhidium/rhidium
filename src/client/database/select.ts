@@ -2,6 +2,16 @@
 
 import { Prisma } from '@prisma/client';
 
+// Prisma.Command
+const populateCommand = Prisma.validator<Prisma.CommandDefaultArgs>()({
+  select: {
+    id: true,
+    data: true,
+    GuildId: true,
+  },
+});
+type PopulatedCommand = Prisma.CommandGetPayload<typeof populateCommand>;
+
 // Prisma.AuditLog
 const populateAuditLog = Prisma.validator<Prisma.AuditLogDefaultArgs>()({
   select: {
@@ -241,6 +251,8 @@ const populateReminder = Prisma.validator<Prisma.ReminderDefaultArgs>()({
 type PopulatedReminder = Prisma.ReminderGetPayload<typeof populateReminder>;
 
 export {
+  populateCommand,
+  type PopulatedCommand,
   populateAuditLog,
   type PopulatedAuditLog,
   populateEmbed,

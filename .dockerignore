@@ -2,7 +2,6 @@
 .github
 .vscode
 config
-data
 dist
 docs
 logs

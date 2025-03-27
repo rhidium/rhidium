@@ -143,17 +143,15 @@ class AuditLogWrapper extends DatabaseWrapper<Model.AuditLog> {
                 value: StringUtils.truncate(
                   diff
                     .map((change) => {
-                      const keyDisplay = StringUtils.titleCase(
-                        change.key.split(/(?=[A-Z])/).join(' '),
-                      );
+                      const keyDisplay = change.path.join('.');
 
                       if (!prompt) {
-                        return `- **${keyDisplay}**: ${change.oldValue} -> ${change.newValue}`;
+                        return `- **${keyDisplay}**: ${change.previousValue} -> ${change.newValue}`;
                       }
 
                       return `- **${keyDisplay}**: ${PromptResolver.defaultFormatter(
                         prompt,
-                        change.oldValue as AnyPromptValue,
+                        change.previousValue as AnyPromptValue,
                         undefined,
                         defaultEmojis,
                       )} -> ${PromptResolver.defaultFormatter(

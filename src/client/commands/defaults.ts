@@ -17,6 +17,7 @@ const permissions: CommandPermissionOptions = {
     users: [],
     categories: [],
   },
+  defaultMemberPermissions: undefined,
 } as const;
 
 const throttle: CommandThrottleOptions = {

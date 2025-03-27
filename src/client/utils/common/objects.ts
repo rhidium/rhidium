@@ -14,8 +14,8 @@ const diffAsChanges = (
     if (typeof value === 'object') {
       if (typeof originalVal !== 'object') {
         changes.push({
-          key,
-          oldValue: `type ${typeof originalVal}`,
+          path: [key],
+          previousValue: `type ${typeof originalVal}`,
           newValue: `type ${typeof value}`,
         });
       } else {
@@ -24,7 +24,7 @@ const diffAsChanges = (
           updatedObj[key] as GenericObject,
         );
         inner.forEach((change) => {
-          change.key = `${key}.${change.key}`;
+          change.path.push(key);
         });
         changes.push(...inner);
       }
@@ -32,8 +32,8 @@ const diffAsChanges = (
       const isSame = originalVal === value;
       if (!isSame) {
         changes.push({
-          key,
-          oldValue: originalVal,
+          path: [key],
+          previousValue: originalVal,
           newValue: value,
         });
       }
@@ -51,8 +51,8 @@ const isEmptyObject = (item: unknown): item is GenericObject =>
 
 type GenericObject = Record<string, unknown>;
 type ObjectChange = {
-  key: string;
-  oldValue: unknown;
+  path: string[];
+  previousValue: unknown;
   newValue: unknown;
 };
 

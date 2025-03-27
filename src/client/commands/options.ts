@@ -3,6 +3,7 @@ import {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   InteractionContextType,
   PermissionResolvable,
+  Permissions,
 } from 'discord.js';
 import { RequiredResourceOptions } from './required-resources';
 import {
@@ -14,6 +15,7 @@ import {
   DeepPartial,
 } from './types';
 import { CommandThrottleOptions } from './throttle';
+import { CommandController } from './controllers';
 
 type CommandInteractionOptions<RefuseUncached extends boolean> = {
   /**
@@ -112,6 +114,7 @@ type CommandPermissionOptions = {
   client: PermissionResolvable[];
   user: PermissionResolvable[];
   whitelist: RequiredResourceOptions;
+  defaultMemberPermissions: Permissions | bigint | number | null | undefined;
 };
 
 type RequiredCommandOptions<
@@ -139,9 +142,31 @@ type OptionalCommandOptions<
 };
 
 type PartialCommandOptions<
+  GuildOnly extends boolean,
+  RefuseUncached extends boolean,
+> = DeepPartial<OptionalCommandOptions<GuildOnly, RefuseUncached>>;
+
+type CommandControllerOptions<
+  Type extends CommandTypeValue = CommandTypeValue,
   GuildOnly extends boolean = false,
   RefuseUncached extends boolean = false,
-> = DeepPartial<OptionalCommandOptions<GuildOnly, RefuseUncached>>;
+  ReturnType = void,
+> = {
+  controllers?: Record<
+    string,
+    | CommandController<
+        ReturnType,
+        CommandInteraction<Type, CacheTypeResolver<GuildOnly, RefuseUncached>>
+      >
+    | Record<
+        string,
+        CommandController<
+          ReturnType,
+          CommandInteraction<Type, CacheTypeResolver<GuildOnly, RefuseUncached>>
+        >
+      >
+  >;
+};
 
 type CommandOptions<
   Type extends CommandTypeValue = CommandTypeValue,
@@ -158,5 +183,6 @@ export {
   type RequiredCommandOptions,
   type OptionalCommandOptions,
   type PartialCommandOptions,
+  type CommandControllerOptions,
   type CommandOptions,
 };

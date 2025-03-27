@@ -15,7 +15,7 @@ import { NumberUtils } from '@client/utils';
 export class CacheManager<T extends NonNullable<unknown>>
   implements AbstractCache<T>
 {
-  protected readonly debug = _debug('@repo/cache:manager');
+  protected readonly debug = _debug('app:cache:manager');
   readonly cacheOptions: ResolvedCreateCacheOptions<T>;
   readonly metadata: CacheManagerMetadata = {
     hits: 0,

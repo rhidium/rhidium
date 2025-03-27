@@ -15,7 +15,6 @@ services:
       NODE_ENV: production
       DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@database:5432/${POSTGRES_DB}
     volumes:
-      - ./data:/app/data:rw
       - ./logs:/app/logs:rw
       - ./docs:/app/docs:rw
       - ./config:/app/config:r

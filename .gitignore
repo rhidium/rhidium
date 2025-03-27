@@ -1,6 +1,5 @@
 config/config.json
 config/config.json.bak
-data/
 dist/
 docs/
 logs/

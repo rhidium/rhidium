@@ -14,6 +14,7 @@ export default {
   debug,
   commands: {
     manager: commands.extend('manager'),
+    rest: commands.extend('rest'),
     [ApplicationCommandType.ChatInput]: commands.extend('chat'),
     [ApplicationCommandType.Message]: commands.extend('message'),
     [ApplicationCommandType.User]: commands.extend('user'),

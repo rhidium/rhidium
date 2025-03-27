@@ -1,4 +1,5 @@
 import { appConfig } from '@client/config';
+import { Database } from '@client/database';
 import { EmojiUtils, StringUtils } from '@client/utils';
 import {
   APIInteractionGuildMember,
@@ -50,18 +51,42 @@ const config: ClientPermissionOptions = {
     {
       name: 'Moderator',
       level: PermLevel.Moderator,
-      hasLevel: (_config, member) =>
-        Promise.resolve(
-          member.permissions.has(PermissionFlagsBits.ManageMessages),
-        ),
+      hasLevel: async (_config, member) => {
+        const guildSettings = await Database.Guild.resolve(member.guild.id);
+
+        if (!guildSettings.modRoleIds.length) {
+          return (
+            member.permissions.has(PermissionFlagsBits.KickMembers) &&
+            member.permissions.has(PermissionFlagsBits.BanMembers) &&
+            member.permissions.has(PermissionFlagsBits.ManageMessages)
+          );
+        }
+
+        return member.roles.cache.some((role) =>
+          guildSettings.modRoleIds.includes(role.id),
+        );
+      },
     },
     {
       name: 'Administrator',
       level: PermLevel.Administrator,
-      hasLevel: (_config, member) =>
-        Promise.resolve(
-          member.permissions.has(PermissionFlagsBits.Administrator),
-        ),
+      hasLevel: async (_config, member) => {
+        const guildSettings = await Database.Guild.resolve(member.guild.id);
+
+        if (
+          !guildSettings.adminRoleIds.length &&
+          !guildSettings.adminUserIds.length
+        ) {
+          return member.permissions.has(PermissionFlagsBits.Administrator);
+        }
+
+        return (
+          guildSettings.adminUserIds.includes(member.id) ||
+          member.roles.cache.some((role) =>
+            guildSettings.adminRoleIds.includes(role.id),
+          )
+        );
+      },
     },
     {
       name: 'Server Owner',
