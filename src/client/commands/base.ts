@@ -1,29 +1,34 @@
 import {
   CommandType,
+  type APICommandTypeValue,
   type CacheTypeResolver,
   type CommandData,
   type CommandInteraction,
   type CommandRunFunction,
-  type CommandTypeValue,
 } from './types';
 import debug, { type Debugger } from '@client/debug';
 import {
   ApplicationIntegrationType,
+  ButtonBuilder,
+  ChannelSelectMenuBuilder,
   ContextMenuCommandBuilder,
   InteractionContextType,
+  InteractionType,
+  MentionableSelectMenuBuilder,
   MessageFlags,
+  ModalBuilder,
   RepliableInteraction,
+  RoleSelectMenuBuilder,
   SlashCommandBuilder,
+  StringSelectMenuBuilder,
+  UserSelectMenuBuilder,
 } from 'discord.js';
 import commandDefaults from './defaults';
 import type {
-  CommandControllerOptions,
   CommandEnabledOptions,
   CommandInteractionOptions,
   CommandOptions,
   CommandPermissionOptions,
-  PartialCommandOptions,
-  RequiredCommandOptions,
 } from './options';
 import { CommandThrottleOptions } from './throttle';
 import { Permissions } from '@client/permissions';
@@ -37,17 +42,15 @@ const isStringArray = (value: unknown): value is string[] =>
   Array.isArray(value) && value.every((item) => typeof item === 'string');
 
 class CommandBase<
-  Type extends CommandTypeValue,
+  Type extends CommandType,
   GuildOnly extends boolean,
   RefuseUncached extends boolean,
   ReturnType,
-> implements
-    RequiredCommandOptions<Type, GuildOnly, RefuseUncached, ReturnType>
-{
+> {
   public readonly id: string;
   public readonly type: Type;
   public readonly data: CommandData<Type>;
-  public readonly run: CommandRunFunction<
+  public readonly run: null | CommandRunFunction<
     ReturnType,
     CommandInteraction<Type, CacheTypeResolver<GuildOnly, RefuseUncached>>
   >;
@@ -65,33 +68,47 @@ class CommandBase<
   >;
 
   public toString(): string {
-    return `Command<${this.type}, ${this.data.name}>`;
+    return `Command<${this.type}, ${this.id}>`;
   }
 
   protected readonly debug: Debugger;
 
   protected constructor(
-    config: RequiredCommandOptions<Type, GuildOnly, RefuseUncached, ReturnType>,
-    public readonly options: PartialCommandOptions<GuildOnly, RefuseUncached> &
-      CommandControllerOptions<Type, GuildOnly, RefuseUncached, ReturnType>,
+    public readonly options: CommandOptions<
+      Type,
+      GuildOnly,
+      RefuseUncached,
+      ReturnType
+    >,
   ) {
-    this.id = config.data.name;
-    this.type = config.type;
-    this.data = CommandBase.dataResolver(this.type, config.data);
-    this.run = config.run.bind(this);
+    const [id, data] = CommandBase.dataResolver(options.type, options.data);
+
+    this.id = id;
+    this.type = options.type;
+    this.data = data;
+    this.run =
+      'run' in options && typeof options.run !== 'undefined'
+        ? options.run.bind(this)
+        : null;
 
     this.debug = debug.commands[this.type].extend(this.id);
 
     this.permissions = Object.assign(
+      {},
       Command.defaults.permissions,
       options.permissions,
     );
-    this.enabled = Object.assign(Command.defaults.enabled, options.enabled);
+    this.enabled = Object.assign({}, Command.defaults.enabled, options.enabled);
     this.interactions = Object.assign(
+      {},
       Command.defaults.interactions,
       options.interactions,
     ) as CommandInteractionOptions<RefuseUncached>;
-    this.throttle = Object.assign(Command.defaults.throttle, options.throttle);
+    this.throttle = Object.assign(
+      {},
+      Command.defaults.throttle,
+      options.throttle,
+    );
 
     const parseControllers = (): Record<
       string,
@@ -100,7 +117,7 @@ class CommandBase<
         CommandInteraction<Type, CacheTypeResolver<GuildOnly, RefuseUncached>>
       >
     > => {
-      const controllers = this.options.controllers ?? {};
+      const controllers = options.controllers ?? {};
 
       return Object.fromEntries(
         Object.entries(controllers)
@@ -137,6 +154,59 @@ class CommandBase<
     });
   };
 
+  public static readonly isApiCommand = (
+    command: AnyCommand,
+  ): command is APICommand =>
+    command.type === CommandType.ChatInput ||
+    command.type === CommandType.UserContextMenu ||
+    command.type === CommandType.MessageContextMenu ||
+    command.type === CommandType.PrimaryEntryPoint;
+
+  public static readonly isComponentCommand = (
+    command: AnyCommand,
+  ): command is APICommand => !CommandBase.isApiCommand(command);
+
+  public static readonly isEnabled = (command: AnyCommand): boolean => {
+    if (command.enabled.global === false) {
+      return false;
+    }
+
+    return true;
+  };
+
+  public static readonly resolveDiscordType = (
+    type: CommandType,
+  ): InteractionType => {
+    switch (type) {
+      case CommandType.ChatInput:
+        return InteractionType.ApplicationCommand;
+      case CommandType.UserContextMenu:
+        return InteractionType.ApplicationCommand;
+      case CommandType.MessageContextMenu:
+        return InteractionType.ApplicationCommand;
+      case CommandType.PrimaryEntryPoint:
+        return InteractionType.ApplicationCommand;
+      case CommandType.Button:
+        return InteractionType.MessageComponent;
+      case CommandType.StringSelect:
+        return InteractionType.MessageComponent;
+      case CommandType.UserSelect:
+        return InteractionType.MessageComponent;
+      case CommandType.RoleSelect:
+        return InteractionType.MessageComponent;
+      case CommandType.MentionableSelect:
+        return InteractionType.MessageComponent;
+      case CommandType.ChannelSelect:
+        return InteractionType.MessageComponent;
+      case CommandType.ModalSubmit:
+        return InteractionType.ModalSubmit;
+      default:
+        throw new Error(
+          `Unknown command type ${type}, cannot resolve Discord interaction type`,
+        );
+    }
+  };
+
   /**
    * Reply to an interaction with a message, dynamically resolving
    * which reply function to use depending on wether or not the
@@ -163,8 +233,33 @@ class CommandBase<
       withResponse,
     );
 
+  public readonly children: AnyCommand[] = [];
+  public readonly extend = <
+    T extends CommandType,
+    GO extends boolean = GuildOnly,
+    RU extends boolean = RefuseUncached,
+    RT = void,
+  >(
+    options: CommandOptions<T, GO, RU, RT>,
+  ): Command<T, GO, RU, RT> => {
+    const command = new Command<T, GO, RU, RT>({
+      ...{
+        ...this.options,
+        data: undefined,
+        type: undefined,
+        controllers: undefined,
+        run: undefined,
+      },
+      ...options,
+    } as CommandOptions<T, GO, RU, RT>);
+
+    this.children.push(command as AnyCommand);
+
+    return command;
+  };
+
   public static readonly getContexts = (
-    command: AnyCommand,
+    command: APICommand,
   ): InteractionContextType[] => {
     if (!command.data.contexts?.length) {
       const contexts: InteractionContextType[] = [];
@@ -197,7 +292,7 @@ class CommandBase<
   };
 
   public static readonly getIntegrationTypes = (
-    command: AnyCommand,
+    command: APICommand,
     contexts: InteractionContextType[],
   ): ApplicationIntegrationType[] => {
     if (!command.data.integration_types?.length) {
@@ -217,7 +312,9 @@ class CommandBase<
     return command.data.integration_types;
   };
 
-  public static readonly buildApiCommand = (command: AnyCommand) => {
+  public static readonly buildApiCommand = (
+    command: APICommand,
+  ): AnyCommand => {
     const contexts = CommandBase.getContexts(command);
     const integrationTypes = CommandBase.getIntegrationTypes(command, contexts);
 
@@ -239,28 +336,80 @@ class CommandBase<
     return command;
   };
 
-  protected static readonly dataResolver = <Type extends CommandTypeValue>(
+  protected static readonly dataResolver = <Type extends CommandType>(
     type: Type,
     data:
       | CommandData<Type>
       | ((builder: CommandData<Type>) => CommandData<Type>),
-  ): CommandData<Type> =>
-    typeof data === 'function'
-      ? data(
-          (type === CommandType.ChatInput ||
-          type === CommandType.PrimaryEntryPoint
-            ? new SlashCommandBuilder()
-            : new ContextMenuCommandBuilder()) as CommandData<Type>,
-        )
-      : data;
+  ): [string, CommandData<Type>] => {
+    let resolved: CommandData<Type>;
+
+    if (typeof data !== 'function') {
+      resolved = data;
+    } else {
+      switch (type) {
+        case CommandType.ChatInput:
+        case CommandType.PrimaryEntryPoint:
+          resolved = data(new SlashCommandBuilder() as CommandData<Type>);
+          break;
+        case CommandType.Button:
+          resolved = data(new ButtonBuilder() as CommandData<Type>);
+          break;
+        case CommandType.StringSelect:
+          resolved = data(new StringSelectMenuBuilder() as CommandData<Type>);
+          break;
+        case CommandType.UserSelect:
+          resolved = data(new UserSelectMenuBuilder() as CommandData<Type>);
+          break;
+        case CommandType.RoleSelect:
+          resolved = data(new RoleSelectMenuBuilder() as CommandData<Type>);
+          break;
+        case CommandType.MentionableSelect:
+          resolved = data(
+            new MentionableSelectMenuBuilder() as CommandData<Type>,
+          );
+          break;
+        case CommandType.ChannelSelect:
+          resolved = data(new ChannelSelectMenuBuilder() as CommandData<Type>);
+          break;
+        case CommandType.ModalSubmit:
+          resolved = data(new ModalBuilder() as CommandData<Type>);
+          break;
+        case CommandType.UserContextMenu:
+        case CommandType.MessageContextMenu:
+          resolved = data(new ContextMenuCommandBuilder() as CommandData<Type>);
+          break;
+      }
+    }
+
+    const id: string | null =
+      'name' in resolved
+        ? resolved.name
+        : 'custom_id' in resolved.data &&
+            typeof resolved.data.custom_id === 'string'
+          ? resolved.data.custom_id
+          : null;
+
+    if (id === null) {
+      throw new Error(
+        `Unable to resolve any unique identifier for command, please provide a name or customId: ${JSON.stringify(
+          resolved,
+          null,
+          2,
+        )}`,
+      );
+    }
+
+    return [id, resolved];
+  };
 
   protected static readonly handlePermissions = async <
-    Type extends CommandTypeValue,
+    Type extends CommandType,
     GuildOnly extends boolean,
     RefuseUncached extends boolean,
     ReturnType,
   >(
-    command: CommandBase<Type, GuildOnly, RefuseUncached, ReturnType>,
+    command: Command<Type, GuildOnly, RefuseUncached, ReturnType>,
     interaction: CommandInteraction,
   ): Promise<true | string> => {
     command.debug('Handling permissions');
@@ -327,6 +476,7 @@ class CommandBase<
       interaction.inGuild()
     ) {
       if (
+        !interaction.channelId ||
         !command.permissions.whitelist.channels.includes(interaction.channelId)
       ) {
         return 'That command is not available in this channel';
@@ -374,13 +524,13 @@ class CommandBase<
   };
 
   public static readonly handleInteraction = async <
-    Type extends CommandTypeValue,
+    Type extends CommandType,
     GuildOnly extends boolean,
     RefuseUncached extends boolean,
     ReturnType,
   >(
-    command: CommandBase<Type, GuildOnly, RefuseUncached, ReturnType>,
-    interaction: CommandInteraction,
+    command: Command<Type, GuildOnly, RefuseUncached, ReturnType>,
+    interaction: CommandInteraction<CommandType>,
   ): Promise<
     | string
     | CommandInteraction<Type, CacheTypeResolver<GuildOnly, RefuseUncached>>
@@ -455,32 +605,76 @@ class CommandBase<
       CacheTypeResolver<GuildOnly, RefuseUncached>
     >;
   };
+
+  public static readonly runFunctionResolver = <
+    Type extends CommandType,
+    GuildOnly extends boolean,
+    RefuseUncached extends boolean,
+    ReturnType,
+  >(
+    command: Command<Type, GuildOnly, RefuseUncached, ReturnType>,
+    interaction: CommandInteraction<
+      Type,
+      CacheTypeResolver<GuildOnly, RefuseUncached>
+    >,
+  ): null | CommandRunFunction<
+    ReturnType,
+    CommandInteraction<Type, CacheTypeResolver<GuildOnly, RefuseUncached>>
+  > => {
+    let fn = command.run;
+    const isChatInputCommand = interaction.isChatInputCommand();
+    const subcommand = isChatInputCommand
+      ? interaction.options.getSubcommand(false)
+      : null;
+    const subcommandGroup = isChatInputCommand
+      ? interaction.options.getSubcommandGroup(false)
+      : null;
+    const controller =
+      subcommandGroup && subcommand
+        ? command.controllers[`${subcommandGroup}.${subcommand}`]
+        : subcommandGroup || subcommand
+          ? command.controllers[(subcommandGroup || subcommand)!]
+          : null;
+
+    if (
+      (subcommand || subcommandGroup) &&
+      Object.keys(command.controllers).length > 0 &&
+      typeof controller === 'function'
+    ) {
+      fn = controller;
+    }
+
+    if (fn === null) {
+      return null;
+    }
+
+    return fn as CommandRunFunction<
+      ReturnType,
+      CommandInteraction<Type, CacheTypeResolver<GuildOnly, RefuseUncached>>
+    >;
+  };
 }
 
 class Command<
-  Type extends CommandTypeValue = CommandTypeValue,
-  GuildOnly extends boolean = false,
-  RefuseUncached extends boolean = false,
+  Type extends CommandType = CommandType,
+  GuildOnly extends boolean = boolean,
+  RefuseUncached extends boolean = boolean,
   ReturnType = void,
 > extends CommandBase<Type, GuildOnly, RefuseUncached, ReturnType> {
-  public constructor({
-    type,
-    data,
-    run,
-    ...options
-  }: CommandOptions<Type, GuildOnly, RefuseUncached, ReturnType> &
-    CommandControllerOptions<Type, GuildOnly, RefuseUncached, ReturnType>) {
-    super(
-      {
-        type,
-        data,
-        run,
-      },
-      options,
-    );
+  public constructor(
+    options: CommandOptions<Type, GuildOnly, RefuseUncached, ReturnType>,
+  ) {
+    super(options);
   }
 }
 
-type AnyCommand = Command<CommandTypeValue, boolean, boolean, unknown>;
+type AnyTypedCommand = {
+  [Type in CommandType]: Command<Type, boolean, boolean, unknown>;
+};
 
-export { Command, CommandBase, type AnyCommand };
+type AnyCommand<Type extends CommandType = CommandType> = AnyTypedCommand[Type];
+
+type APICommand<Type extends APICommandTypeValue = APICommandTypeValue> =
+  AnyTypedCommand[Type];
+
+export { Command, CommandBase, type AnyCommand, type APICommand };

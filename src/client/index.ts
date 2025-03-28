@@ -15,7 +15,13 @@ const client = new Client({
 });
 const manager = new CommandManager();
 
-manager.register(TestChatInput);
+manager.register(
+  TestChatInput,
+  // TestButton,
+  // TestModal,
+  // TestSelect,
+  // TestPrimaryEntryPoint,
+);
 
 const main = async () => {
   await client.login(appConfig.client.token);
@@ -23,12 +29,13 @@ const main = async () => {
   client.once(Events.ClientReady, (c) => {
     Logger.info(`Client ready and logged in as ${c.user.username}`);
 
-    manager.initialize(c);
-    manager.REST;
-    void manager.REST.syncCommands(
-      appConfig.client.development_server_id,
-      true,
-    );
+    void manager
+      .initialize(c)
+      .syncCommands(
+        appConfig.client.development_server_id,
+        true,
+        process.env.NODE_ENV !== 'production',
+      );
   });
 };
 

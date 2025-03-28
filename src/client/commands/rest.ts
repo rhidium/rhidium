@@ -58,11 +58,14 @@ type AbstractRESTClient = {
    * @param guildId The guild ID to sync commands for, or `null` for global
    * @param clearOtherEnvironment Whether to clear commands from the other environment. If
    *   `guildId` is provided, this will clear global commands, and vice versa
+   * @param forceSync Whether to force sync commands, even if they are already in sync. Useful
+   *   if you run multiple code bases on the same (development) bot (user) account.
    * @returns A promise that resolves when the commands are synced
    */
   syncCommands: (
     guildId?: string | null,
     clearOtherEnvironment?: boolean,
+    forceSync?: boolean,
   ) => Promise<void>;
 };
 
@@ -319,25 +322,30 @@ class RESTClient implements AbstractRESTClient {
   public async syncCommands(
     guildId?: string | null,
     clearOtherEnvironment = false,
+    forceSync = false,
   ): Promise<void> {
     this.debug('Syncing commands');
 
     const synced = await this.checkCommandsSynced(guildId ?? null);
 
-    if (synced.isSynced) {
+    if (synced.isSynced && !forceSync) {
       this.debug('Commands are already in sync, skipping');
       return;
     }
 
-    const putCommandData = this.data.filter(
-      (command) =>
-        synced.new.includes(Database.Command.resolveId(command)) ||
-        synced.updated.includes(Database.Command.resolveId(command)),
-    );
+    const putCommandData = forceSync
+      ? this.data
+      : this.data.filter(
+          (command) =>
+            synced.new.includes(Database.Command.resolveId(command)) ||
+            synced.updated.includes(Database.Command.resolveId(command)),
+        );
 
-    const deleteCommandData = synced.deleted
-      .map((id) => Database.Command.findInApiData(id, this.data) ?? null)
-      .filter((command) => command !== null);
+    const deleteCommandData = forceSync
+      ? []
+      : synced.deleted
+          .map((id) => Database.Command.findInApiData(id, this.data) ?? null)
+          .filter((command) => command !== null);
 
     this.debug(
       'Commands to put: %o',

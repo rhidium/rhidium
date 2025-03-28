@@ -11,7 +11,7 @@ import {
   CommandData,
   CommandInteraction,
   CommandRunFunction,
-  CommandTypeValue,
+  CommandType,
   DeepPartial,
 } from './types';
 import { CommandThrottleOptions } from './throttle';
@@ -117,42 +117,42 @@ type CommandPermissionOptions = {
   defaultMemberPermissions: Permissions | bigint | number | null | undefined;
 };
 
-type RequiredCommandOptions<
-  Type extends CommandTypeValue = CommandTypeValue,
-  GuildOnly extends boolean = false,
-  RefuseUncached extends boolean = false,
-  ReturnType = void,
-> = {
+type LocalRequiredCommandOptionsBase<Type extends CommandType = CommandType> = {
   type: Type;
   data: CommandData<Type> | ((builder: CommandData<Type>) => CommandData<Type>);
-  run: CommandRunFunction<
-    ReturnType,
-    CommandInteraction<Type, CacheTypeResolver<GuildOnly, RefuseUncached>>
-  >;
 };
 
-type OptionalCommandOptions<
+type LocalPartialCommandOptions<
   GuildOnly extends boolean,
   RefuseUncached extends boolean,
-> = {
+> = DeepPartial<{
   enabled: CommandEnabledOptions<GuildOnly>;
   permissions: CommandPermissionOptions;
   interactions: CommandInteractionOptions<RefuseUncached>;
   throttle: CommandThrottleOptions;
-};
+}>;
 
-type PartialCommandOptions<
-  GuildOnly extends boolean,
-  RefuseUncached extends boolean,
-> = DeepPartial<OptionalCommandOptions<GuildOnly, RefuseUncached>>;
-
-type CommandControllerOptions<
-  Type extends CommandTypeValue = CommandTypeValue,
+type CommandRunOptions<
+  Type extends CommandType = CommandType,
   GuildOnly extends boolean = false,
   RefuseUncached extends boolean = false,
   ReturnType = void,
 > = {
-  controllers?: Record<
+  run: CommandRunFunction<
+    ReturnType,
+    CommandInteraction<Type, CacheTypeResolver<GuildOnly, RefuseUncached>>
+  >;
+  controllers?: never;
+};
+
+type CommandControllerOptions<
+  Type extends CommandType = CommandType,
+  GuildOnly extends boolean = false,
+  RefuseUncached extends boolean = false,
+  ReturnType = void,
+> = {
+  run?: never;
+  controllers: Record<
     string,
     | CommandController<
         ReturnType,
@@ -169,20 +169,23 @@ type CommandControllerOptions<
 };
 
 type CommandOptions<
-  Type extends CommandTypeValue = CommandTypeValue,
+  Type extends CommandType = CommandType,
   GuildOnly extends boolean = false,
   RefuseUncached extends boolean = false,
   ReturnType = void,
-> = RequiredCommandOptions<Type, GuildOnly, RefuseUncached, ReturnType> &
-  PartialCommandOptions<GuildOnly, RefuseUncached>;
+> = LocalPartialCommandOptions<GuildOnly, RefuseUncached> &
+  (
+    | (CommandRunOptions<Type, GuildOnly, RefuseUncached, ReturnType> &
+        LocalRequiredCommandOptionsBase<Type>)
+    | (CommandControllerOptions<Type, GuildOnly, RefuseUncached, ReturnType> &
+        LocalRequiredCommandOptionsBase<Type>)
+  );
 
 export {
   type CommandInteractionOptions,
   type CommandEnabledOptions,
   type CommandPermissionOptions,
-  type RequiredCommandOptions,
-  type OptionalCommandOptions,
-  type PartialCommandOptions,
+  type CommandRunOptions,
   type CommandControllerOptions,
   type CommandOptions,
 };

@@ -1,5 +1,4 @@
 import _debug, { type Debugger as _Debugger } from 'debug';
-import { ApplicationCommandType } from 'discord.js';
 
 const debug = _debug('app');
 
@@ -15,10 +14,17 @@ export default {
   commands: {
     manager: commands.extend('manager'),
     rest: commands.extend('rest'),
-    [ApplicationCommandType.ChatInput]: commands.extend('chat'),
-    [ApplicationCommandType.Message]: commands.extend('message'),
-    [ApplicationCommandType.User]: commands.extend('user'),
-    [ApplicationCommandType.PrimaryEntryPoint]: commands.extend('entry'),
+    ChatInput: commands.extend('chat'),
+    UserContextMenu: commands.extend('message'),
+    MessageContextMenu: commands.extend('user'),
+    PrimaryEntryPoint: commands.extend('entry'),
+    Button: commands.extend('button'),
+    StringSelect: commands.extend('string'),
+    UserSelect: commands.extend('userselect'),
+    RoleSelect: commands.extend('roleselect'),
+    MentionableSelect: commands.extend('mentionableselect'),
+    ChannelSelect: commands.extend('channelselect'),
+    ModalSubmit: commands.extend('modal'),
   },
   permissions,
   events,

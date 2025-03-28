@@ -3,7 +3,18 @@ import { CommandType } from '@client/commands/types';
 import { Embeds } from '@client/config';
 import { Logger } from '@client/logger';
 import { PermLevel } from '@client/permissions';
-import { PermissionFlagsBits } from 'discord.js';
+import {
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+  ModalBuilder,
+  PermissionFlagsBits,
+  StringSelectMenuBuilder,
+  TextInputBuilder,
+  TextInputStyle,
+} from 'discord.js';
+
+const testMap: Map<string, number> = new Map();
 
 const TestChatInput = new Command({
   type: CommandType.ChatInput,
@@ -57,7 +68,14 @@ const TestChatInput = new Command({
           TestChatInput.permissions.whitelist.guilds,
         );
 
-        await TestChatInput.reply(interaction, Embeds.primary('Test command'));
+        await TestChatInput.reply(interaction, {
+          embeds: [Embeds.primary('Test command')],
+          components: [
+            new ActionRowBuilder<ButtonBuilder>().addComponents(
+              TestButton.data,
+            ),
+          ],
+        });
 
         Logger.debug(interaction.inGuild());
 
@@ -74,12 +92,148 @@ const TestChatInput = new Command({
       },
     },
   },
-  async run(_client, interaction) {
-    await TestChatInput.reply(
-      interaction,
-      Embeds.primary('Unknown (sub)command, please try again'),
-    );
+});
 
+const TestButton = TestChatInput.extend({
+  type: CommandType.Button,
+  data: new ButtonBuilder()
+    .setCustomId('Test button')
+    .setLabel('Test button')
+    .setStyle(ButtonStyle.Primary)
+    .setEmoji('✅')
+    .setDisabled(false),
+  run: async (_client, interaction) => {
+    const currentCount = testMap.get(interaction.user.id) ?? 0;
+    const isPrompt =
+      currentCount !== 0 && (currentCount % 3 === 0 || currentCount % 5 === 0);
+    const newCount = currentCount + (isPrompt ? 0 : 1);
+
+    testMap.set(interaction.user.id, newCount);
+
+    const ctx = {
+      content: 'Test button',
+      embeds: [Embeds.primary(`You have clicked the button ${newCount} times`)],
+      components: [
+        new ActionRowBuilder<ButtonBuilder>().addComponents(
+          TestButton.data.setLabel(`Clicked ${newCount} times`),
+        ),
+      ],
+    };
+
+    if (!isPrompt) {
+      await interaction.update(ctx);
+    } else if (currentCount % 3 === 0) {
+      await interaction.showModal(TestModal.data);
+    } else {
+      await interaction.reply({
+        ...ctx,
+        components: [
+          new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
+            TestSelect.data.setPlaceholder(
+              `Test select (${currentCount} times)`,
+            ),
+          ),
+        ],
+      });
+    }
+  },
+});
+
+const TestModal = TestChatInput.extend({
+  type: CommandType.ModalSubmit,
+  data: new ModalBuilder()
+    .setCustomId('Test modal')
+    .setTitle('Test modal')
+    .addComponents(
+      new ActionRowBuilder<TextInputBuilder>().addComponents(
+        new TextInputBuilder()
+          .setCustomId('Test input')
+          .setLabel('Test input')
+          .setStyle(TextInputStyle.Short)
+          .setPlaceholder('Test input')
+          .setMinLength(1)
+          .setMaxLength(100)
+          .setRequired(true),
+      ),
+    ),
+  run: async (_client, interaction) => {
+    const input = interaction.fields.getTextInputValue('Test input');
+    const currentCount = testMap.get(interaction.user.id) ?? 0;
+    const newCount = currentCount + 1;
+
+    testMap.set(interaction.user.id, newCount);
+
+    await interaction.reply({
+      content: 'Test modal',
+      embeds: [
+        Embeds.primary(
+          `You have clicked the button ${newCount} times`,
+        ).addFields({
+          name: 'Input',
+          value: input,
+        }),
+      ],
+      components: [
+        new ActionRowBuilder<ButtonBuilder>().addComponents(
+          TestButton.data.setLabel(`Clicked ${newCount} times`),
+        ),
+      ],
+    });
+  },
+});
+
+const TestSelect = TestChatInput.extend({
+  type: CommandType.StringSelect,
+  data: new StringSelectMenuBuilder()
+    .setCustomId('Test select')
+    .setPlaceholder('Test select')
+    .setMinValues(1)
+    .setMaxValues(1)
+    .setDisabled(false)
+    .setOptions(
+      Array.from({ length: 10 }, (_, i) => ({
+        label: `Test select ${i + 1}`,
+        value: `test_select_${i + 1}`,
+        description: `Test select ${i + 1}`,
+        emoji: '✅',
+      })),
+    ),
+  run: async (_client, interaction) => {
+    const selected = interaction.values[0];
+    const currentCount = testMap.get(interaction.user.id) ?? 0;
+    const newCount = currentCount + 1;
+
+    testMap.set(interaction.user.id, newCount);
+
+    await interaction.reply({
+      content: 'Test select',
+      embeds: [
+        Embeds.primary(
+          `You have clicked the button ${newCount} times`,
+        ).addFields({
+          name: 'Selected',
+          value: `${selected ?? 'None'}`,
+        }),
+      ],
+      components: [
+        new ActionRowBuilder<ButtonBuilder>().addComponents(
+          TestButton.data.setLabel(`Clicked ${newCount} times`),
+        ),
+      ],
+    });
+  },
+});
+
+TestChatInput.extend({
+  type: CommandType.PrimaryEntryPoint,
+  enabled: {
+    global: false,
+  },
+  data: (builder) =>
+    builder
+      .setName('test-entry-point-1')
+      .setDescription('Test command, Primary Entry Point'),
+  run: async () => {
     return ['TEST'] as const;
   },
 });

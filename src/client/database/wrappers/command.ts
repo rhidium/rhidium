@@ -21,7 +21,7 @@ class CommandWrapper extends DatabaseWrapper<Model.Command> {
       return `${cmd.type}/${cmd.name}`;
     }
 
-    return `${cmd.type}/${cmd.data.name}`;
+    return `${cmd.type}/${cmd.id}`;
   };
 
   public readonly findInApiData = (
