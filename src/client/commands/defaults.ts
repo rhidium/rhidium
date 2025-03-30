@@ -1,4 +1,4 @@
-import { PermLevel } from '@client/permissions';
+import { PermLevel } from '@client/commands/permissions';
 import { type CommandThrottleOptions, CommandThrottleType } from './throttle';
 import type {
   CommandEnabledOptions,
@@ -21,8 +21,9 @@ const permissions: CommandPermissionOptions = {
 } as const;
 
 const throttle: CommandThrottleOptions = {
-  limit: 1,
-  duration: 3,
+  enabled: true,
+  limit: 2,
+  duration: 5,
   type: CommandThrottleType.User,
 } as const;
 

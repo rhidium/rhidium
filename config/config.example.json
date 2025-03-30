@@ -1,82 +1,23 @@
 {
   "client": {
-    "id": "835856785512464436",
-    "token": "YOUR_BOT_TOKEN",
+    "id": "Replace with your bot ID from https://discord.dev/application",
+    "token": "Replace with your bot token from https://discord.dev/application",
+    "development_server_id": "Replace with the ID of your development server or primary server/guild",
     "presence": {
       "active": true,
       "status": "online",
       "activities": [
         {
-          "name": "with the API",
-          "type": "PLAYING",
-          "url": ""
+          "name": "Exploring Rhidium",
+          "type": "CUSTOM",
+          "url": "https://rhidium.xyz"
         }
       ]
     }
   },
   "permissions": {
-    "owner_id": "1148597817498140774",
-    "developer_ids": ["1148597817498140774"],
-    "system_administrator_ids": ["1148597817498140774"],
-    "default_lock_member_permissions": false
-  },
-  "cooldown": {
-    "default_cooldown_enabled": true,
-    "default_cooldown_type": "User",
-    "default_cooldown_usages": 2,
-    "default_cooldown_duration": 15,
-    "default_cooldown_persistent": false
-  },
-  "cluster": {
-    "enabled": false,
-    "total_shards": 2,
-    "shards_per_clusters": 1,
-    "total_clusters": 2,
-    "mode": "process",
-    "respawn": true,
-    "restarts": {
-      "max": 1,
-      "interval": 5000
-    }
-  },
-  "colors": {
-    "primary": "#91DDF2",
-    "secondary": "#99aab5",
-    "success": "#57F287",
-    "error": "#dd2e44",
-    "info": "#3b88c3",
-    "warning": "#ffcc4d",
-    "debug": "#9266cc",
-    "waiting": "#f7b977"
-  },
-  "emojis": {
-    "success": "✅",
-    "error": "❌",
-    "info": ":information_source:",
-    "warning": "⚠️",
-    "debug": "🐛",
-    "waiting": "⏳",
-    "separator": "•"
-  },
-  "urls": {
-    "github": "https://github.com/rhidium/rhidium",
-    "docs": "https://rhidium.xyz/",
-    "website": "https://mirasaki.dev/",
-    "support_server": "https://discord.gg/mirasaki"
-  },
-  "logging": {
-    "max_size": "5m",
-    "max_files": "14d",
-    "zipped_archive": true,
-    "directory": "logs",
-    "date_pattern": "YYYY-MM-DD",
-    "combined_logging": true,
-    "error_logging": true,
-    "warn_logging": true,
-    "info_logging": true,
-    "http_logging": true,
-    "verbose_logging": true,
-    "debug_logging": true,
-    "silly_logging": true
+    "owner_id": "Replace with the Discord user ID of the bot owner",
+    "system_administrator_ids": [],
+    "developer_ids": []
   }
 }

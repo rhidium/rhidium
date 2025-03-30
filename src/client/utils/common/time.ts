@@ -30,7 +30,11 @@ const discordInfoTimestamp = (timestamp: number = Date.now()): string =>
     TimestampStyles.ShortDateTime,
   )} (${discordTimestamp(timestamp, TimestampStyles.RelativeTime)})`;
 
-const humanReadableMs = (ms: number, maxParts = 2) => {
+const humanReadableMs = (
+  ms: number,
+  maxParts = 2,
+  msDisplay: string | ((ms: number) => string) = 'Just now',
+) => {
   const days = (ms / UnitConstants.MS_IN_ONE_DAY) | 0;
   const hours =
     ((ms % UnitConstants.MS_IN_ONE_DAY) / UnitConstants.MS_IN_ONE_HOUR) | 0;
@@ -51,7 +55,10 @@ const humanReadableMs = (ms: number, maxParts = 2) => {
 
   if (formattedParts.length > 0) {
     return `${formattedParts.join(', ')}${formattedParts.length > 1 ? ',' : ''} and ${lastPart}`;
-  } else return lastPart ?? 'Just now';
+  } else
+    return (
+      lastPart ?? (typeof msDisplay === 'function' ? msDisplay(ms) : msDisplay)
+    );
 };
 
 const hrTimeToMs = (hrTime: [number, number]): number =>

@@ -1,0 +1,45 @@
+{
+  "logging": {
+    "log_level": "info",
+    "timestamp_format": "YYYY-MM-DD HH:mm:ss",
+    "use_console": true,
+    "use_file": true,
+    "file_options": {
+      "directory": "logs",
+      "filename": "logs/app.log",
+      "level": "info",
+      "json": false,
+      "max_size": 5242880,
+      "max_files": 5,
+      "tailable": true,
+      "zipped_archive": true
+    }
+  },
+  "colors": {
+    "primary": "#91DDF2",
+    "secondary": "#99aab5",
+    "success": "#57F287",
+    "error": "#dd2e44",
+    "info": "#3b88c3",
+    "warning": "#ffcc4d",
+    "debug": "#9266cc",
+    "waiting": "#f7b977"
+  },
+  "emojis": {
+    "primary": "🔹",
+    "secondary": "🔸",
+    "success": "✅",
+    "error": "❌",
+    "info": ":information_source:",
+    "warning": "⚠️",
+    "debug": "🐛",
+    "waiting": "⏳",
+    "separator": "•"
+  },
+  "urls": {
+    "github": "https://github.com/rhidium/rhidium",
+    "docs": "https://rhidium.xyz/",
+    "website": "https://mirasaki.dev",
+    "support_server": "https://discord.gg/mirasaki"
+  }
+}

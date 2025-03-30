@@ -12,6 +12,8 @@ const utils = debug.extend('utils');
 export default {
   debug,
   commands: {
+    jobs: commands.extend('jobs'),
+    listeners: commands.extend('listeners'),
     manager: commands.extend('manager'),
     rest: commands.extend('rest'),
     ChatInput: commands.extend('chat'),
@@ -25,6 +27,7 @@ export default {
     MentionableSelect: commands.extend('mentionableselect'),
     ChannelSelect: commands.extend('channelselect'),
     ModalSubmit: commands.extend('modal'),
+    AutoComplete: commands.extend('autocomplete'),
   },
   permissions,
   events,

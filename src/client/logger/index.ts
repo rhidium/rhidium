@@ -1,125 +1,61 @@
-import { UnitConstants } from '@client/constants';
-import { TimeUtils } from '@client/utils';
+import fs from 'fs';
+import { createLogger, format, transports } from 'winston';
 import colors from 'colors/safe.js';
+import type { AbstractConfigSetLevels } from 'winston/lib/winston/config';
+import { appConfig } from '@client/config';
 
-enum LogLevel {
-  ERROR = 0,
-  WARN = 1,
-  INFO = 2,
-  HTTP = 3,
-  VERBOSE = 4,
-  DEBUG = 5,
-  SILLY = 6,
-}
+const config = appConfig.logging;
 
-type LogLevelsType = Record<keyof typeof LogLevel, LogLevel> & {
-  readonly SUCCESS: LogLevel;
+const { combine, timestamp, printf, colorize, json } = format;
+
+const levels: AbstractConfigSetLevels = {
+  error: 0,
+  warn: 1,
+  info: 2,
+  http: 3,
+  verbose: 4,
+  debug: 5,
+  silly: 6,
 };
 
-type LogLevelTags = {
-  readonly [k in keyof typeof Logger.LogLevels]: string;
-};
+const logFormat = printf(({ level, message, timestamp }) => {
+  return `${colors.cyan(`[${timestamp}]`)} ${colors.bold(level.toUpperCase())}: ${message}`;
+});
 
-class Logger {
-  private constructor() {}
+const logger = createLogger({
+  level: config.log_level,
+  levels,
+  format: combine(timestamp({ format: config.timestamp_format }), logFormat),
+  transports: [],
+});
 
-  static readonly LogLevels: LogLevelsType = {
-    ERROR: LogLevel.ERROR,
-    WARN: LogLevel.WARN,
-    INFO: LogLevel.INFO,
-    HTTP: LogLevel.HTTP,
-    VERBOSE: LogLevel.VERBOSE,
-    DEBUG: LogLevel.DEBUG,
-    SILLY: LogLevel.SILLY,
-    SUCCESS: LogLevel.INFO,
-  } as const;
-
-  static readonly logLevelTags: LogLevelTags = {
-    ERROR: '[ERROR]',
-    WARN: '[WARN]',
-    INFO: '[INFO]',
-    HTTP: '[HTTP]',
-    VERBOSE: '[VERBOSE]',
-    DEBUG: '[DEBUG]',
-    SILLY: '[SILLY]',
-    SUCCESS: '[SUCCESS]',
-  } as const;
-
-  static readonly coloredTags: LogLevelTags = {
-    ERROR: colors.red(Logger.logLevelTags.ERROR),
-    WARN: colors.yellow(Logger.logLevelTags.WARN),
-    INFO: colors.blue(Logger.logLevelTags.INFO),
-    HTTP: colors.magenta(Logger.logLevelTags.HTTP),
-    VERBOSE: colors.magenta(Logger.logLevelTags.VERBOSE),
-    DEBUG: colors.bgMagenta(Logger.logLevelTags.DEBUG),
-    SILLY: colors.gray(Logger.logLevelTags.SILLY),
-    SUCCESS: colors.green(Logger.logLevelTags.SUCCESS),
-  } as const;
-
-  static readonly longestTagLength = Math.max(
-    ...Object.values(Logger.coloredTags).map((t) => t.length),
+if (config.use_console) {
+  logger.add(
+    new transports.Console({ format: combine(colorize(), logFormat) }),
   );
-
-  static readonly padTag = (tag: string) =>
-    `${tag}${' '.repeat(Logger.longestTagLength - tag.length)}:`;
-
-  static readonly paddedTags: LogLevelTags = {
-    ERROR: Logger.padTag(Logger.coloredTags.ERROR),
-    WARN: Logger.padTag(Logger.coloredTags.WARN),
-    INFO: Logger.padTag(Logger.coloredTags.INFO),
-    HTTP: Logger.padTag(Logger.coloredTags.HTTP),
-    VERBOSE: Logger.padTag(Logger.coloredTags.VERBOSE),
-    DEBUG: Logger.padTag(Logger.coloredTags.DEBUG),
-    SILLY: Logger.padTag(Logger.coloredTags.SILLY),
-    SUCCESS: Logger.padTag(Logger.coloredTags.SUCCESS),
-  } as const;
-
-  static readonly timestamp = () =>
-    colors.cyan(`[${TimeUtils.currentUTCTime()}]`);
-  static readonly error = (...args: unknown[]) =>
-    console.error(`${Logger.timestamp()} ${Logger.paddedTags.ERROR}`, ...args);
-  static readonly warn = (...args: unknown[]) =>
-    console.warn(`${Logger.timestamp()} ${Logger.paddedTags.WARN}`, ...args);
-  static readonly info = (...args: unknown[]) =>
-    console.info(`${Logger.timestamp()} ${Logger.paddedTags.INFO}`, ...args);
-  static readonly http = (...args: unknown[]) =>
-    console.debug(`${Logger.timestamp()} ${Logger.paddedTags.HTTP}`, ...args);
-  static readonly verbose = (...args: unknown[]) =>
-    console.debug(
-      `${Logger.timestamp()} ${Logger.paddedTags.VERBOSE}`,
-      ...args,
-    );
-  static readonly debug = (...args: unknown[]) =>
-    console.debug(`${Logger.timestamp()} ${Logger.paddedTags.DEBUG}`, ...args);
-  static readonly silly = (...args: unknown[]) =>
-    console.debug(`${Logger.timestamp()} ${Logger.paddedTags.SILLY}`, ...args);
-  static readonly success = (...args: unknown[]) =>
-    console.info(`${Logger.timestamp()} ${Logger.paddedTags.SUCCESS}`, ...args);
-
-  static readonly startLog = (...args: unknown[]) =>
-    console.debug(
-      `${Logger.timestamp()} ${Logger.paddedTags.DEBUG} ${colors.green('[START]')}`,
-      ...args,
-    );
-
-  static readonly endLog = (...args: unknown[]) =>
-    console.debug(
-      `${Logger.timestamp()} ${Logger.paddedTags.DEBUG} ${colors.red('[ END ]')}`,
-      ...args,
-    );
-
-  static readonly printRuntime = (hrtime: [number, number]) => {
-    const timeSinceHrMs = Number(
-      (
-        process.hrtime(hrtime)[0] * UnitConstants.MS_IN_ONE_SECOND +
-        hrtime[1] / UnitConstants.NS_IN_ONE_MS
-      ).toFixed(2),
-    );
-
-    return `${colors.yellow(
-      (timeSinceHrMs / UnitConstants.MS_IN_ONE_SECOND).toFixed(2),
-    )} seconds (${colors.yellow(`${timeSinceHrMs}`)} ms)`;
-  };
 }
+
+if (config.use_file) {
+  const options = config.file_options;
+
+  if (!fs.existsSync(options.directory)) {
+    fs.mkdirSync(options.directory, { recursive: true });
+  }
+
+  logger.add(
+    new transports.File({
+      dirname: options.directory,
+      filename: options.filename,
+      format: combine(timestamp(), json()),
+      level: options.level ?? config.log_level,
+      maxFiles: options.max_files,
+      maxsize: options.max_size,
+      zippedArchive: options.zipped_archive,
+      tailable: options.tailable,
+    }),
+  );
+}
+
+const Logger = logger;
 
 export { Logger };

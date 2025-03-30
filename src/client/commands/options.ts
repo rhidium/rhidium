@@ -1,4 +1,4 @@
-import { PermLevel } from '@client/permissions';
+import { PermLevel } from '@client/commands/permissions';
 import {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   InteractionContextType,
@@ -122,7 +122,7 @@ type LocalRequiredCommandOptionsBase<Type extends CommandType = CommandType> = {
   data: CommandData<Type> | ((builder: CommandData<Type>) => CommandData<Type>);
 };
 
-type LocalPartialCommandOptions<
+type PartialCommandOptions<
   GuildOnly extends boolean,
   RefuseUncached extends boolean,
 > = DeepPartial<{
@@ -173,7 +173,7 @@ type CommandOptions<
   GuildOnly extends boolean = false,
   RefuseUncached extends boolean = false,
   ReturnType = void,
-> = LocalPartialCommandOptions<GuildOnly, RefuseUncached> &
+> = PartialCommandOptions<GuildOnly, RefuseUncached> &
   (
     | (CommandRunOptions<Type, GuildOnly, RefuseUncached, ReturnType> &
         LocalRequiredCommandOptionsBase<Type>)
@@ -185,6 +185,7 @@ export {
   type CommandInteractionOptions,
   type CommandEnabledOptions,
   type CommandPermissionOptions,
+  type PartialCommandOptions,
   type CommandRunOptions,
   type CommandControllerOptions,
   type CommandOptions,

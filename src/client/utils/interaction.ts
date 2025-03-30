@@ -39,6 +39,14 @@ type WithResponseContent<T extends boolean> = Omit<
   'ephemeral'
 >;
 
+class ResponseContent {
+  public constructor(
+    public content: WithResponseContent<boolean>,
+    public ephemeral = false,
+    public withResponse = false,
+  ) {}
+}
+
 type WithResponseType<T extends boolean> = T extends true
   ? InteractionCallbackResponse
   : Message | InteractionResponse;
@@ -48,6 +56,16 @@ class InteractionUtils {
     interaction: T,
   ) =>
     interaction.isRepliable() && (interaction.replied || interaction.deferred);
+
+  public static readonly isResponseContent = (
+    content: unknown,
+  ): content is WithResponseContent<boolean> => {
+    if (typeof content === 'string') return true;
+    if (content instanceof EmbedBuilder) return true;
+    if (content instanceof ResponseContent) return true;
+
+    return false;
+  };
 
   public static readonly replyDynamic = async <
     I extends RepliableInteraction,
@@ -105,6 +123,7 @@ class InteractionUtils {
 }
 
 export {
+  ResponseContent,
   InteractionUtils,
   type WithResponseContent,
   type DynamicContent,

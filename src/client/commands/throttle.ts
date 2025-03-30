@@ -7,6 +7,7 @@ enum CommandThrottleType {
 }
 
 type CommandThrottleOptions = {
+  enabled: boolean;
   type: CommandThrottleType;
   limit: number;
   duration: number;

@@ -11,18 +11,14 @@ import {
 import { Model } from '../models';
 import type { PopulatedAuditLog } from '../select';
 import { DatabaseWrapper } from './wrapper';
-import {
-  Client,
-  EmbedBuilder,
-  MessageCreateOptions,
-  MessagePayload,
-} from 'discord.js';
+import { EmbedBuilder, MessageCreateOptions, MessagePayload } from 'discord.js';
 import { guildWrapper } from './guild';
 import { memberWrapper } from './member';
 import { userWrapper } from './user';
 import { EmbedConstants } from '@client/constants';
 import { Embeds } from '@client/config';
-import { Permissions } from '@client/permissions';
+import { Permissions } from '@client/commands/permissions';
+import Client from '@client/client';
 
 const defaultEmojis = {
   success: '✅',

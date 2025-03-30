@@ -1,5 +1,7 @@
 config/config.json
 config/config.json.bak
+config/extended-config.json
+config/extended-config.json.bak
 dist/
 docs/
 logs/

@@ -1,5 +1,5 @@
 import moduleAlias from 'module-alias';
-import { Client, Events, GatewayIntentBits } from 'discord.js';
+import { GatewayIntentBits } from 'discord.js';
 
 moduleAlias.addAliases({
   '@client': `${__dirname}/`,
@@ -7,36 +7,25 @@ moduleAlias.addAliases({
 
 import { appConfig } from './config';
 import { CommandManager } from './commands';
-import TestChatInput from '../modules/test/test';
-import { Logger } from './logger';
-
-const client = new Client({
-  intents: [GatewayIntentBits.Guilds],
-});
-const manager = new CommandManager();
-
-manager.register(
-  TestChatInput,
-  // TestButton,
-  // TestModal,
-  // TestSelect,
-  // TestPrimaryEntryPoint,
-);
+import TestChatInput, { TestJob } from '../modules/test/test';
+import ProcessCommandUsageJob from '../modules/system/jobs/process-command-usage';
+import Client from './client';
+import ClientReady from '../modules/system/listeners/ready';
+import { I18n } from './i18n';
 
 const main = async () => {
-  await client.login(appConfig.client.token);
-
-  client.once(Events.ClientReady, (c) => {
-    Logger.info(`Client ready and logged in as ${c.user.username}`);
-
-    void manager
-      .initialize(c)
-      .syncCommands(
-        appConfig.client.development_server_id,
-        true,
-        process.env.NODE_ENV !== 'production',
-      );
+  const manager = new CommandManager();
+  const client = new Client({
+    intents: [GatewayIntentBits.Guilds],
+    manager,
+    Lang: await I18n.init(),
   });
+
+  manager.register(TestChatInput);
+  manager.addJobs(TestJob, ProcessCommandUsageJob);
+  manager.addListeners(ClientReady);
+
+  await client.login(appConfig.client.token);
 };
 
 void main();

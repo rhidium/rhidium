@@ -2,16 +2,6 @@
 
 import { Prisma } from '@prisma/client';
 
-// Prisma.Command
-const populateCommand = Prisma.validator<Prisma.CommandDefaultArgs>()({
-  select: {
-    id: true,
-    data: true,
-    GuildId: true,
-  },
-});
-type PopulatedCommand = Prisma.CommandGetPayload<typeof populateCommand>;
-
 // Prisma.AuditLog
 const populateAuditLog = Prisma.validator<Prisma.AuditLogDefaultArgs>()({
   select: {
@@ -193,47 +183,6 @@ const populateGuild = Prisma.validator<Prisma.GuildDefaultArgs>()({
 });
 type PopulatedGuild = Prisma.GuildGetPayload<typeof populateGuild>;
 
-// Prisma.CommandCooldown
-const populateCommandCooldown =
-  Prisma.validator<Prisma.CommandCooldownDefaultArgs>()({
-    select: {
-      id: true,
-      cooldownId: true,
-      duration: true,
-      usages: true,
-    },
-  });
-type PopulatedCommandCooldown = Prisma.CommandCooldownGetPayload<
-  typeof populateCommandCooldown
->;
-
-// Prisma.CommandStatistics
-const populateCommandStatistics =
-  Prisma.validator<Prisma.CommandStatisticsDefaultArgs>()({
-    select: {
-      id: true,
-      type: true,
-      commandId: true,
-      usages: true,
-      lastUsedAt: true,
-      firstUsedAt: true,
-      errorCount: true,
-      lastError: true,
-      lastErrorAt: true,
-      runtimeCount: true,
-      runtimeTotal: true,
-      runtimeMax: true,
-      runtimeMin: true,
-      runtimeMean: true,
-      runtimeMedian: true,
-      runtimeVariance: true,
-      runtimeStdDeviation: true,
-    },
-  });
-type PopulatedCommandStatistics = Prisma.CommandStatisticsGetPayload<
-  typeof populateCommandStatistics
->;
-
 // Prisma.Reminder
 const populateReminder = Prisma.validator<Prisma.ReminderDefaultArgs>()({
   select: {
@@ -250,9 +199,63 @@ const populateReminder = Prisma.validator<Prisma.ReminderDefaultArgs>()({
 });
 type PopulatedReminder = Prisma.ReminderGetPayload<typeof populateReminder>;
 
+// Prisma.Command
+const populateCommand = Prisma.validator<Prisma.CommandDefaultArgs>()({
+  select: {
+    id: true,
+    data: true,
+    GuildId: true,
+  },
+});
+type PopulatedCommand = Prisma.CommandGetPayload<typeof populateCommand>;
+
+// Prisma.CommandUsage
+const populateCommandUsage = Prisma.validator<Prisma.CommandUsageDefaultArgs>()(
+  {
+    select: {
+      key: true,
+      usages: true,
+      consumedUsageCount: true,
+      CommandId: true,
+      userId: true,
+      channelId: true,
+      guildId: true,
+      expireThreshold: true,
+      runtime: true,
+      runtimeErrors: true,
+    },
+  },
+);
+type PopulatedCommandUsage = Prisma.CommandUsageGetPayload<
+  typeof populateCommandUsage
+>;
+
+// Prisma.CommandUsageSummary
+const populateCommandUsageSummary =
+  Prisma.validator<Prisma.CommandUsageSummaryDefaultArgs>()({
+    select: {
+      CommandId: true,
+      date: true,
+      totalUsages: true,
+      uniqueUsers: true,
+      uniqueChannels: true,
+      uniqueGuilds: true,
+      uniqueErrors: true,
+      runtimeTot: true,
+      runtimeAvg: true,
+      runtimeMin: true,
+      runtimeMax: true,
+      runtimeMea: true,
+      runtimeMed: true,
+      runtimeVar: true,
+      runtimeStD: true,
+    },
+  });
+type PopulatedCommandUsageSummary = Prisma.CommandUsageSummaryGetPayload<
+  typeof populateCommandUsageSummary
+>;
+
 export {
-  populateCommand,
-  type PopulatedCommand,
   populateAuditLog,
   type PopulatedAuditLog,
   populateEmbed,
@@ -271,10 +274,12 @@ export {
   type PopulatedMember,
   populateGuild,
   type PopulatedGuild,
-  populateCommandCooldown,
-  type PopulatedCommandCooldown,
-  populateCommandStatistics,
-  type PopulatedCommandStatistics,
   populateReminder,
   type PopulatedReminder,
+  populateCommand,
+  type PopulatedCommand,
+  populateCommandUsage,
+  type PopulatedCommandUsage,
+  populateCommandUsageSummary,
+  type PopulatedCommandUsageSummary,
 };

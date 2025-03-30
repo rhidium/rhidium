@@ -11,7 +11,6 @@
 - **`jobs`**:
 - **`listeners`**:
 - **`message-context`**:
-- **`middleware`**:
 - **`modals`**:
 - **`placeholders`**:
 - **`select-menus`**:
@@ -30,7 +29,6 @@
 - **`jobs`**:
 - **`logger`**:
 - **`managers`**:
-- **`middleware`**:
 - **`utils`**:
 
 > 11 directories

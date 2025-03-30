@@ -1,4 +1,5 @@
-import type { Client, RepliableInteraction, Snowflake } from 'discord.js';
+import type Client from '@client/client';
+import type { RepliableInteraction, Snowflake } from 'discord.js';
 
 interface RequiredResourceOptions {
   guilds: Snowflake[];

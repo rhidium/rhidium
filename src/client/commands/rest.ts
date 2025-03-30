@@ -3,12 +3,13 @@ import debug, { Debugger } from '@client/debug';
 import { Logger } from '@client/logger';
 import { ObjectUtils } from '@client/utils';
 import {
-  Client,
   REST,
   RESTPostAPIChatInputApplicationCommandsJSONBody,
   RESTPostAPIContextMenuApplicationCommandsJSONBody,
   Routes,
 } from 'discord.js';
+import { CommandBase } from './base';
+import Client from '@client/client';
 
 type APICommandData =
   | RESTPostAPIChatInputApplicationCommandsJSONBody
@@ -38,7 +39,7 @@ type AbstractRESTClient = {
    * Syncs the local commands to the database
    * @param guildId The guild ID to sync commands for, or `null` for global
    * @param commandData The command data to sync
-   * @param diff The diff response from {@link AbstractRESTClient.checkCommandsSynced our check}
+   * @param diff The diff response from `checkCommandsSynced`
    * @returns A promise that resolves when the commands are synced
    */
   syncCommandsToDatabase: (
@@ -123,7 +124,7 @@ class RESTClient implements AbstractRESTClient {
     guildId: string | null,
   ): Promise<CommandCheckResponse> {
     const commandApiIds = this.data.map((command) =>
-      Database.Command.resolveId(command),
+      CommandBase.resolveId(command),
     );
 
     const dbCommands = await Database.Command.findMany({
@@ -143,7 +144,7 @@ class RESTClient implements AbstractRESTClient {
 
     const updatedCommands = dbCommandIds.filter((id) => {
       const original = dbCommands.find((command) => command.id === id);
-      const updated = Database.Command.findInApiData(id, this.data);
+      const updated = CommandBase.findInApiData(id, this.data);
 
       if (!original || !updated || typeof original.data !== 'string') {
         return false;
@@ -192,18 +193,22 @@ class RESTClient implements AbstractRESTClient {
     this.debug('Syncing commands to database');
 
     if (diff.isSynced) {
-      this.debug('Commands are already in sync, skipping');
+      this.debug('Commands are already synced in database, skipping');
       return;
     }
 
+    if (guildId) {
+      await Database.Guild.resolve(guildId);
+    }
+
     const resolvedNew = diff.new
-      .map((id) => Database.Command.findInApiData(id, commandData) ?? null)
+      .map((id) => CommandBase.findInApiData(id, commandData) ?? null)
       .filter((command) => command !== null);
     const resolvedUpdated = diff.updated
-      .map((id) => Database.Command.findInApiData(id, commandData) ?? null)
+      .map((id) => CommandBase.findInApiData(id, commandData) ?? null)
       .filter((command) => command !== null);
     const resolvedDeleted = diff.deleted
-      .map((id) => Database.Command.findInApiData(id, commandData) ?? null)
+      .map((id) => CommandBase.findInApiData(id, commandData) ?? null)
       .filter((command) => command !== null);
 
     if (resolvedNew.length > 0) {
@@ -214,7 +219,7 @@ class RESTClient implements AbstractRESTClient {
       await Promise.all(
         resolvedNew.map(async (command) => {
           await Database.Command.create({
-            id: Database.Command.resolveId(command),
+            id: CommandBase.resolveId(command),
             GuildId: guildId,
             data: JSON.stringify(command),
           });
@@ -231,7 +236,7 @@ class RESTClient implements AbstractRESTClient {
         resolvedUpdated.map(async (command) => {
           const original = await Database.Command.findFirst({
             where: {
-              id: Database.Command.resolveId(command),
+              id: CommandBase.resolveId(command),
               GuildId: guildId,
             },
           });
@@ -242,7 +247,7 @@ class RESTClient implements AbstractRESTClient {
 
           await Database.Command.update({
             where: {
-              id: Database.Command.resolveId(command),
+              id: CommandBase.resolveId(command),
               GuildId: guildId,
             },
             data: {
@@ -270,7 +275,7 @@ class RESTClient implements AbstractRESTClient {
         NOT: {
           id: {
             // Note: commandData can be a subset of this.data, use global/this data
-            in: this.data.map((command) => Database.Command.resolveId(command)),
+            in: this.data.map((command) => CommandBase.resolveId(command)),
           },
         },
         GuildId: guildId,
@@ -337,23 +342,23 @@ class RESTClient implements AbstractRESTClient {
       ? this.data
       : this.data.filter(
           (command) =>
-            synced.new.includes(Database.Command.resolveId(command)) ||
-            synced.updated.includes(Database.Command.resolveId(command)),
+            synced.new.includes(CommandBase.resolveId(command)) ||
+            synced.updated.includes(CommandBase.resolveId(command)),
         );
 
     const deleteCommandData = forceSync
       ? []
       : synced.deleted
-          .map((id) => Database.Command.findInApiData(id, this.data) ?? null)
+          .map((id) => CommandBase.findInApiData(id, this.data) ?? null)
           .filter((command) => command !== null);
 
     this.debug(
       'Commands to put: %o',
-      putCommandData.map((c) => Database.Command.resolveId(c)),
+      putCommandData.map((c) => CommandBase.resolveId(c)),
     );
     this.debug(
       'Commands to delete: %o',
-      deleteCommandData.map((c) => Database.Command.resolveId(c)),
+      deleteCommandData.map((c) => CommandBase.resolveId(c)),
     );
 
     if (guildId) {

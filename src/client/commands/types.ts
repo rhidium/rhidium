@@ -1,4 +1,6 @@
+import Client from '@client/client';
 import {
+  AutocompleteInteraction,
   BaseInteraction,
   ButtonBuilder,
   ButtonInteraction,
@@ -6,7 +8,6 @@ import {
   ChannelSelectMenuBuilder,
   ChannelSelectMenuInteraction,
   ChatInputCommandInteraction,
-  Client,
   ContextMenuCommandBuilder,
   DMChannel,
   Guild,
@@ -20,6 +21,7 @@ import {
   RoleSelectMenuBuilder,
   RoleSelectMenuInteraction,
   SlashCommandBuilder,
+  SlashCommandStringOption,
   SlashCommandSubcommandsOnlyBuilder,
   StringSelectMenuBuilder,
   StringSelectMenuInteraction,
@@ -40,6 +42,7 @@ enum CommandType {
   MentionableSelect = 'MentionableSelect',
   ChannelSelect = 'ChannelSelect',
   ModalSubmit = 'ModalSubmit',
+  AutoComplete = 'AutoComplete',
 }
 
 type APICommandTypeValue = Exclude<
@@ -51,6 +54,7 @@ type APICommandTypeValue = Exclude<
   | 'MentionableSelect'
   | 'ChannelSelect'
   | 'ModalSubmit'
+  | 'AutoComplete'
 >;
 
 type DeepPartial<T> = {
@@ -84,7 +88,9 @@ type CommandData<Type extends CommandType = CommandType> =
                       ? ChannelSelectMenuBuilder
                       : Type extends typeof CommandType.ModalSubmit
                         ? ModalBuilder
-                        : never;
+                        : Type extends typeof CommandType.AutoComplete
+                          ? SlashCommandStringOption
+                          : never;
 
 type CommandInteraction<
   Type extends CommandType = CommandType,
@@ -111,7 +117,9 @@ type CommandInteraction<
                     ? ChannelSelectMenuInteraction<Cached>
                     : Type extends typeof CommandType.ModalSubmit
                       ? ModalSubmitInteraction<Cached>
-                      : never;
+                      : Type extends typeof CommandType.AutoComplete
+                        ? AutocompleteInteraction<Cached>
+                        : never;
 
 type CommandRunFunction<
   ReturnType,

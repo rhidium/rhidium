@@ -1,4 +1,5 @@
-import type { Client, ClientEvents } from 'discord.js';
+import type Client from '@client/client';
+import type { ClientEvents } from 'discord.js';
 
 interface EventListenerOptions<K extends keyof ClientEvents> {
   once?: boolean;

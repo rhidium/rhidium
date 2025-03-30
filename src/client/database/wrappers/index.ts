@@ -1,7 +1,5 @@
 import { auditLogWrapper } from './audit-log';
 import { commandWrapper } from './command';
-import { commandCooldownWrapper } from './command-cooldown';
-import { commandStatisticsWrapper } from './command-statistics';
 import { guildWrapper } from './guild';
 import { memberWrapper } from './member';
 import { reminderWrapper } from './reminder';
@@ -30,10 +28,7 @@ export class Database {
     return Database._instance;
   }
 
-  // [DEV] Merge into one Commands
   static readonly Command = commandWrapper;
-  static readonly CommandCooldown = commandCooldownWrapper;
-  static readonly CommandStatistics = commandStatisticsWrapper;
   static readonly Guild = guildWrapper;
   static readonly Member = memberWrapper;
   static readonly User = userWrapper;

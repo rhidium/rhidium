@@ -8,18 +8,24 @@ import {
 } from './types';
 import debug, { type Debugger } from '@client/debug';
 import {
+  ApplicationCommandType,
   ApplicationIntegrationType,
   ButtonBuilder,
+  CacheType,
   ChannelSelectMenuBuilder,
   ContextMenuCommandBuilder,
+  Interaction,
   InteractionContextType,
   InteractionType,
   MentionableSelectMenuBuilder,
   MessageFlags,
   ModalBuilder,
   RepliableInteraction,
+  RESTPostAPIChatInputApplicationCommandsJSONBody,
+  RESTPostAPIContextMenuApplicationCommandsJSONBody,
   RoleSelectMenuBuilder,
   SlashCommandBuilder,
+  SlashCommandStringOption,
   StringSelectMenuBuilder,
   UserSelectMenuBuilder,
 } from 'discord.js';
@@ -29,17 +35,29 @@ import type {
   CommandInteractionOptions,
   CommandOptions,
   CommandPermissionOptions,
+  PartialCommandOptions,
 } from './options';
 import { CommandThrottleOptions } from './throttle';
-import { Permissions } from '@client/permissions';
+import { Permissions } from '@client/commands/permissions';
 import {
   InteractionUtils,
+  ResponseContent,
   WithResponseContent,
 } from '@client/utils/interaction';
 import { CommandController } from './controllers';
 
 const isStringArray = (value: unknown): value is string[] =>
   Array.isArray(value) && value.every((item) => typeof item === 'string');
+
+type ThrottleConsumerResult = {
+  ok: boolean;
+  /** The minimal time the user has to wait before being able to use the command again */
+  expiresAt: number;
+};
+
+type ThrottleConsumer = (
+  throttle: Readonly<CommandThrottleOptions>,
+) => ThrottleConsumerResult | Promise<ThrottleConsumerResult>;
 
 class CommandBase<
   Type extends CommandType,
@@ -50,16 +68,19 @@ class CommandBase<
   public readonly id: string;
   public readonly type: Type;
   public readonly data: CommandData<Type>;
-  public readonly run: null | CommandRunFunction<
+  private readonly run: null | CommandRunFunction<
     ReturnType,
     CommandInteraction<Type, CacheTypeResolver<GuildOnly, RefuseUncached>>
   >;
 
-  public readonly permissions: CommandPermissionOptions;
-  public readonly enabled: CommandEnabledOptions<GuildOnly>;
-  public readonly interactions: CommandInteractionOptions<RefuseUncached>;
-  public readonly throttle: CommandThrottleOptions;
-  public readonly controllers: Record<
+  private readonly permissions: CommandPermissionOptions;
+  private readonly enabled: CommandEnabledOptions<GuildOnly>;
+  private readonly interactions: CommandInteractionOptions<RefuseUncached>;
+  private readonly throttle: CommandThrottleOptions;
+  public get throttleOptions(): CommandThrottleOptions {
+    return this.throttle;
+  }
+  private readonly controllers: Record<
     string,
     CommandController<
       ReturnType,
@@ -68,24 +89,41 @@ class CommandBase<
   >;
 
   public toString(): string {
-    return `Command<${this.type}, ${this.id}>`;
+    return `Command<${this.id}>`;
   }
 
   protected readonly debug: Debugger;
 
   protected constructor(
-    public readonly options: CommandOptions<
+    private readonly options: CommandOptions<
       Type,
       GuildOnly,
       RefuseUncached,
       ReturnType
     >,
   ) {
-    const [id, data] = CommandBase.dataResolver(options.type, options.data);
+    const data = CommandBase.dataResolver(options.type, options.data);
+    const id: string | null =
+      'name' in data
+        ? data.name
+        : 'custom_id' in data.data && typeof data.data.custom_id === 'string'
+          ? data.data.custom_id
+          : null;
 
-    this.id = id;
+    if (id === null) {
+      throw new Error(
+        `Unable to resolve any unique identifier for command, please provide a name or customId: ${JSON.stringify(
+          data,
+          null,
+          2,
+        )}`,
+      );
+    }
+
     this.type = options.type;
+    this.id = `${this.type}/${id}`;
     this.data = data;
+
     this.run =
       'run' in options && typeof options.run !== 'undefined'
         ? options.run.bind(this)
@@ -143,8 +181,10 @@ class CommandBase<
 
   protected static readonly defaults = commandDefaults;
 
-  protected static readonly deferReply = async (
-    interaction: CommandInteraction,
+  protected static readonly deferReply = async <
+    Interaction extends RepliableInteraction,
+  >(
+    interaction: Interaction,
     ephemeral: boolean,
   ) => {
     if (interaction.deferred || interaction.replied) return;
@@ -200,11 +240,51 @@ class CommandBase<
         return InteractionType.MessageComponent;
       case CommandType.ModalSubmit:
         return InteractionType.ModalSubmit;
+      case CommandType.AutoComplete:
+        return InteractionType.ApplicationCommandAutocomplete;
       default:
         throw new Error(
           `Unknown command type ${type}, cannot resolve Discord interaction type`,
         );
     }
+  };
+
+  public static readonly commandIdentifierFor = <
+    I extends Interaction<CacheType>,
+  >(
+    interaction: I,
+  ): string => {
+    const prefix = interaction.isAutocomplete()
+      ? CommandType.AutoComplete
+      : interaction.isButton()
+        ? CommandType.Button
+        : interaction.isStringSelectMenu()
+          ? CommandType.StringSelect
+          : interaction.isUserSelectMenu()
+            ? CommandType.UserSelect
+            : interaction.isRoleSelectMenu()
+              ? CommandType.RoleSelect
+              : interaction.isMentionableSelectMenu()
+                ? CommandType.MentionableSelect
+                : interaction.isChannelSelectMenu()
+                  ? CommandType.ChannelSelect
+                  : interaction.isModalSubmit()
+                    ? CommandType.ModalSubmit
+                    : interaction.isMessageContextMenuCommand()
+                      ? CommandType.MessageContextMenu
+                      : interaction.isUserContextMenuCommand()
+                        ? CommandType.UserContextMenu
+                        : CommandType.ChatInput;
+
+    return (
+      prefix +
+      '/' +
+      (interaction.isAutocomplete()
+        ? interaction.options.getFocused(true).name
+        : 'customId' in interaction
+          ? interaction.customId
+          : interaction.commandName)
+    );
   };
 
   /**
@@ -233,7 +313,25 @@ class CommandBase<
       withResponse,
     );
 
-  public readonly children: AnyCommand[] = [];
+  public readonly response = <WithResponse extends boolean = false>(
+    content: WithResponseContent<WithResponse>,
+    withResponse?: WithResponse,
+    ephemeral?: boolean,
+  ) =>
+    new ResponseContent(
+      content,
+      ephemeral ?? this.interactions.replyEphemeral,
+      withResponse,
+    );
+
+  private readonly children: AnyCommand[] = [];
+  public get registry(): AnyCommand[] {
+    return [
+      this as unknown as AnyCommand,
+      ...this.children.flatMap((child) => child.registry),
+    ];
+  }
+
   public readonly extend = <
     T extends CommandType,
     GO extends boolean = GuildOnly,
@@ -253,6 +351,61 @@ class CommandBase<
       ...options,
     } as CommandOptions<T, GO, RU, RT>);
 
+    this.children.push(command as AnyCommand);
+
+    return command;
+  };
+
+  public readonly extends = <
+    T extends CommandType,
+    GO extends boolean = GuildOnly,
+    RU extends boolean = RefuseUncached,
+    RT = void,
+  >(
+    command: Command<T, GO, RU, RT>,
+  ): Command<T, GO, RU, RT> => {
+    const filterInheritable = ([, value]: [string, unknown]) => {
+      if (typeof value === 'undefined') {
+        return false;
+      }
+
+      return true;
+    };
+
+    const inheritProp = (
+      key: keyof PartialCommandOptions<boolean, boolean>,
+    ) => {
+      const fromCmd = command[key as keyof typeof command];
+
+      if (typeof fromCmd !== 'object' || fromCmd === null) {
+        return fromCmd;
+      }
+
+      return {
+        ...fromCmd,
+        ...Object.fromEntries(
+          Object.entries(this.options[key] ?? {}).filter(filterInheritable),
+        ),
+      };
+    };
+
+    command.children.push(
+      new Command({
+        type: this.type,
+        data: this.data,
+        run: this.run,
+        controllers: this.controllers,
+        permissions: inheritProp('permissions'),
+        enabled: inheritProp('enabled'),
+        interactions: inheritProp('interactions'),
+        throttle: inheritProp('throttle'),
+      } as unknown as CommandOptions<T, GO, RU, RT>) as AnyCommand,
+    );
+
+    return command;
+  };
+
+  public readonly extendRaw = (command: Command) => {
     this.children.push(command as AnyCommand);
 
     return command;
@@ -312,28 +465,129 @@ class CommandBase<
     return command.data.integration_types;
   };
 
-  public static readonly buildApiCommand = (
-    command: APICommand,
-  ): AnyCommand => {
-    const contexts = CommandBase.getContexts(command);
-    const integrationTypes = CommandBase.getIntegrationTypes(command, contexts);
+  public static readonly buildCommand = (command: AnyCommand): AnyCommand => {
+    if (!CommandBase.isApiCommand(command)) {
+      if (
+        command.data instanceof SlashCommandStringOption &&
+        command.data.autocomplete !== true
+      ) {
+        command.data.setAutocomplete(true);
+      }
 
-    command.data.setContexts(contexts);
-    command.data.setIntegrationTypes(integrationTypes);
+      return command;
+    }
 
-    if (typeof command.data.default_member_permissions === 'undefined') {
-      command.data.setDefaultMemberPermissions(
-        command.permissions.defaultMemberPermissions,
+    const apiCommand = command as APICommand;
+    const contexts = CommandBase.getContexts(apiCommand);
+    const integrationTypes = CommandBase.getIntegrationTypes(
+      apiCommand,
+      contexts,
+    );
+
+    apiCommand.data.setContexts(contexts);
+    apiCommand.data.setIntegrationTypes(integrationTypes);
+
+    if (typeof apiCommand.data.default_member_permissions === 'undefined') {
+      apiCommand.data.setDefaultMemberPermissions(
+        apiCommand.permissions.defaultMemberPermissions,
       );
     }
 
-    if (command.data instanceof SlashCommandBuilder) {
-      if (typeof command.data.nsfw === 'undefined') {
-        command.data.setNSFW(command.enabled.nsfw);
+    if (apiCommand.data instanceof SlashCommandBuilder) {
+      if (typeof apiCommand.data.nsfw === 'undefined') {
+        apiCommand.data.setNSFW(apiCommand.enabled.nsfw);
       }
     }
 
-    return command;
+    return apiCommand;
+  };
+
+  /**
+   * Run a function, throttled by the configured throttle options.
+   * @param consumer The function to be called before the throttled function is executed, should return wether or not to proceed to `fn`.
+   * @param fn The function to be executed, can return a value or a promise. Not executed if `before` returns false.
+   * @param throttleAutoComplete Whether or not to throttle auto-complete commands. If set to false, the function will be executed immediately.
+   * @returns A tuple of the result of the `fn` function and a promise for the `after` function.
+   */
+  public readonly withThrottle = async <
+    T extends () => unknown | Promise<unknown>,
+  >(
+    consumer: ThrottleConsumer,
+    fn: T,
+    throttleAutoComplete = false,
+  ) => {
+    if (this.type === CommandType.AutoComplete && !throttleAutoComplete) {
+      return [
+        fn(),
+        {
+          ok: true,
+          expiresAt: Date.now() - 1,
+        } as ThrottleConsumerResult,
+      ] as const;
+    }
+
+    if (!this.throttle.enabled) {
+      return [
+        fn(),
+        {
+          ok: true,
+          expiresAt: Date.now() - 1,
+        } as ThrottleConsumerResult,
+      ] as const;
+    }
+
+    const consumerResult = await consumer(this.throttle);
+
+    if (!consumerResult.ok) {
+      return [undefined, consumerResult] as const;
+    }
+
+    return [fn(), consumerResult] as const;
+  };
+
+  public static readonly resolveId = (
+    cmd:
+      | RESTPostAPIChatInputApplicationCommandsJSONBody
+      | RESTPostAPIContextMenuApplicationCommandsJSONBody,
+  ) => {
+    const resolveCommandTypeFromDiscordType = (
+      type: ApplicationCommandType,
+    ): CommandType => {
+      switch (type) {
+        case ApplicationCommandType.ChatInput:
+          return CommandType.ChatInput;
+        case ApplicationCommandType.User:
+          return CommandType.UserContextMenu;
+        case ApplicationCommandType.Message:
+          return CommandType.MessageContextMenu;
+        case ApplicationCommandType.PrimaryEntryPoint:
+          return CommandType.PrimaryEntryPoint;
+      }
+    };
+
+    if (!cmd.type) {
+      throw new Error(
+        `Unable to resolve command type for command ${cmd.name}, please provide a type: ${JSON.stringify(
+          cmd,
+          null,
+          2,
+        )}`,
+      );
+    }
+
+    const id: string = cmd.name;
+
+    return `${resolveCommandTypeFromDiscordType(cmd.type)}/${id}`;
+  };
+
+  public static readonly findInApiData = (
+    id: string,
+    data: (
+      | RESTPostAPIChatInputApplicationCommandsJSONBody
+      | RESTPostAPIContextMenuApplicationCommandsJSONBody
+    )[],
+  ) => {
+    return data.find((cmd) => this.resolveId(cmd) === id);
   };
 
   protected static readonly dataResolver = <Type extends CommandType>(
@@ -341,7 +595,7 @@ class CommandBase<
     data:
       | CommandData<Type>
       | ((builder: CommandData<Type>) => CommandData<Type>),
-  ): [string, CommandData<Type>] => {
+  ): CommandData<Type> => {
     let resolved: CommandData<Type>;
 
     if (typeof data !== 'function') {
@@ -379,28 +633,16 @@ class CommandBase<
         case CommandType.MessageContextMenu:
           resolved = data(new ContextMenuCommandBuilder() as CommandData<Type>);
           break;
+        case CommandType.AutoComplete:
+          resolved = data(
+            new SlashCommandStringOption().setAutocomplete(
+              true,
+            ) as CommandData<Type>,
+          );
       }
     }
 
-    const id: string | null =
-      'name' in resolved
-        ? resolved.name
-        : 'custom_id' in resolved.data &&
-            typeof resolved.data.custom_id === 'string'
-          ? resolved.data.custom_id
-          : null;
-
-    if (id === null) {
-      throw new Error(
-        `Unable to resolve any unique identifier for command, please provide a name or customId: ${JSON.stringify(
-          resolved,
-          null,
-          2,
-        )}`,
-      );
-    }
-
-    return [id, resolved];
+    return resolved;
   };
 
   protected static readonly handlePermissions = async <
@@ -593,7 +835,7 @@ class CommandBase<
       }
     }
 
-    if (command.interactions.deferReply) {
+    if (command.interactions.deferReply && interaction.isRepliable()) {
       await CommandBase.deferReply(
         interaction,
         command.interactions.replyEphemeral,
@@ -632,8 +874,8 @@ class CommandBase<
     const controller =
       subcommandGroup && subcommand
         ? command.controllers[`${subcommandGroup}.${subcommand}`]
-        : subcommandGroup || subcommand
-          ? command.controllers[(subcommandGroup || subcommand)!]
+        : (subcommandGroup ?? subcommand)
+          ? command.controllers[(subcommandGroup ?? subcommand)!]
           : null;
 
     if (
@@ -677,4 +919,11 @@ type AnyCommand<Type extends CommandType = CommandType> = AnyTypedCommand[Type];
 type APICommand<Type extends APICommandTypeValue = APICommandTypeValue> =
   AnyTypedCommand[Type];
 
-export { Command, CommandBase, type AnyCommand, type APICommand };
+export {
+  Command,
+  CommandBase,
+  type AnyCommand,
+  type APICommand,
+  type ThrottleConsumer,
+  type ThrottleConsumerResult,
+};

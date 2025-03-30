@@ -204,39 +204,6 @@ model AuditLog {
   Guild   Guild? @relation(fields: [GuildId], references: [id])
 }
 
-model CommandCooldown {
-  id         Int        @id @default(autoincrement())
-  cooldownId String     @unique
-  duration   Int
-  usages     DateTime[]
-}
-
-model CommandStatistics {
-  id        Int    @id @unique @default(autoincrement())
-  type      Int
-  commandId String @unique
-
-  // Track usage information
-  usages      DateTime[] @default([])
-  lastUsedAt  DateTime?
-  firstUsedAt DateTime?
-
-  // Track error information
-  errorCount  Int       @default(0)
-  lastError   String?
-  lastErrorAt DateTime?
-
-  // Track runtime information
-  runtimeCount        Int
-  runtimeTotal        Float?
-  runtimeMax          Float?
-  runtimeMin          Float?
-  runtimeMean         Float?
-  runtimeMedian       Float?
-  runtimeVariance     Float?
-  runtimeStdDeviation Float?
-}
-
 model Embed {
   id            Int          @id @default(autoincrement())
   messageText   String?
@@ -269,14 +236,75 @@ model EmbedField {
   inline  Boolean
 }
 
+model CommandUsage {
+  key              String       @id
+
+  CommandId String
+  Command Command @relation(fields: [CommandId], references: [id], onDelete: Cascade)
+
+  userId         String
+  channelId      String?
+  guildId        String?
+
+  // When the usage is safe to be transferred to the summary table, aka. no longer used
+  // for processing, like command cooldowns/throttling, etc. The record is merged
+  // into CommandUsageSummary when this date is reached, or the next mightnight UTC after
+  // `timestamp` if not set. The value should be set to  the cooldown's expiry if it applies,
+  // or ommitted if not. CommandUsage records are processed every night at 00:00 UTC.
+  expireThreshold       DateTime?
+
+  usages DateTime[] @default([])
+  consumedUsageCount Int @default(0)
+  runtime       Float
+  runtimeErrors  String[]
+
+  @@index([expireThreshold], name: "ExpireThresholdInd")
+}
+
+model CommandUsageSummary {
+  // id              Int       @id @default(autoincrement())
+
+  CommandId String
+  Command Command @relation(fields: [CommandId], references: [id], onDelete: Cascade)
+
+  date            DateTime
+  totalUsages Int @default(0)
+  uniqueUsers Int     @default(0)
+  uniqueChannels Int   @default(0)
+  uniqueGuilds   Int   @default(0)
+  uniqueErrors   String[]
+
+  runtimeTot Float? // Total
+  runtimeAvg Float? // Average
+  runtimeMin Float? // Minimum
+  runtimeMax Float? // Maximum
+  runtimeMea Float? // Mean
+  runtimeMed Float? // Median
+  runtimeVar Float? // Variance
+  runtimeStD Float? // Standard Deviation
+
+  @@id([CommandId, date], name: "CommandId_date")
+}
+
 model Command {
   id          String  @id @unique
   data        Json
+
   GuildId     String?
   Guild       Guild? @relation(fields: [GuildId], references: [id])
+
+  Usages      CommandUsage[] // Active command usage, used for processing
+  UsagesSummary CommandUsageSummary[] // Last 2 years of command usage
+
+  createdAt DateTime @default(now()) // The date the command was created
+  updatedAt DateTime @updatedAt // The date the command was last updated
+  firstUsed DateTime? // The date the command was first used
+  lastUsed DateTime? // The date the command was last used
 }
 
+// [DEV]
 model Settings {
   key  String @id @default("singleton")
+  // [DEV] TRACK LAST PROCESSED SUMMARY AND INIT PROPERLY IF MISSED
   @@unique([key])
 }

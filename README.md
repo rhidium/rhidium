@@ -1,7 +1,7 @@
 <div align="center">
   <a href="https://rhidium.xyz"><img src="https://github.com/rhidium/core/assets/57721238/e6d25fa1-07cb-4284-a02a-f73fe7ef3878" width="100" alt="logo" /></a>
 
-  ![Font_PNG](https://github.com/rhidium/core/assets/57721238/9ccc5763-8336-4d1e-8187-a738bafdc519)
+![Font_PNG](https://github.com/rhidium/core/assets/57721238/9ccc5763-8336-4d1e-8187-a738bafdc519)
 
   <p>
     <a href="https://discord.gg/mirasaki"><img src="https://img.shields.io/discord/793894728847720468?color=5865F2&logo=discord&logoColor=white" alt="Discord server" /></a>
@@ -94,7 +94,7 @@ Please note, a [Discord Application](https://wiki.mirasaki.dev/docs/discord-crea
 
 The quickest, and easiest, way to host/use this bot template is by deploying it inside of a [Docker](https://www.docker.com/) container. We recommend [Docker Desktop](https://www.docker.com/products/docker-desktop/).
 
-1. Download the [latest release](<https://github.com/rhidium/template/releases`>) or `git clone git@github.com:rhidium/template.git` the repo
+1. Download the [latest release](https://github.com/rhidium/template/releases`) or `git clone git@github.com:rhidium/template.git` the repo
 2. Run `pnpm setup:linux` or `pnpm setup:windows` (depending on your OS) in the project root folder
 3. Edit the newly created `.env` and `/config/config.json` files and provide your configuration
 4. Start the application: `docker compose up`
@@ -104,7 +104,7 @@ The quickest, and easiest, way to host/use this bot template is by deploying it 
 - Install the additional pre-requisites:
   - [Node.js](https://nodejs.org/en/) v16.6.0 or newer
   - [PostgreSQL](https://www.postgresql.org/) v13 or newer
-- Download the [latest release](<https://github.com/rhidium/template/releases`>) or `git clone git@github.com:rhidium/template.git` the repo
+- Download the [latest release](https://github.com/rhidium/template/releases`) or `git clone git@github.com:rhidium/template.git` the repo
 - Run `pnpm setup:linux` or `pnpm setup:windows` in the project root folder
 - Edit the newly created `/config/config.json` file and provide your configuration
   - Alternatively, use `pnpm setup:config` if you prefer a web-based editor
@@ -115,12 +115,6 @@ The quickest, and easiest, way to host/use this bot template is by deploying it 
 ## ⚙️ Configuration
 
 The full configuration for this project can be found [here](./config/config.example.json), and is validated through a JSON schema file that is automatically kept up-to-date. There's quite a bit of options to explore, which is why we've included a web-based editor to keep things simple.
-
-- `pnpm config-editor` - starts the configuration editor, edit [the script](./scripts/config-editor.mjs) if needed
-- `pnpm update-schema` - generate a new JSON Schema, `config-editor` automatically does this
-- `pnpm generate-schema` - CLI alternative to `update-schema`, included for completeness
-
-> Using the editor is by no means necessary, and only serves to make the large amount of configuration a bit more digestible to new users.
 
 ### dotenv
 

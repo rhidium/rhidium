@@ -1,8 +1,10 @@
+import { ClientJob, CommandThrottleType } from '@client/commands';
 import { Command } from '@client/commands/base';
 import { CommandType } from '@client/commands/types';
 import { Embeds } from '@client/config';
+import { UnitConstants } from '@client/constants';
 import { Logger } from '@client/logger';
-import { PermLevel } from '@client/permissions';
+import { PermLevel } from '@client/commands/permissions';
 import {
   ActionRowBuilder,
   ButtonBuilder,
@@ -15,6 +17,30 @@ import {
 } from 'discord.js';
 
 const testMap: Map<string, number> = new Map();
+
+const choices = Array.from({ length: 10 }, (_, i) => ({
+  label: `Test select ${i + 1}`,
+  value: `test_select_${i + 1}`,
+  description: `Test select ${i + 1}`,
+  emoji: '✅',
+}));
+
+const TestAutoComplete = new Command({
+  type: CommandType.AutoComplete,
+  data: (builder) =>
+    builder.setName('test-autocomplete').setDescription('Test command'),
+  run: async (_client, interaction) => {
+    const query = interaction.options.getFocused();
+    const filtered = choices.filter((choice) =>
+      choice.label.toLowerCase().includes(query.toLowerCase()),
+    );
+    const options = filtered.map((choice) => ({
+      name: choice.label,
+      value: choice.value,
+    }));
+    await interaction.respond(options);
+  },
+});
 
 const TestChatInput = new Command({
   type: CommandType.ChatInput,
@@ -29,6 +55,12 @@ const TestChatInput = new Command({
       users: ['1148597817498140774'],
       roles: ['1222898693498470502'],
     },
+  },
+  throttle: {
+    enabled: true,
+    type: CommandThrottleType.User,
+    duration: UnitConstants.MS_IN_ONE_SECOND * 5,
+    limit: 1,
   },
   enabled: {
     global: true,
@@ -51,22 +83,13 @@ const TestChatInput = new Command({
             subcommand
               .setName('subcommand')
               .setDescription('Test subcommand')
-              .addStringOption((option) =>
-                option
-                  .setName('string')
-                  .setDescription('Test string option')
-                  .setRequired(true),
-              ),
+              .addStringOption(TestAutoComplete.data),
           ),
       ),
   controllers: {
     group: {
       subcommand: async (client, interaction) => {
-        Logger.debug(
-          client.user.username,
-          TestChatInput.data.name,
-          TestChatInput.permissions.whitelist.guilds,
-        );
+        Logger.debug(client.user.username, TestChatInput.data.name);
 
         await TestChatInput.reply(interaction, {
           embeds: [Embeds.primary('Test command')],
@@ -77,22 +100,14 @@ const TestChatInput = new Command({
           ],
         });
 
-        Logger.debug(interaction.inGuild());
-
-        interaction.guild;
-        if (interaction.inGuild() && interaction.inCachedGuild()) {
-          interaction.guild.afkChannel;
-          interaction.channel;
-        }
-        if (!interaction.inGuild()) {
-          // interaction.channel;
-        }
-
         return ['TEST'] as const;
       },
     },
   },
 });
+
+// Note: Inherit the TestChatInput options and register as a child command
+TestAutoComplete.extends(TestChatInput);
 
 const TestButton = TestChatInput.extend({
   type: CommandType.Button,
@@ -163,7 +178,7 @@ const TestModal = TestChatInput.extend({
 
     testMap.set(interaction.user.id, newCount);
 
-    await interaction.reply({
+    return TestChatInput.response({
       content: 'Test modal',
       embeds: [
         Embeds.primary(
@@ -190,14 +205,7 @@ const TestSelect = TestChatInput.extend({
     .setMinValues(1)
     .setMaxValues(1)
     .setDisabled(false)
-    .setOptions(
-      Array.from({ length: 10 }, (_, i) => ({
-        label: `Test select ${i + 1}`,
-        value: `test_select_${i + 1}`,
-        description: `Test select ${i + 1}`,
-        emoji: '✅',
-      })),
-    ),
+    .setOptions(choices),
   run: async (_client, interaction) => {
     const selected = interaction.values[0];
     const currentCount = testMap.get(interaction.user.id) ?? 0;
@@ -205,7 +213,7 @@ const TestSelect = TestChatInput.extend({
 
     testMap.set(interaction.user.id, newCount);
 
-    await interaction.reply({
+    return TestChatInput.response({
       content: 'Test select',
       embeds: [
         Embeds.primary(
@@ -236,6 +244,16 @@ TestChatInput.extend({
   run: async () => {
     return ['TEST'] as const;
   },
+});
+
+const everyFiveSeconds = '*/5 * * * * *';
+
+export const TestJob = new ClientJob({
+  id: 'test-job',
+  cronTime: everyFiveSeconds,
+  runOnInit: true,
+  start: true,
+  async onTick() {},
 });
 
 export default TestChatInput;

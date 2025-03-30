@@ -1,8 +1,6 @@
 import type {
   AuditLog,
   Command,
-  CommandCooldown,
-  CommandStatistics,
   Guild,
   Member,
   Reminder,
@@ -13,8 +11,6 @@ import type {
   PopulatedUser,
   PopulatedMember,
   PopulatedGuild,
-  PopulatedCommandCooldown,
-  PopulatedCommandStatistics,
   PopulatedAuditLog,
   PopulatedReminder,
   PopulatedCommand,
@@ -24,8 +20,6 @@ enum Model {
   User = 'User',
   Member = 'Member',
   Guild = 'Guild',
-  CommandCooldown = 'CommandCooldown',
-  CommandStatistics = 'CommandStatistics',
   AuditLog = 'AuditLog',
   Reminder = 'Reminder',
   Command = 'Command',
@@ -49,22 +43,12 @@ for (const model of modelValues) {
   seenModels.add(lowercased);
 }
 
-type ModelUnion =
-  | User
-  | Member
-  | Guild
-  | CommandCooldown
-  | CommandStatistics
-  | AuditLog
-  | Reminder
-  | Command;
+type ModelUnion = User | Member | Guild | AuditLog | Reminder | Command;
 
 type PopulatedModelUnion =
   | PopulatedUser
   | PopulatedMember
   | PopulatedGuild
-  | PopulatedCommandCooldown
-  | PopulatedCommandStatistics
   | PopulatedAuditLog
   | PopulatedReminder
   | PopulatedCommand;
@@ -73,8 +57,6 @@ type Models = {
   User: User;
   Member: Member;
   Guild: Guild;
-  CommandCooldown: CommandCooldown;
-  CommandStatistics: CommandStatistics;
   AuditLog: AuditLog;
   Reminder: Reminder;
   Command: Command;
