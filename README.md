@@ -170,7 +170,7 @@ Due to the dynamic nature of the project structure/architecture, some (file) nam
 
 `components`, `options`, `types`, `helpers`, `controllers`, `services`, `transformers`, and `enums`.
 
-Check out [the `/embeds` command structure](./src/client/chat-input/Administrator/embeds) for an example of what this looks like in action.
+Check out [the `/embeds` command structure](./src/core/chat-input/Administrator/embeds) for an example of what this looks like in action.
 
 ## ⌨️ Scripts
 

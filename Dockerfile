@@ -30,4 +30,4 @@ FROM base AS prod
 EXPOSE 9000
 COPY --from=prod-deps /app/node_modules /app/node_modules
 COPY --from=build /app/dist /app/dist
-CMD  [ "node", "dist/src/client/index.js" ]
+CMD  [ "node", "dist/src/core/index.js" ]

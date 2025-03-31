@@ -1,0 +1,46 @@
+{
+  "actions": {
+    "cancel": "Annuleren",
+    "confirm": "Bevestigen",
+    "delete": "Verwijderen",
+    "edit": "Bewerken",
+    "save": "Opslaan",
+    "close": "Sluiten"
+  },
+  "confirmation": {
+    "prompt": {
+      "title": "Weet je het zeker?",
+      "message": "Deze actie kan niet ongedaan worden gemaakt."
+    },
+    "cancel": {
+      "title": "Geannuleerd",
+      "message": "De actie is geannuleerd."
+    },
+    "confirm": {
+      "title": "Bevestigd",
+      "message": "De actie is bevestigd."
+    }
+  },
+  "errors": {
+    "tryAgainLater": "Probeer het later opnieuw.",
+    "issueReportedToSupport": "Dit probleem is gemeld bij de ontwikkelaars/ondersteuningsteam.",
+    "rateLimit": {
+      "title": "Snelheidslimiet",
+      "message": "Je wordt beperkt, wacht alsjeblieft {{time}} voordat je het opnieuw probeert."
+    }
+  },
+  "time": {
+    "singular": {
+      "seconds": "{{count}} seconde",
+      "minutes": "{{count}} minuut",
+      "hours": "{{count}} uur",
+      "days": "{{count}} dag"
+    },
+    "plural": {
+      "seconds": "{{count}} seconden",
+      "minutes": "{{count}} minuten",
+      "hours": "{{count}} uur",
+      "days": "{{count}} dagen"
+    }
+  }
+}

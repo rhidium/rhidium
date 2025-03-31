@@ -1,10 +1,10 @@
-import { ClientJob, CommandThrottleType } from '@client/commands';
-import { Command } from '@client/commands/base';
-import { CommandType } from '@client/commands/types';
-import { Embeds } from '@client/config';
-import { UnitConstants } from '@client/constants';
-import { Logger } from '@client/logger';
-import { PermLevel } from '@client/commands/permissions';
+import { ClientJob, CommandThrottleType } from '@core/commands';
+import { Command } from '@core/commands/base';
+import { CommandType } from '@core/commands/types';
+import { Embeds } from '@core/config';
+import { UnitConstants } from '@core/constants';
+import { Logger } from '@core/logger';
+import { PermLevel } from '@core/commands/permissions';
 import {
   ActionRowBuilder,
   ButtonBuilder,
@@ -15,6 +15,7 @@ import {
   TextInputBuilder,
   TextInputStyle,
 } from 'discord.js';
+import { Placeholder } from '@core/placeholders';
 
 const testMap: Map<string, number> = new Map();
 
@@ -90,6 +91,28 @@ const TestChatInput = new Command({
     group: {
       subcommand: async (client, interaction) => {
         Logger.debug(client.user.username, TestChatInput.data.name);
+
+        const context = Placeholder.parseContext({
+          channel: (await interaction.channel?.fetch()) ?? 'n/a',
+          guild: interaction.guild,
+          member: interaction.member,
+          user: interaction.user,
+        });
+        const matches = Placeholder.match(
+          'Welcome {user.username}, to {guild.name}! And {guild.name} again!',
+          context,
+        );
+
+        Logger.debug(context);
+        Logger.debug(Placeholder.apply('{user.username}', context));
+        Logger.debug(
+          'matches and resolved',
+          matches,
+          Placeholder.apply(
+            'Welcome {user.username}, to {guild.name}! And {guild.name} again!',
+            matches,
+          ),
+        );
 
         await TestChatInput.reply(interaction, {
           embeds: [Embeds.primary('Test command')],

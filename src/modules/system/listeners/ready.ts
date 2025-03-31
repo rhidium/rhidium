@@ -1,20 +1,14 @@
-import { ClientEventListener } from '@client/commands';
-import { appConfig } from '@client/config';
-import { Logger } from '@client/logger';
+import { ClientEventListener } from '@core/commands';
+import { Logger } from '@core/logger';
 import { Events } from 'discord.js';
+import { backlogCommandUsage } from '../jobs/process-command-usage';
 
 const ClientReady = new ClientEventListener({
+  once: true,
   event: Events.ClientReady,
   run: async (client) => {
     Logger.info(`Client ready and logged in as ${client.user.username}`);
-
-    void client.manager.initialize(client).syncCommands(
-      appConfig.client.development_server_id,
-      true,
-      // process.env.NODE_ENV !== 'production',
-    );
-
-    console.log(client.Lang.t(''));
+    await backlogCommandUsage();
   },
 });
 

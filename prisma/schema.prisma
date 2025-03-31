@@ -302,9 +302,8 @@ model Command {
   lastUsed DateTime? // The date the command was last used
 }
 
-// [DEV]
 model Settings {
-  key  String @id @default("singleton")
-  // [DEV] TRACK LAST PROCESSED SUMMARY AND INIT PROPERLY IF MISSED
-  @@unique([key])
+  @@unique([id])
+  id  String @id @default("singleton")
+  commandUsageSummaryLastProcessedAt DateTime? // The date the command usage summary was last processed
 }
