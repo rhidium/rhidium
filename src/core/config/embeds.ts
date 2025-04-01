@@ -2,6 +2,7 @@ import { EmbedBuilder, type EmbedData } from 'discord.js';
 import { StringUtils, TimeUtils } from '../utils';
 import { EmbedConstants } from '../constants';
 import { appConfig } from './app';
+import { SafeEmbedBuilder } from '@core/utils/embeds';
 
 type EmbedType = keyof typeof appConfig.colors;
 
@@ -10,6 +11,7 @@ type EmbedTimestampStyle = 'short' | 'long';
 type CreateEmbedData = string | Omit<EmbedData, 'color'>;
 
 type EmbedsOptions = {
+  useSafeEmbeds?: boolean;
   useTimestamp?: boolean;
   timestampInline?: boolean;
   timestampStyle?: EmbedTimestampStyle;
@@ -28,6 +30,7 @@ class Embeds implements EmbedsOptions {
     this.timestampStyle = options?.timestampStyle ?? 'short';
     this.embedBase = options?.embedBase ?? {};
   }
+  useSafeEmbeds?: boolean | undefined;
 
   public readonly resolveEmbedColor = (color?: EmbedType): number => {
     if (!color) return appConfig.colors.primary;
@@ -49,7 +52,9 @@ class Embeds implements EmbedsOptions {
 
   public readonly build = (data: CreateEmbedData) => {
     const resolvedData = this.resolveData(data);
-    const embed = new EmbedBuilder(resolvedData);
+    const embed = this.useSafeEmbeds
+      ? new SafeEmbedBuilder(resolvedData)
+      : new EmbedBuilder(resolvedData);
     if (this.useTimestamp) this.applyTimestamp(embed);
     return embed;
   };
@@ -97,6 +102,7 @@ class Embeds implements EmbedsOptions {
 }
 
 const embeds = new Embeds({
+  useSafeEmbeds: true,
   timestampInline: true,
   timestampStyle: 'short',
   useTimestamp: true,

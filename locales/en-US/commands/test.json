@@ -1,0 +1,39 @@
+{
+  "name": "test",
+  "description": "Test command for development purposes",
+  "options": {
+    "subcommand-group": {
+      "name": "subcommand-group",
+      "description": "Test subcommand group",
+      "options": {
+        "subcommand": {
+          "name": "subcommand",
+          "description": "Test subcommand",
+          "options": {
+            "test-autocomplete": {
+              "name": "test-autocomplete",
+              "description": "Test autocomplete option"
+            }
+          }
+        }
+      }
+    },
+    "direct-subcommand": {
+      "name": "direct-subcommand",
+      "description": "Direct subcommand",
+      "options": {
+        "test-choices": {
+          "name": "test-choices",
+          "description": "Test choices in a String option",
+          "choices": {
+            "test_select_1": "Test Select 1",
+            "test_select_2": "Test Select 1",
+            "test_select_3": "Test Select 1",
+            "test_select_4": "Test Select 1",
+            "test_select_5": "Test Select 1"
+          }
+        }
+      }
+    }
+  }
+}

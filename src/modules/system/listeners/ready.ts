@@ -9,6 +9,11 @@ const ClientReady = new ClientEventListener({
   run: async (client) => {
     Logger.info(`Client ready and logged in as ${client.user.username}`);
     await backlogCommandUsage();
+
+    console.dir(
+      client.manager.apiCommands.map((command) => command.data.toJSON()),
+      { depth: null },
+    );
   },
 });
 

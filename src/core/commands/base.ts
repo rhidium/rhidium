@@ -8,6 +8,7 @@ import {
 } from './types';
 import { debug, type Debugger } from '@core/logger';
 import {
+  ApplicationCommandOptionBase,
   ApplicationCommandType,
   ApplicationIntegrationType,
   ButtonBuilder,
@@ -25,7 +26,11 @@ import {
   RESTPostAPIContextMenuApplicationCommandsJSONBody,
   RoleSelectMenuBuilder,
   SlashCommandBuilder,
+  SlashCommandOptionsOnlyBuilder,
   SlashCommandStringOption,
+  SlashCommandSubcommandBuilder,
+  SlashCommandSubcommandGroupBuilder,
+  SlashCommandSubcommandsOnlyBuilder,
   StringSelectMenuBuilder,
   UserSelectMenuBuilder,
 } from 'discord.js';
@@ -46,6 +51,7 @@ import {
 } from '@core/utils/interaction';
 import { CommandController } from './controllers';
 import { LocalizedLabelKey } from '@core/i18n/i18next';
+import { defaultLocale, I18n, locales } from '@core/i18n';
 
 const isStringArray = (value: unknown): value is string[] =>
   Array.isArray(value) && value.every((item) => typeof item === 'string');
@@ -68,6 +74,7 @@ class CommandBase<
 > {
   public readonly id: string;
   public readonly idWithoutPrefix: string;
+  public readonly category: string | null;
   public readonly type: Type;
   public readonly data: CommandData<Type>;
   private readonly run: null | CommandRunFunction<
@@ -126,6 +133,7 @@ class CommandBase<
     this.id = `${this.type}/${id}`;
     this.idWithoutPrefix = this.id.split('/').slice(1).join('/');
     this.data = data;
+    this.category = options?.category ?? null;
 
     this.run =
       'run' in options && typeof options.run !== 'undefined'
@@ -468,7 +476,7 @@ class CommandBase<
     return command.data.integration_types;
   };
 
-  public static readonly buildCommand = (command: AnyCommand): AnyCommand => {
+  public static readonly build = (command: AnyCommand): AnyCommand => {
     if (!CommandBase.isApiCommand(command)) {
       if (
         command.data instanceof SlashCommandStringOption &&
@@ -502,7 +510,123 @@ class CommandBase<
       }
     }
 
+    this.registerLocalization(apiCommand);
+
     return apiCommand;
+  };
+
+  public static readonly registerLocalization = (command: APICommand) => {
+    if (!I18n.isLocalizedCommand(command.idWithoutPrefix)) {
+      return command;
+    }
+
+    const loadKey = (
+      key: `commands:${string}`,
+      onSuccess?: (localizations: Record<string, string>) => void,
+    ) => {
+      const defaultValue = I18n.instance.t(key, {
+        lng: defaultLocale,
+        defaultValue: '__NOT_TRANSLATED__',
+      });
+
+      if (defaultValue === '__NOT_TRANSLATED__') {
+        return null;
+      }
+
+      const localization = Object.fromEntries(
+        locales
+          .map((locale) => [
+            locale,
+            I18n.instance.t(key, {
+              lng: locale,
+              defaultValue: '__NOT_TRANSLATED__',
+            }),
+          ])
+          .filter(([, value]) => value !== '__NOT_TRANSLATED__'),
+      );
+
+      if (onSuccess) {
+        onSuccess(localization);
+      }
+
+      return localization;
+    };
+
+    loadKey(`commands:${command.idWithoutPrefix}.name`, (nameLocalizations) =>
+      command.data.setNameLocalizations(nameLocalizations),
+    );
+
+    if (command.data instanceof SlashCommandBuilder) {
+      loadKey(
+        `commands:${command.idWithoutPrefix}.description`,
+        (descriptionLocalizations) =>
+          (command.data as SlashCommandBuilder).setDescriptionLocalizations(
+            descriptionLocalizations,
+          ),
+      );
+
+      const localizeOptions = (
+        options: (
+          | SlashCommandBuilder
+          | SlashCommandSubcommandBuilder
+          | SlashCommandOptionsOnlyBuilder
+          | SlashCommandSubcommandGroupBuilder
+          | SlashCommandSubcommandsOnlyBuilder
+          | ApplicationCommandOptionBase
+        )[],
+        path: string[] = ['options'],
+      ) => {
+        for (const option of options) {
+          // const option = 'toJSON' in _option ? _option.toJSON() : _option;
+          const key = `commands:${command.idWithoutPrefix}${path
+            .map((p) => `.${p}`)
+            .join('')}.${option.name}` as const;
+
+          loadKey(`${key}.name`, (localizations) => {
+            option.setNameLocalizations(localizations);
+          });
+          loadKey(`${key}.description`, (localizations) => {
+            option.setDescriptionLocalizations(localizations);
+          });
+
+          if (
+            option instanceof SlashCommandStringOption &&
+            'choices' in option &&
+            Array.isArray(option.choices) &&
+            option.choices.length
+          ) {
+            option.setChoices(
+              option.choices.map((choice) => ({
+                ...choice,
+                name_localizations: loadKey(
+                  `${key}.choices.${choice.value}`,
+                  (localizations) => {
+                    choice.name_localizations = localizations;
+                  },
+                ),
+              })),
+            );
+          }
+
+          if ('options' in option && option.options) {
+            localizeOptions(option.options as ApplicationCommandOptionBase[], [
+              ...path,
+              option.name,
+              'options',
+            ]);
+          }
+        }
+      };
+
+      localizeOptions(
+        command.data.options as (
+          | SlashCommandBuilder
+          | ApplicationCommandOptionBase
+        )[],
+      );
+    }
+
+    return command;
   };
 
   /**
@@ -601,46 +725,44 @@ class CommandBase<
   ): CommandData<Type> => {
     let resolved: CommandData<Type>;
 
+    const cast = (builder: unknown) => builder as CommandData<Type>;
+
     if (typeof data !== 'function') {
       resolved = data;
     } else {
       switch (type) {
         case CommandType.ChatInput:
         case CommandType.PrimaryEntryPoint:
-          resolved = data(new SlashCommandBuilder() as CommandData<Type>);
+          resolved = data(cast(new SlashCommandBuilder()));
           break;
         case CommandType.Button:
-          resolved = data(new ButtonBuilder() as CommandData<Type>);
+          resolved = data(cast(new ButtonBuilder()));
           break;
         case CommandType.StringSelect:
-          resolved = data(new StringSelectMenuBuilder() as CommandData<Type>);
+          resolved = data(cast(new StringSelectMenuBuilder()));
           break;
         case CommandType.UserSelect:
-          resolved = data(new UserSelectMenuBuilder() as CommandData<Type>);
+          resolved = data(cast(new UserSelectMenuBuilder()));
           break;
         case CommandType.RoleSelect:
-          resolved = data(new RoleSelectMenuBuilder() as CommandData<Type>);
+          resolved = data(cast(new RoleSelectMenuBuilder()));
           break;
         case CommandType.MentionableSelect:
-          resolved = data(
-            new MentionableSelectMenuBuilder() as CommandData<Type>,
-          );
+          resolved = data(cast(new MentionableSelectMenuBuilder()));
           break;
         case CommandType.ChannelSelect:
-          resolved = data(new ChannelSelectMenuBuilder() as CommandData<Type>);
+          resolved = data(cast(new ChannelSelectMenuBuilder()));
           break;
         case CommandType.ModalSubmit:
-          resolved = data(new ModalBuilder() as CommandData<Type>);
+          resolved = data(cast(new ModalBuilder()));
           break;
         case CommandType.UserContextMenu:
         case CommandType.MessageContextMenu:
-          resolved = data(new ContextMenuCommandBuilder() as CommandData<Type>);
+          resolved = data(cast(new ContextMenuCommandBuilder()));
           break;
         case CommandType.AutoComplete:
           resolved = data(
-            new SlashCommandStringOption().setAutocomplete(
-              true,
-            ) as CommandData<Type>,
+            cast(new SlashCommandStringOption().setAutocomplete(true)),
           );
       }
     }

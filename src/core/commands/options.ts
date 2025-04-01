@@ -126,6 +126,7 @@ type PartialCommandOptions<
   GuildOnly extends boolean,
   RefuseUncached extends boolean,
 > = DeepPartial<{
+  category: string;
   enabled: CommandEnabledOptions<GuildOnly>;
   permissions: CommandPermissionOptions;
   interactions: CommandInteractionOptions<RefuseUncached>;

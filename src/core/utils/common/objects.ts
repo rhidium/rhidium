@@ -10,6 +10,15 @@ const diffAsChanges = (
   const diffState = diff(originalObj, updatedObj);
 
   Object.entries(diffState).forEach(([key, value]) => {
+    if (originalObj === null) {
+      changes.push({
+        path: [key],
+        previousValue: 'null',
+        newValue: value,
+      });
+      return;
+    }
+
     const originalVal = originalObj[key];
     if (typeof value === 'object') {
       if (typeof originalVal !== 'object') {

@@ -11,6 +11,7 @@ import {
   ButtonStyle,
   ModalBuilder,
   PermissionFlagsBits,
+  SlashCommandStringOption,
   StringSelectMenuBuilder,
   TextInputBuilder,
   TextInputStyle,
@@ -64,7 +65,7 @@ const TestChatInput = new Command({
     limit: 1,
   },
   enabled: {
-    global: true,
+    global: process.env.NODE_ENV !== 'production',
     guildOnly: true,
     guilds: ['1148585850007994388'],
   },
@@ -75,16 +76,49 @@ const TestChatInput = new Command({
   data: (builder) =>
     builder
       .setName('test')
-      .setDescription('Test command')
+      .setDescription('Test command for development purposes')
       .addSubcommandGroup((group) =>
         group
-          .setName('group')
+          .setName('subcommand-group')
           .setDescription('Test subcommand group')
           .addSubcommand((subcommand) =>
             subcommand
               .setName('subcommand')
               .setDescription('Test subcommand')
               .addStringOption(TestAutoComplete.data),
+          ),
+      )
+      .addSubcommand((subcommand) =>
+        subcommand
+          .setName('direct-subcommand')
+          .setDescription('Test direct subcommand (not in subcommand group)')
+          .addStringOption(
+            new SlashCommandStringOption()
+              .setName('test-choices')
+              .setDescription('Test choices in a String option')
+              .setAutocomplete(false)
+              .setChoices(
+                {
+                  name: 'Test select 1',
+                  value: 'test_select_1',
+                },
+                {
+                  name: 'Test select 2',
+                  value: 'test_select_2',
+                },
+                {
+                  name: 'Test select 3',
+                  value: 'test_select_3',
+                },
+                {
+                  name: 'Test select 4',
+                  value: 'test_select_4',
+                },
+                {
+                  name: 'Test select 5',
+                  value: 'test_select_5',
+                },
+              ),
           ),
       ),
   controllers: {
@@ -134,12 +168,13 @@ TestAutoComplete.extends(TestChatInput);
 
 const TestButton = TestChatInput.extend({
   type: CommandType.Button,
-  data: new ButtonBuilder()
-    .setCustomId('Test button')
-    .setLabel('Test button')
-    .setStyle(ButtonStyle.Primary)
-    .setEmoji('✅')
-    .setDisabled(false),
+  data: (builder) =>
+    builder
+      .setCustomId('Test button')
+      .setLabel('Test button')
+      .setStyle(ButtonStyle.Primary)
+      .setEmoji('✅')
+      .setDisabled(false),
   run: async (_client, interaction) => {
     const currentCount = testMap.get(interaction.user.id) ?? 0;
     const isPrompt =

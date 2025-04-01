@@ -137,9 +137,9 @@ class ClientManager {
         withChildren.map((command) => command.id),
       );
 
-      withChildren.forEach((command) => {
-        this.commands.add(CommandBase.buildCommand(command));
-      });
+      withChildren.forEach((command) =>
+        this.commands.add(CommandBase.build(command)),
+      );
     }
 
     const jobs = components.filter(
