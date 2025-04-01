@@ -10,7 +10,7 @@ import {
   RESTPostAPIContextMenuApplicationCommandsJSONBody,
   Routes,
 } from 'discord.js';
-import { CommandBase } from './base';
+import { CommandBase, NonAPICommand } from './base';
 import Client from '@core/client';
 
 type APICommandData =
@@ -78,7 +78,10 @@ type AbstractRESTClient = {
    * @param options The options to sync commands with
    * @returns A promise that resolves when the commands are synced
    */
-  syncCommands: (options?: SyncCommandOptions) => Promise<void>;
+  syncCommands: (
+    components: Collection<string, NonAPICommand>,
+    options?: SyncCommandOptions,
+  ) => Promise<void>;
   /**
    * Fetches commands from the Discord API
    * @param guildId The guild ID to fetch commands for, or `null` for global
@@ -371,7 +374,40 @@ class RESTClient implements AbstractRESTClient {
     });
   }
 
-  public async syncCommands(options?: SyncCommandOptions): Promise<void> {
+  private async syncComponentsToDatabase(
+    components: Collection<string, NonAPICommand>,
+    guildId?: string | null,
+  ) {
+    this.debug(
+      'Syncing component commands to database: %o',
+      components.map((c) => CommandBase.resolveId(c)),
+    );
+
+    await Promise.all(
+      components.map(async (command) => {
+        const id = CommandBase.resolveId(command);
+        return await Database.Command.upsert({
+          where: {
+            id,
+            GuildId: guildId,
+          },
+          create: {
+            id,
+            GuildId: guildId ?? null,
+            data: false,
+          },
+          update: {
+            data: false,
+          },
+        });
+      }),
+    );
+  }
+
+  public async syncCommands(
+    components: Collection<string, NonAPICommand>,
+    options?: SyncCommandOptions,
+  ): Promise<void> {
     this.debug('Syncing commands');
 
     const { guildId, clearOtherEnvironment, forceSync } = options ?? {};
@@ -379,6 +415,7 @@ class RESTClient implements AbstractRESTClient {
     const [synced, apiCommands] = await Promise.all([
       this.checkCommandsSynced(guildId ?? null),
       this.fetchApiCommands(guildId ?? null),
+      this.syncComponentsToDatabase(components, guildId),
     ]);
 
     const environmentIsDesynced = Array.isArray(apiCommands)

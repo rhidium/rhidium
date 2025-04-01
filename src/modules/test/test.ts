@@ -27,10 +27,14 @@ const choices = Array.from({ length: 10 }, (_, i) => ({
   emoji: '✅',
 }));
 
+const data = new SlashCommandStringOption()
+  .setName('test-autocomplete')
+  .setDescription('Test command')
+  .setAutocomplete(true);
+
 const TestAutoComplete = new Command({
+  data,
   type: CommandType.AutoComplete,
-  data: (builder) =>
-    builder.setName('test-autocomplete').setDescription('Test command'),
   run: async (_client, interaction) => {
     const query = interaction.options.getFocused();
     const filtered = choices.filter((choice) =>
@@ -42,10 +46,16 @@ const TestAutoComplete = new Command({
     }));
     await interaction.respond(options);
   },
+  resolver: async (interaction, options) => {
+    const { optionName = data.name, optionRequired = data.required } =
+      options || {};
+    return interaction.options.getString(optionName, optionRequired) ?? '';
+  },
 });
 
 const TestChatInput = new Command({
   type: CommandType.ChatInput,
+  category: 'Testing & Development',
   permissions: {
     level: PermLevel.Developer,
     client: [PermissionFlagsBits.SendMessages],

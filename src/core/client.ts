@@ -3,7 +3,7 @@ import {
   ClientOptions as DiscordClientOptions,
   Events,
 } from 'discord.js';
-import { ClientManager } from './commands';
+import { ClientManager, CommandBase } from './commands';
 import { i18n } from 'i18next';
 import { SyncCommandOptions } from './commands/rest';
 
@@ -36,7 +36,10 @@ class Client<Ready extends boolean = boolean>
     super.once(Events.ClientReady, () => {
       void this.manager
         .initialize(this as Client<true>)
-        .syncCommands(syncOptions);
+        .syncCommands(
+          this.manager.commands.byFilter(CommandBase.isNonApiCommand),
+          syncOptions,
+        );
     });
 
     return promise;

@@ -28,6 +28,7 @@ const minRepeatEveryMs =
 
 const RemindersCommand = new Command({
   type: CommandType.ChatInput,
+  category: 'Utility',
   enabled: {
     guildOnly: false,
   },

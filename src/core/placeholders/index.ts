@@ -4,6 +4,8 @@ import {
   GuildMember,
   User,
   ThreadChannel,
+  EmbedBuilder,
+  PartialGuildMember,
 } from 'discord.js';
 import extractProperty from 'object-property-extractor';
 import { placeholderKeys } from './keys';
@@ -53,7 +55,7 @@ class Placeholder {
 
   public static parseContext = (options: {
     user: User;
-    member: GuildMember;
+    member: GuildMember | PartialGuildMember;
     guild: Guild;
     channel: GuildChannel | ThreadChannel | 'n/a';
   }): ContextPlaceholders => {
@@ -125,6 +127,22 @@ class Placeholder {
     }
 
     return matches;
+  };
+
+  public static applyToEmbed = (
+    embed: EmbedBuilder,
+    placeholders: ContextPlaceholders | [string, string][],
+  ): EmbedBuilder => {
+    const str = JSON.stringify(embed.data);
+    const matches = Array.isArray(placeholders)
+      ? placeholders
+      : Placeholder.match(str, placeholders);
+
+    if (matches.length === 0) {
+      return EmbedBuilder.from(embed);
+    }
+
+    return EmbedBuilder.from(JSON.parse(this.apply(str, matches)));
   };
 }
 

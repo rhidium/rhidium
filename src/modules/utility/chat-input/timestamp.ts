@@ -56,6 +56,7 @@ const timestampStyleChoices = [
 
 const TimestampCommand = new Command({
   type: CommandType.ChatInput,
+  category: 'Utility',
   enabled: {
     global: true,
     guilds: true,

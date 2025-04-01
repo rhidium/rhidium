@@ -3,6 +3,7 @@ import { StringUtils, TimeUtils } from '../utils';
 import { EmbedConstants } from '../constants';
 import { appConfig } from './app';
 import { SafeEmbedBuilder } from '@core/utils/embeds';
+import { PopulatedEmbed } from '@core/database';
 
 type EmbedType = keyof typeof appConfig.colors;
 
@@ -99,6 +100,52 @@ class Embeds implements EmbedsOptions {
   public readonly debug = (data: CreateEmbedData) => this.status('debug', data);
   public readonly waiting = (data: CreateEmbedData) =>
     this.status('waiting', data);
+
+  public readonly fromEmbedModel = (
+    embed: PopulatedEmbed | null,
+    baseEmbed = new EmbedBuilder(),
+  ) => {
+    const embedBuilder = baseEmbed.setColor(
+      embed?.color ?? appConfig.colors.primary,
+    );
+
+    if (embed?.title) embedBuilder.setTitle(embed.title);
+    if (embed?.description) embedBuilder.setDescription(embed.description);
+    if (embed?.url) embedBuilder.setURL(embed.url);
+    if (embed?.imageURL) embedBuilder.setImage(embed.imageURL);
+    if (embed?.thumbnailURL) embedBuilder.setThumbnail(embed.thumbnailURL);
+
+    if (embed?.authorName) {
+      const author: {
+        name: string;
+        icon_url?: string;
+        url?: string;
+      } = { name: embed?.authorName };
+      if (embed?.authorIconURL) author.icon_url = embed.authorIconURL;
+      if (embed?.authorURL) author.url = embed.authorURL;
+      embedBuilder.setAuthor(author);
+    }
+
+    if (embed?.footerText) {
+      const footer: {
+        text: string;
+        icon_url?: string;
+      } = { text: embed?.footerText };
+      if (embed?.footerIconURL) footer.icon_url = embed.footerIconURL;
+      embedBuilder.setFooter(footer);
+    }
+
+    if (embed?.fields)
+      for (const field of embed.fields) {
+        embedBuilder.addFields({
+          name: field.name,
+          value: field.value,
+          inline: field.inline,
+        });
+      }
+
+    return embedBuilder;
+  };
 }
 
 const embeds = new Embeds({

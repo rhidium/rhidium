@@ -10,8 +10,8 @@ import { ClientManager } from './commands';
 import Client from './client';
 import { I18n } from './i18n';
 import utilityRegistry from '../modules/utility';
-import testRegistry from '../modules/test';
 import systemRegistry from '../modules/system';
+import moderationRegistry from '../modules/moderation';
 
 const main = async () => {
   const manager = new ClientManager();
@@ -21,7 +21,11 @@ const main = async () => {
     Lang: await I18n.init(),
   });
 
-  manager.register(...systemRegistry, ...utilityRegistry, ...testRegistry);
+  manager.register(
+    ...systemRegistry,
+    ...utilityRegistry,
+    ...moderationRegistry,
+  );
 
   await client.login(appConfig.client.token, {
     guildId: appConfig.client.development_server_id,

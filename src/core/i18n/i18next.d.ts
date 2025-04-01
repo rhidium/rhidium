@@ -1,7 +1,7 @@
 import { AppendKeyPrefix, ParseKeys, TFunctionReturn, TOptions } from 'i18next';
 import { defaultNS, Locales, resources, ns } from '.';
 
-type LocalizedLabelKey = ParseKeys<typeof ns, {}, typeof defaultNS>;
+type LocalizedLabelKey = ParseKeys<typeof ns>;
 // | TemplateStringsArray;
 
 type LocalizedReturnType<

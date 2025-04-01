@@ -23,7 +23,7 @@ import {
   UserSelectMenuBuilder,
   UserSelectMenuInteraction,
 } from 'discord.js';
-import type { AvailableGuildInteraction } from '@core/commands';
+import type { GuildInteraction } from '@core/commands';
 import type {
   AnyPromptValue,
   Prompt,
@@ -36,7 +36,7 @@ import { StringUtils } from '../common';
 import { UnitConstants } from '@core/constants';
 import { PromptResolver } from './resolver';
 
-type PromptInteraction = AvailableGuildInteraction<
+type PromptInteraction = GuildInteraction<
   | UserSelectMenuInteraction<CacheType>
   | ChannelSelectMenuInteraction<CacheType>
   | RoleSelectMenuInteraction<CacheType>
@@ -226,7 +226,7 @@ class PromptInteractionHandler {
     P extends Prompt,
     I extends RepliableInteraction | ModalSubmitInteraction,
   >(
-    interaction: AvailableGuildInteraction<I>,
+    interaction: GuildInteraction<I>,
     prompt: ResolvedPrompt<P>,
     prompts: ResolvedPrompt<P>[],
     {
@@ -679,7 +679,7 @@ class PromptInteractionHandler {
 
               componentCollector.stop();
 
-              resolve(response as AvailableGuildInteraction<typeof response>);
+              resolve(response as GuildInteraction<typeof response>);
 
               return;
             }
@@ -696,7 +696,7 @@ class PromptInteractionHandler {
 
               componentCollector.stop();
 
-              resolve(response as AvailableGuildInteraction<typeof response>);
+              resolve(response as GuildInteraction<typeof response>);
 
               return;
             }
@@ -750,7 +750,7 @@ class PromptInteractionHandler {
                   time: UnitConstants.MS_IN_ONE_MINUTE * 14,
                   filter: (interaction) =>
                     interaction.customId === `@${prompt.id}`,
-                })) as AvailableGuildInteraction<ModalSubmitInteraction>;
+                })) as GuildInteraction<ModalSubmitInteraction>;
               } catch {
                 componentCollector.stop();
                 reject(new Error('Prompt timed out.'));
@@ -802,7 +802,7 @@ class PromptInteractionHandler {
 
           componentCollector.stop();
 
-          resolve(response as AvailableGuildInteraction<PromptInteraction>);
+          resolve(response as GuildInteraction<PromptInteraction>);
 
           return;
         });
@@ -864,7 +864,7 @@ class PromptInteractionHandler {
   };
 
   public static readonly handlePromptInteraction = async <P extends Prompt>(
-    interaction: AvailableGuildInteraction<RepliableInteraction>,
+    interaction: GuildInteraction<RepliableInteraction>,
     prompts: (P & {
       /**
        * Value is of type `any` because {@link Prompt Prompt[]} is generic,

@@ -3,8 +3,7 @@ import { AnyCommand, APICommand, Command, CommandBase } from './base';
 import { debug, Debugger, Logger } from '@core/logger';
 import { Embeds } from '@core/config';
 import { AbstractRESTClient, NoOpRESTClient, RESTClient } from './rest';
-import { InteractionUtils } from '@core/utils/interaction';
-import { StringUtils } from '@core/utils';
+import { InteractionUtils, StringUtils } from '@core/utils';
 import { Database } from '@core/database';
 import { ClientJob } from './jobs';
 import { ClientEventListener } from './events';
@@ -252,7 +251,7 @@ class ClientManager {
       this.apiCommands.map((c) => c.data.toJSON()),
     );
 
-    client.on('interactionCreate', async (interaction) => {
+    client.on(Events.InteractionCreate, async (interaction) => {
       const commandIdentifier = CommandBase.commandIdentifierFor(interaction);
 
       this.debug(

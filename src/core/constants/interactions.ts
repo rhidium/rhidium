@@ -1,3 +1,3 @@
 export class InteractionConstants {
-  static readonly EMIT_COMPONENT_HANDLER_IDENTIFIER = '@';
+  static readonly COMPONENT_HANDLER_IDENTIFIER = '@';
 }

@@ -20,7 +20,7 @@ import {
   ModalSubmitInteraction,
   RoleSelectMenuBuilder,
   RoleSelectMenuInteraction,
-  SlashCommandBuilder,
+  SlashCommandOptionsOnlyBuilder,
   SlashCommandStringOption,
   SlashCommandSubcommandsOnlyBuilder,
   StringSelectMenuBuilder,
@@ -32,6 +32,7 @@ import {
 
 enum CommandType {
   ChatInput = 'ChatInput',
+  ChatInputPlain = 'ChatInputPlain',
   UserContextMenu = 'UserContextMenu',
   MessageContextMenu = 'MessageContextMenu',
   PrimaryEntryPoint = 'PrimaryEntryPoint',
@@ -57,6 +58,14 @@ type APICommandTypeValue = Exclude<
   | 'AutoComplete'
 >;
 
+type NonAPICommandTypeValue = Exclude<
+  (typeof CommandType)[keyof typeof CommandType],
+  | 'ChatInput'
+  | 'ChatInputPlain'
+  | 'UserContextMenu'
+  | 'MessageContextMenu'
+  | 'PrimaryEntryPoint'
+>;
 type DeepPartial<T> = {
   [P in keyof T]?: T[P] extends object
     ? T[P] extends Array<unknown>
@@ -66,31 +75,33 @@ type DeepPartial<T> = {
 };
 
 type CommandData<Type extends CommandType = CommandType> =
-  Type extends typeof CommandType.ChatInput
-    ? SlashCommandBuilder | SlashCommandSubcommandsOnlyBuilder
-    : Type extends typeof CommandType.PrimaryEntryPoint
-      ? SlashCommandBuilder | SlashCommandSubcommandsOnlyBuilder
-      : Type extends typeof CommandType.UserContextMenu
+  Type extends typeof CommandType.ChatInputPlain
+    ? SlashCommandOptionsOnlyBuilder
+    : Type extends
+          | typeof CommandType.ChatInput
+          | typeof CommandType.PrimaryEntryPoint
+      ? SlashCommandSubcommandsOnlyBuilder
+      : Type extends
+            | typeof CommandType.UserContextMenu
+            | typeof CommandType.MessageContextMenu
         ? ContextMenuCommandBuilder
-        : Type extends typeof CommandType.MessageContextMenu
-          ? ContextMenuCommandBuilder
-          : Type extends typeof CommandType.Button
-            ? ButtonBuilder
-            : Type extends typeof CommandType.StringSelect
-              ? StringSelectMenuBuilder
-              : Type extends typeof CommandType.UserSelect
-                ? UserSelectMenuBuilder
-                : Type extends typeof CommandType.RoleSelect
-                  ? RoleSelectMenuBuilder
-                  : Type extends typeof CommandType.MentionableSelect
-                    ? MentionableSelectMenuBuilder
-                    : Type extends typeof CommandType.ChannelSelect
-                      ? ChannelSelectMenuBuilder
-                      : Type extends typeof CommandType.ModalSubmit
-                        ? ModalBuilder
-                        : Type extends typeof CommandType.AutoComplete
-                          ? SlashCommandStringOption
-                          : never;
+        : Type extends typeof CommandType.Button
+          ? ButtonBuilder
+          : Type extends typeof CommandType.StringSelect
+            ? StringSelectMenuBuilder
+            : Type extends typeof CommandType.UserSelect
+              ? UserSelectMenuBuilder
+              : Type extends typeof CommandType.RoleSelect
+                ? RoleSelectMenuBuilder
+                : Type extends typeof CommandType.MentionableSelect
+                  ? MentionableSelectMenuBuilder
+                  : Type extends typeof CommandType.ChannelSelect
+                    ? ChannelSelectMenuBuilder
+                    : Type extends typeof CommandType.ModalSubmit
+                      ? ModalBuilder
+                      : Type extends typeof CommandType.AutoComplete
+                        ? SlashCommandStringOption
+                        : never;
 
 type CommandInteraction<
   Type extends CommandType = CommandType,
@@ -99,7 +110,9 @@ type CommandInteraction<
   ? UserContextMenuCommandInteraction<Cached>
   : Type extends typeof CommandType.MessageContextMenu
     ? MessageContextMenuCommandInteraction<Cached>
-    : Type extends typeof CommandType.ChatInput
+    : Type extends
+          | typeof CommandType.ChatInput
+          | typeof CommandType.ChatInputPlain
       ? ChatInputCommandInteraction<Cached>
       : Type extends typeof CommandType.PrimaryEntryPoint
         ? ChatInputCommandInteraction<Cached>
@@ -135,16 +148,13 @@ type CacheTypeResolver<
     : Exclude<CacheType, undefined> // inGuild = raw | cached
   : Exclude<CacheType, 'raw'>; // inDMs = cached
 
-type AvailableGuildInteraction<
-  I extends BaseInteraction = BaseInteraction<'cached'>,
-> = I & {
-  guild: Guild & {
-    available: true;
+type GuildInteraction<I extends BaseInteraction = BaseInteraction<'cached'>> =
+  I & {
+    guild: Guild;
+    guildId: string;
+    channel: GuildBasedChannel | null;
+    member: GuildMember;
   };
-  guildId: string;
-  channel: GuildBasedChannel | null;
-  member: GuildMember;
-};
 
 type DMInteraction<I extends BaseInteraction = BaseInteraction<'cached'>> =
   I & {
@@ -157,11 +167,12 @@ type DMInteraction<I extends BaseInteraction = BaseInteraction<'cached'>> =
 export {
   CommandType,
   type APICommandTypeValue,
+  type NonAPICommandTypeValue,
   type DeepPartial,
   type CommandData,
   type CommandInteraction,
   type CommandRunFunction,
   type CacheTypeResolver,
-  type AvailableGuildInteraction,
+  type GuildInteraction,
   type DMInteraction,
 };

@@ -20,5 +20,20 @@
       "missingRoles": "You do not have the required role(s) to use this command.",
       "unauthorized": "You are not authorized to use this command."
     }
+  },
+  "discord": {
+    "joinedServer": "Joined Server",
+    "joinedDiscord": "Joined Discord",
+    "accountCreated": "Account Created",
+    "memberCount": "Member Count",
+    "messageHasNoEmbeds": "This message has no embeds.",
+    "memberJoined": {
+      "title": "Member Joined",
+      "description": "Member {{user}} joined {{guild}}."
+    },
+    "memberLeft": {
+      "title": "Member Left",
+      "description": "Member {{user}} left {{guild}}."
+    }
   }
 }

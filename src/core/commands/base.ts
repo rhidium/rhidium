@@ -1,5 +1,6 @@
 import {
   CommandType,
+  NonAPICommandTypeValue,
   type APICommandTypeValue,
   type CacheTypeResolver,
   type CommandData,
@@ -49,10 +50,11 @@ import {
   InteractionUtils,
   ResponseContent,
   WithResponseContent,
-} from '@core/utils/interaction';
+} from '@core/utils';
 import { CommandController } from './controllers';
 import { LocalizedLabelKey } from '@core/i18n/i18next';
 import { defaultLocale, I18n, locales } from '@core/i18n';
+import { InteractionConstants } from '@core/constants';
 
 const isStringArray = (value: unknown): value is string[] =>
   Array.isArray(value) && value.every((item) => typeof item === 'string');
@@ -72,7 +74,7 @@ class CommandBase<
   GuildOnly extends boolean,
   RefuseUncached extends boolean,
   ReturnType,
-  ResolveType extends NonNullable<unknown> | null = null,
+  ResolveType extends NonNullable<unknown> | null,
 > {
   public readonly id: string;
   public readonly idWithoutPrefix: string;
@@ -84,14 +86,11 @@ class CommandBase<
     CommandInteraction<Type, CacheTypeResolver<GuildOnly, RefuseUncached>>
   >;
 
-  private readonly permissions: CommandPermissionOptions;
-  private readonly enabled: CommandEnabledOptions<GuildOnly>;
-  private readonly interactions: CommandInteractionOptions<RefuseUncached>;
-  private readonly throttle: CommandThrottleOptions;
-  public get throttleOptions(): CommandThrottleOptions {
-    return this.throttle;
-  }
-  private readonly controllers: Record<
+  public readonly permissions: CommandPermissionOptions;
+  public readonly enabled: CommandEnabledOptions<GuildOnly>;
+  public readonly interactions: CommandInteractionOptions<RefuseUncached>;
+  public readonly throttle: CommandThrottleOptions;
+  public readonly controllers: Record<
     string,
     CommandController<
       ReturnType,
@@ -123,6 +122,7 @@ class CommandBase<
           : null;
 
     if (id === null) {
+      console.log(data);
       throw new Error(
         `Unable to resolve any unique identifier for command, please provide a name or customId: ${JSON.stringify(
           data,
@@ -133,7 +133,7 @@ class CommandBase<
     }
 
     this.type = options.type;
-    this.id = `${this.type}/${id}`;
+    this.id = `${this.type === CommandType.ChatInputPlain ? CommandType.ChatInput : this.type}/${id}`;
     this.idWithoutPrefix = this.id.split('/').slice(1).join('/');
     this.data = data;
     this.category = options?.category ?? null;
@@ -222,13 +222,14 @@ class CommandBase<
     command: AnyCommand,
   ): command is APICommand =>
     command.type === CommandType.ChatInput ||
+    command.type === CommandType.ChatInputPlain ||
     command.type === CommandType.UserContextMenu ||
     command.type === CommandType.MessageContextMenu ||
     command.type === CommandType.PrimaryEntryPoint;
 
-  public static readonly isComponentCommand = (
+  public static readonly isNonApiCommand = (
     command: AnyCommand,
-  ): command is APICommand => !CommandBase.isApiCommand(command);
+  ): command is NonAPICommand => !CommandBase.isApiCommand(command);
 
   public static readonly isEnabled = (command: AnyCommand): boolean => {
     if (command.enabled.global === false) {
@@ -243,9 +244,9 @@ class CommandBase<
   ): InteractionType => {
     switch (type) {
       case CommandType.ChatInput:
+      case CommandType.ChatInputPlain:
         return InteractionType.ApplicationCommand;
       case CommandType.UserContextMenu:
-        return InteractionType.ApplicationCommand;
       case CommandType.MessageContextMenu:
         return InteractionType.ApplicationCommand;
       case CommandType.PrimaryEntryPoint:
@@ -300,15 +301,26 @@ class CommandBase<
                         ? CommandType.UserContextMenu
                         : CommandType.ChatInput;
 
-    return (
+    const base =
       prefix +
       '/' +
       (interaction.isAutocomplete()
         ? interaction.options.getFocused(true).name
         : 'customId' in interaction
           ? interaction.customId
-          : interaction.commandName)
+          : interaction.commandName);
+
+    if (
+      base.indexOf(InteractionConstants.COMPONENT_HANDLER_IDENTIFIER) === -1
+    ) {
+      return base;
+    }
+
+    const [withoutData] = base.split(
+      InteractionConstants.COMPONENT_HANDLER_IDENTIFIER,
     );
+
+    return withoutData ?? base;
   };
 
   /**
@@ -361,11 +373,11 @@ class CommandBase<
     GO extends boolean = GuildOnly,
     RU extends boolean = RefuseUncached,
     RT = void,
-    ResolveType extends NonNullable<unknown> | null = null,
+    RST extends NonNullable<unknown> | null = null,
   >(
-    options: CommandOptions<T, GO, RU, RT, ResolveType>,
-  ): Command<T, GO, RU, RT, ResolveType> => {
-    const command = new Command<T, GO, RU, RT, ResolveType>({
+    options: CommandOptions<T, GO, RU, RT, RST>,
+  ): Command<T, GO, RU, RT, RST> => {
+    const command = new Command<T, GO, RU, RT, RST>({
       ...{
         category: options.category,
         enabled: options.enabled,
@@ -378,9 +390,9 @@ class CommandBase<
         run: undefined,
       },
       ...options,
-    } as CommandOptions<T, GO, RU, RT, ResolveType>);
+    } as CommandOptions<T, GO, RU, RT, RST>);
 
-    this.children.push(command as AnyCommand);
+    this.children.push(command as unknown as AnyCommand);
 
     return command;
   };
@@ -390,10 +402,10 @@ class CommandBase<
     GO extends boolean = GuildOnly,
     RU extends boolean = RefuseUncached,
     RT = void,
-    ResolveType extends NonNullable<unknown> | null = null,
+    RST extends NonNullable<unknown> | null = null,
   >(
-    command: Command<T, GO, RU, RT, ResolveType>,
-  ): Command<T, GO, RU, RT, ResolveType> => {
+    command: Command<T, GO, RU, RT, RST>,
+  ): Command<T, GO, RU, RT, RST> => {
     const filterInheritable = ([, value]: [string, unknown]) => {
       if (typeof value === 'undefined') {
         return false;
@@ -429,7 +441,13 @@ class CommandBase<
         enabled: inheritProp('enabled'),
         interactions: inheritProp('interactions'),
         throttle: inheritProp('throttle'),
-      } as unknown as CommandOptions<T, GO, RU, RT, ResolveType>) as AnyCommand,
+      } as unknown as CommandOptions<
+        T,
+        GO,
+        RU,
+        RT,
+        RST
+      >) as unknown as AnyCommand,
     );
 
     return command;
@@ -591,6 +609,7 @@ class CommandBase<
           | SlashCommandOptionsOnlyBuilder
           | SlashCommandSubcommandGroupBuilder
           | SlashCommandSubcommandsOnlyBuilder
+          | SlashCommandOptionsOnlyBuilder
           | ApplicationCommandOptionBase
         )[],
         path: string[] = ['options'],
@@ -693,11 +712,12 @@ class CommandBase<
 
   public static readonly resolveId = (
     cmd:
+      | NonAPICommand
       | RESTPostAPIChatInputApplicationCommandsJSONBody
       | RESTPostAPIContextMenuApplicationCommandsJSONBody,
   ) => {
     const resolveCommandTypeFromDiscordType = (
-      type: ApplicationCommandType,
+      type: ApplicationCommandType | CommandType,
     ): CommandType => {
       switch (type) {
         case ApplicationCommandType.ChatInput:
@@ -708,6 +728,21 @@ class CommandBase<
           return CommandType.MessageContextMenu;
         case ApplicationCommandType.PrimaryEntryPoint:
           return CommandType.PrimaryEntryPoint;
+        case CommandType.ChatInput:
+        case CommandType.ChatInputPlain:
+        case CommandType.UserContextMenu:
+        case CommandType.MessageContextMenu:
+        case CommandType.PrimaryEntryPoint:
+        case CommandType.Button:
+        case CommandType.StringSelect:
+        case CommandType.UserSelect:
+        case CommandType.RoleSelect:
+        case CommandType.MentionableSelect:
+        case CommandType.ChannelSelect:
+        case CommandType.ModalSubmit:
+        case CommandType.AutoComplete:
+        default:
+          return type;
       }
     };
 
@@ -721,7 +756,38 @@ class CommandBase<
       );
     }
 
-    const id: string = cmd.name;
+    const id: string | null =
+      cmd instanceof Command
+        ? (() => {
+            let json;
+            try {
+              json = cmd.data.toJSON();
+            } catch (err) {
+              console.error(
+                'Failed to convert command to JSON:',
+                err,
+                cmd.data,
+              );
+              return null;
+            }
+            return 'custom_id' in json
+              ? json.custom_id
+              : 'name' in json
+                ? json.name
+                : null;
+          })()
+        : cmd.name;
+
+    if (id === null) {
+      console.log(cmd);
+      throw new Error(
+        `Unable to resolve any unique identifier for command, please provide a name or customId: ${JSON.stringify(
+          cmd,
+          null,
+          2,
+        )}`,
+      );
+    }
 
     return `${resolveCommandTypeFromDiscordType(cmd.type)}/${id}`;
   };
@@ -738,52 +804,61 @@ class CommandBase<
 
   protected static readonly dataResolver = <Type extends CommandType>(
     type: Type,
-    data:
+    _data:
       | CommandData<Type>
       | ((builder: CommandData<Type>) => CommandData<Type>),
   ): CommandData<Type> => {
     let resolved: CommandData<Type>;
 
     const cast = (builder: unknown) => builder as CommandData<Type>;
-
-    if (typeof data !== 'function') {
-      resolved = data;
-    } else {
-      switch (type) {
-        case CommandType.ChatInput:
-        case CommandType.PrimaryEntryPoint:
-          resolved = data(cast(new SlashCommandBuilder()));
-          break;
-        case CommandType.Button:
-          resolved = data(cast(new ButtonBuilder()));
-          break;
-        case CommandType.StringSelect:
-          resolved = data(cast(new StringSelectMenuBuilder()));
-          break;
-        case CommandType.UserSelect:
-          resolved = data(cast(new UserSelectMenuBuilder()));
-          break;
-        case CommandType.RoleSelect:
-          resolved = data(cast(new RoleSelectMenuBuilder()));
-          break;
-        case CommandType.MentionableSelect:
-          resolved = data(cast(new MentionableSelectMenuBuilder()));
-          break;
-        case CommandType.ChannelSelect:
-          resolved = data(cast(new ChannelSelectMenuBuilder()));
-          break;
-        case CommandType.ModalSubmit:
-          resolved = data(cast(new ModalBuilder()));
-          break;
-        case CommandType.UserContextMenu:
-        case CommandType.MessageContextMenu:
-          resolved = data(cast(new ContextMenuCommandBuilder()));
-          break;
-        case CommandType.AutoComplete:
-          resolved = data(
-            cast(new SlashCommandStringOption().setAutocomplete(true)),
-          );
+    const data = (builder: unknown) => {
+      if (typeof _data === 'function') {
+        return _data(cast(builder));
       }
+
+      return cast(_data);
+    };
+
+    switch (type) {
+      case CommandType.ChatInput:
+      case CommandType.ChatInputPlain:
+      case CommandType.PrimaryEntryPoint:
+        resolved = data(new SlashCommandBuilder());
+        break;
+      case CommandType.Button:
+        resolved = data(new ButtonBuilder());
+        break;
+      case CommandType.StringSelect:
+        resolved = data(new StringSelectMenuBuilder());
+        break;
+      case CommandType.UserSelect:
+        resolved = data(new UserSelectMenuBuilder());
+        break;
+      case CommandType.RoleSelect:
+        resolved = data(new RoleSelectMenuBuilder());
+        break;
+      case CommandType.MentionableSelect:
+        resolved = data(new MentionableSelectMenuBuilder());
+        break;
+      case CommandType.ChannelSelect:
+        resolved = data(new ChannelSelectMenuBuilder());
+        break;
+      case CommandType.ModalSubmit:
+        resolved = data(new ModalBuilder());
+        break;
+      case CommandType.UserContextMenu:
+      case CommandType.MessageContextMenu:
+        resolved = data(new ContextMenuCommandBuilder());
+        if (resolved instanceof ContextMenuCommandBuilder) {
+          if (type === CommandType.UserContextMenu) {
+            resolved.setType(ApplicationCommandType.User);
+          } else {
+            resolved.setType(ApplicationCommandType.Message);
+          }
+        }
+        break;
+      case CommandType.AutoComplete:
+        resolved = data(new SlashCommandStringOption().setAutocomplete(true));
     }
 
     return resolved;
@@ -1081,11 +1156,16 @@ type AnyCommand<Type extends CommandType = CommandType> = AnyTypedCommand[Type];
 type APICommand<Type extends APICommandTypeValue = APICommandTypeValue> =
   AnyTypedCommand[Type];
 
+type NonAPICommand<
+  Type extends NonAPICommandTypeValue = NonAPICommandTypeValue,
+> = AnyTypedCommand[Type];
+
 export {
   Command,
   CommandBase,
   type AnyCommand,
   type APICommand,
+  type NonAPICommand,
   type ThrottleConsumer,
   type ThrottleConsumerResult,
 };

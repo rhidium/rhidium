@@ -52,9 +52,9 @@ const config: ClientPermissionOptions = {
       name: 'Moderator',
       level: PermLevel.Moderator,
       hasLevel: async (_config, member) => {
-        const guildSettings = await Database.Guild.resolve(member.guild.id);
+        const guild = await Database.Guild.resolve(member.guild.id);
 
-        if (!guildSettings.modRoleIds.length) {
+        if (!guild.modRoleIds.length) {
           return (
             member.permissions.has(PermissionFlagsBits.KickMembers) &&
             member.permissions.has(PermissionFlagsBits.BanMembers) &&
@@ -63,7 +63,7 @@ const config: ClientPermissionOptions = {
         }
 
         return member.roles.cache.some((role) =>
-          guildSettings.modRoleIds.includes(role.id),
+          guild.modRoleIds.includes(role.id),
         );
       },
     },
@@ -71,19 +71,16 @@ const config: ClientPermissionOptions = {
       name: 'Administrator',
       level: PermLevel.Administrator,
       hasLevel: async (_config, member) => {
-        const guildSettings = await Database.Guild.resolve(member.guild.id);
+        const guild = await Database.Guild.resolve(member.guild.id);
 
-        if (
-          !guildSettings.adminRoleIds.length &&
-          !guildSettings.adminUserIds.length
-        ) {
+        if (!guild.adminRoleIds.length && !guild.adminUserIds.length) {
           return member.permissions.has(PermissionFlagsBits.Administrator);
         }
 
         return (
-          guildSettings.adminUserIds.includes(member.id) ||
+          guild.adminUserIds.includes(member.id) ||
           member.roles.cache.some((role) =>
-            guildSettings.adminRoleIds.includes(role.id),
+            guild.adminRoleIds.includes(role.id),
           )
         );
       },

@@ -3,6 +3,7 @@ import {
   ButtonBuilder,
   ButtonInteraction,
   ButtonStyle,
+  CacheType,
   ComponentType,
   Interaction,
   InteractionEditReplyOptions,
@@ -12,14 +13,22 @@ import {
 import { appConfig } from '@core/config';
 import { I18n } from '@core/i18n';
 import { UnitConstants } from '@core/constants';
-import { InteractionUtils } from '../interaction';
+import { InteractionUtils } from '../interactions/interaction';
 
-type PromptConfirmationOptions<I extends RepliableInteraction> = {
+type PromptConfirmationOptions<I extends RepliableInteraction<CacheType>> = {
   interaction: I;
   ephemeral?: boolean;
   content?: InteractionReplyOptions & InteractionEditReplyOptions;
-  onConfirm?: (interaction: ButtonInteraction) => void | Promise<void>;
-  onCancel?: (interaction: ButtonInteraction) => void | Promise<void>;
+  onConfirm?: (
+    interaction: ButtonInteraction<
+      I extends RepliableInteraction<infer C> ? C : CacheType
+    >,
+  ) => void | Promise<void>;
+  onCancel?: (
+    interaction: ButtonInteraction<
+      I extends RepliableInteraction<infer C> ? C : CacheType
+    >,
+  ) => void | Promise<void>;
 };
 
 class ConfirmationInput {
@@ -94,10 +103,17 @@ class ConfirmationInput {
             return;
           }
 
+          const cast = (interaction: ButtonInteraction) =>
+            interaction as ButtonInteraction<
+              I extends RepliableInteraction<infer C extends CacheType>
+                ? C
+                : CacheType
+            >;
+
           if (button.customId === this.BUTTON_CONFIRM_ID) {
-            resolve(button);
+            resolve(cast(button));
             if (onConfirm) {
-              await onConfirm(button);
+              await onConfirm(cast(button));
             } else {
               await button.update({
                 content: I18n.localize(
@@ -112,7 +128,7 @@ class ConfirmationInput {
           if (button.customId === this.BUTTON_CANCEL_ID) {
             resolve(false);
             if (onCancel) {
-              await onCancel(button);
+              await onCancel(cast(button));
             } else {
               await button.update({
                 content: I18n.localize(

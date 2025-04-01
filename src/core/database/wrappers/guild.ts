@@ -6,7 +6,7 @@ import { UnitConstants } from '@core/constants';
 import { BaseInteraction } from 'discord.js';
 import { memberWrapper } from './member';
 import { userWrapper } from './user';
-import { AvailableGuildInteraction } from '@core/commands';
+import { GuildInteraction } from '@core/commands';
 
 class GuildWrapper extends DatabaseWrapper<Model.Guild> {
   constructor() {
@@ -42,7 +42,7 @@ class GuildWrapper extends DatabaseWrapper<Model.Guild> {
   }
 
   async resolveFromInteraction<I extends BaseInteraction>(
-    interaction: AvailableGuildInteraction<I>,
+    interaction: GuildInteraction<I>,
   ): Promise<readonly [PopulatedGuild, PopulatedMember, PopulatedUser]> {
     const [user, guild] = await Promise.all([
       userWrapper.resolve(interaction.user.id),

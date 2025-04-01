@@ -37,7 +37,7 @@ class CommandWrapper extends DatabaseWrapper<Model.Command> {
     interaction: CommandInteraction,
   ): string => {
     let resource: string | null;
-    const options = command.throttleOptions;
+    const options = command.throttle;
 
     switch (options.type) {
       case CommandThrottleType.User:
@@ -72,7 +72,7 @@ class CommandWrapper extends DatabaseWrapper<Model.Command> {
     command: Command,
     interaction: CommandInteraction,
   ): Promise<ThrottleConsumerResult> => {
-    const options = command.throttleOptions;
+    const options = command.throttle;
 
     if (!options.enabled) {
       return {
@@ -186,7 +186,7 @@ class CommandWrapper extends DatabaseWrapper<Model.Command> {
         channelId: interaction.channelId,
         guildId: interaction.guildId,
         expireThreshold: new Date(
-          interaction.createdAt.valueOf() + command.throttleOptions.duration,
+          interaction.createdAt.valueOf() + command.throttle.duration,
         ),
         runtime: runtimeMs,
         runtimeErrors: runtimeError ? [runtimeError] : [],
