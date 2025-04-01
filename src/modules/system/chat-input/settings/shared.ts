@@ -38,6 +38,7 @@ import {
   StringUtils,
 } from '@core/utils';
 import { appConfig, Embeds } from '@core/config';
+import { Logger } from '@core/logger';
 
 const isProduction: boolean = process.env.NODE_ENV === 'production';
 
@@ -285,7 +286,7 @@ export const handleSettingsUpdate = async (
         );
       },
       async onPromptError(error, i, prompt) {
-        console.error(error);
+        Logger.error(error);
         const ctx = {
           embeds: [
             Embeds.error({

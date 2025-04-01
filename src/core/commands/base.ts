@@ -7,7 +7,7 @@ import {
   type CommandInteraction,
   type CommandRunFunction,
 } from './types';
-import { debug, type Debugger } from '@core/logger';
+import { debug, Logger, type Debugger } from '@core/logger';
 import {
   ApplicationCommandOptionBase,
   ApplicationCommandType,
@@ -122,13 +122,16 @@ class CommandBase<
           : null;
 
     if (id === null) {
-      console.log(data);
+      let json;
+      try {
+        json = JSON.stringify(data, null, 2);
+      } catch (err) {
+        throw new Error(
+          `Unable to convert command data to JSON: ${data.toString()} - ${err}`,
+        );
+      }
       throw new Error(
-        `Unable to resolve any unique identifier for command, please provide a name or customId: ${JSON.stringify(
-          data,
-          null,
-          2,
-        )}`,
+        `Unable to resolve any unique identifier for command, please provide a name or customId: ${json}`,
       );
     }
 
@@ -756,18 +759,18 @@ class CommandBase<
       );
     }
 
+    let json;
     const id: string | null =
       cmd instanceof Command
         ? (() => {
-            let json;
             try {
               json = cmd.data.toJSON();
             } catch (err) {
-              console.error(
-                'Failed to convert command to JSON:',
+              json = cmd.data;
+              Logger.error('Failed to convert command to JSON', {
                 err,
-                cmd.data,
-              );
+                data: cmd.data,
+              });
               return null;
             }
             return 'custom_id' in json
@@ -779,13 +782,8 @@ class CommandBase<
         : cmd.name;
 
     if (id === null) {
-      console.log(cmd);
       throw new Error(
-        `Unable to resolve any unique identifier for command, please provide a name or customId: ${JSON.stringify(
-          cmd,
-          null,
-          2,
-        )}`,
+        `Unable to resolve any unique identifier for command, please provide a name or customId: ${json}`,
       );
     }
 
