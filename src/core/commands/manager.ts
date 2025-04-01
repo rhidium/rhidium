@@ -122,9 +122,7 @@ class ClientManager {
     this.REST = new NoOpRESTClient();
   }
 
-  public register(
-    ...components: (AnyCommand | ClientJob | ClientEventListener)[]
-  ): void {
+  public register(...components: ComponentRegistry): void {
     const commands = components.filter(
       (component): component is AnyCommand => component instanceof Command,
     );
@@ -190,6 +188,48 @@ class ClientManager {
 
     this.commands.clear();
     this.jobs.clear();
+  }
+
+  public async commandLink(
+    client: Client<true>,
+    name: string,
+    options?: {
+      subcommand?: string;
+      subcommandGroup?: string;
+      guildId?: string;
+    },
+  ): Promise<string> {
+    this.debug(`Getting command link for ${name}`);
+
+    const {
+      subcommandGroup,
+      subcommand,
+      guildId = client.syncOptions?.guildId,
+    } = options ?? {};
+    const apiCommands = await this.REST.fetchApiCommands(guildId ?? null);
+    const apiCommand = apiCommands.find((c) => c.name === name);
+
+    if (!apiCommand) {
+      return `**\`/${name}${
+        subcommandGroup && subcommand
+          ? ` ${subcommandGroup} ${subcommand}`
+          : subcommandGroup
+            ? ` ${subcommandGroup}`
+            : subcommand
+              ? ` ${subcommand}`
+              : ''
+      }\`**`;
+    }
+
+    return `</${name}${
+      subcommandGroup && subcommand
+        ? ` ${subcommandGroup} ${subcommand}`
+        : subcommandGroup
+          ? ` ${subcommandGroup}`
+          : subcommand
+            ? ` ${subcommand}`
+            : ''
+    }:${apiCommand.id}>`;
   }
 
   /**
@@ -375,4 +415,7 @@ class ClientManager {
   }
 }
 
-export { ClientManager };
+type AnyComponent = AnyCommand | ClientJob | ClientEventListener;
+type ComponentRegistry = AnyComponent[];
+
+export { ClientManager, type AnyComponent, type ComponentRegistry };

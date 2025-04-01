@@ -2,6 +2,9 @@ import { Database } from '@core/database';
 import { debug, Debugger, Logger } from '@core/logger';
 import { ObjectUtils } from '@core/utils';
 import {
+  ApplicationCommand,
+  Collection,
+  GuildResolvable,
   REST,
   RESTPostAPIChatInputApplicationCommandsJSONBody,
   RESTPostAPIContextMenuApplicationCommandsJSONBody,
@@ -76,6 +79,16 @@ type AbstractRESTClient = {
    * @returns A promise that resolves when the commands are synced
    */
   syncCommands: (options?: SyncCommandOptions) => Promise<void>;
+  /**
+   * Fetches commands from the Discord API
+   * @param guildId The guild ID to fetch commands for, or `null` for global
+   * @returns A promise that resolves with the command data
+   */
+  fetchApiCommands: (
+    guildId: string | null,
+  ) => Promise<
+    Collection<string, ApplicationCommand<{ guild: GuildResolvable }>>
+  >;
 };
 
 const noOpMessage =
@@ -98,6 +111,12 @@ class NoOpRESTClient implements AbstractRESTClient {
   }
 
   public async syncCommands(): Promise<void> {
+    throw this.error;
+  }
+
+  public async fetchApiCommands(): Promise<
+    Collection<string, ApplicationCommand<{ guild: GuildResolvable }>>
+  > {
     throw this.error;
   }
 }
@@ -340,17 +359,16 @@ class RESTClient implements AbstractRESTClient {
     if (guildId) {
       if (!(await this.client.guilds.fetch(guildId).catch(() => null))) {
         Logger.warn(`Guild ${guildId} not found, skipping command fetch`);
-        return [];
+        return new Collection<
+          string,
+          ApplicationCommand<{ guild: GuildResolvable }>
+        >();
       }
-
-      return this.REST.get(
-        Routes.applicationGuildCommands(this.client.application.id, guildId),
-      );
     }
 
-    return this.REST.get(
-      Routes.applicationCommands(this.client.application.id),
-    );
+    return this.client.application.commands.fetch({
+      guildId: guildId ?? undefined,
+    });
   }
 
   public async syncCommands(options?: SyncCommandOptions): Promise<void> {

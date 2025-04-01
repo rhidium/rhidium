@@ -1,5 +1,6 @@
 import { PermLevel } from '@core/commands/permissions';
 import {
+  ChatInputCommandInteraction,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   InteractionContextType,
   PermissionResolvable,
@@ -76,7 +77,7 @@ type CommandEnabledOptions<GuildOnly extends boolean> = {
        *
        * **Default:**
        * - If `process.env.NODE_ENV` is `production`, this defaults to `undefined`.
-       * - If `process.env.NODE_ENV` is not `production`, this defaults to `['process.env.DEVELOPMENT_GUILD_ID']`.
+       * - If `process.env.NODE_ENV` is not `production`, this defaults to `[appConfig.client.development_server_id]`.
        */
       guilds: string[];
     }
@@ -91,7 +92,7 @@ type CommandEnabledOptions<GuildOnly extends boolean> = {
        *
        * **Default:**
        * - If `process.env.NODE_ENV` is `production`, this defaults to `true`.
-       * - If `process.env.NODE_ENV` is not `production`, this defaults to `['process.env.DEVELOPMENT_GUILD_ID']`.
+       * - If `process.env.NODE_ENV` is not `production`, this defaults to `[appConfig.client.development_server_id]`.
        */
       guilds: boolean | string[];
       /**
@@ -169,18 +170,45 @@ type CommandControllerOptions<
   >;
 };
 
+type AutoCompleteResolver<
+  GuildOnly extends boolean,
+  RefuseUncached extends boolean,
+  ResolveType extends NonNullable<unknown> | null = null,
+> = (
+  interaction: ChatInputCommandInteraction<
+    CacheTypeResolver<GuildOnly, RefuseUncached>
+  >,
+  options?: {
+    optionName?: string;
+    optionRequired?: boolean;
+  },
+) => ResolveType;
+
+type AutoCompleteCommandOptions<
+  Type extends CommandType,
+  GuildOnly extends boolean,
+  RefuseUncached extends boolean,
+  ResolveType extends NonNullable<unknown> | null = null,
+> = Type extends CommandType.AutoComplete
+  ? {
+      resolver: AutoCompleteResolver<GuildOnly, RefuseUncached, ResolveType>;
+    }
+  : {};
+
 type CommandOptions<
-  Type extends CommandType = CommandType,
-  GuildOnly extends boolean = false,
-  RefuseUncached extends boolean = false,
-  ReturnType = void,
+  Type extends CommandType,
+  GuildOnly extends boolean,
+  RefuseUncached extends boolean,
+  ReturnType,
+  ResolveType extends NonNullable<unknown> | null = null,
 > = PartialCommandOptions<GuildOnly, RefuseUncached> &
   (
     | (CommandRunOptions<Type, GuildOnly, RefuseUncached, ReturnType> &
         LocalRequiredCommandOptionsBase<Type>)
     | (CommandControllerOptions<Type, GuildOnly, RefuseUncached, ReturnType> &
         LocalRequiredCommandOptionsBase<Type>)
-  );
+  ) &
+  AutoCompleteCommandOptions<Type, GuildOnly, RefuseUncached, ResolveType>;
 
 export {
   type CommandInteractionOptions,
@@ -189,5 +217,7 @@ export {
   type PartialCommandOptions,
   type CommandRunOptions,
   type CommandControllerOptions,
+  type AutoCompleteResolver,
+  type AutoCompleteCommandOptions,
   type CommandOptions,
 };

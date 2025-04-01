@@ -12,12 +12,13 @@ type ClientOptions = {
   Lang: i18n;
 };
 
-class Client<Ready extends boolean = false>
+class Client<Ready extends boolean = boolean>
   extends DiscordClient<Ready>
   implements ClientOptions
 {
   public readonly manager: ClientManager;
   public readonly Lang: i18n;
+  public syncOptions: SyncCommandOptions | undefined;
 
   constructor(options: DiscordClientOptions & ClientOptions) {
     super(options);
@@ -30,6 +31,7 @@ class Client<Ready extends boolean = false>
     syncOptions?: SyncCommandOptions,
   ): Promise<string> => {
     const promise = super.login(token);
+    this.syncOptions = syncOptions;
 
     super.once(Events.ClientReady, () => {
       void this.manager

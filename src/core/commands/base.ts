@@ -36,6 +36,7 @@ import {
 } from 'discord.js';
 import commandDefaults from './defaults';
 import type {
+  AutoCompleteResolver,
   CommandEnabledOptions,
   CommandInteractionOptions,
   CommandOptions,
@@ -71,6 +72,7 @@ class CommandBase<
   GuildOnly extends boolean,
   RefuseUncached extends boolean,
   ReturnType,
+  ResolveType extends NonNullable<unknown> | null = null,
 > {
   public readonly id: string;
   public readonly idWithoutPrefix: string;
@@ -108,7 +110,8 @@ class CommandBase<
       Type,
       GuildOnly,
       RefuseUncached,
-      ReturnType
+      ReturnType,
+      ResolveType
     >,
   ) {
     const data = CommandBase.dataResolver(options.type, options.data);
@@ -134,13 +137,19 @@ class CommandBase<
     this.idWithoutPrefix = this.id.split('/').slice(1).join('/');
     this.data = data;
     this.category = options?.category ?? null;
-
     this.run =
       'run' in options && typeof options.run !== 'undefined'
         ? options.run.bind(this)
         : null;
 
     this.debug = debug.commands[this.type].extend(this.idWithoutPrefix);
+    this.resolver = (
+      this.type === CommandType.AutoComplete && 'resolver' in options
+        ? options.resolver
+        : null
+    ) as Type extends CommandType.AutoComplete
+      ? AutoCompleteResolver<GuildOnly, RefuseUncached, ResolveType>
+      : null;
 
     this.permissions = Object.assign(
       {},
@@ -189,6 +198,10 @@ class CommandBase<
     // Assign controllers to the class instance
     this.controllers = parseControllers();
   }
+
+  public readonly resolver: Type extends CommandType.AutoComplete
+    ? AutoCompleteResolver<GuildOnly, RefuseUncached, ResolveType>
+    : null;
 
   protected static readonly defaults = commandDefaults;
 
@@ -348,19 +361,24 @@ class CommandBase<
     GO extends boolean = GuildOnly,
     RU extends boolean = RefuseUncached,
     RT = void,
+    ResolveType extends NonNullable<unknown> | null = null,
   >(
-    options: CommandOptions<T, GO, RU, RT>,
-  ): Command<T, GO, RU, RT> => {
-    const command = new Command<T, GO, RU, RT>({
+    options: CommandOptions<T, GO, RU, RT, ResolveType>,
+  ): Command<T, GO, RU, RT, ResolveType> => {
+    const command = new Command<T, GO, RU, RT, ResolveType>({
       ...{
-        ...this.options,
+        category: options.category,
+        enabled: options.enabled,
+        interactions: options.interactions,
+        permissions: options.permissions,
+        throttle: options.throttle,
         data: undefined,
         type: undefined,
         controllers: undefined,
         run: undefined,
       },
       ...options,
-    } as CommandOptions<T, GO, RU, RT>);
+    } as CommandOptions<T, GO, RU, RT, ResolveType>);
 
     this.children.push(command as AnyCommand);
 
@@ -372,9 +390,10 @@ class CommandBase<
     GO extends boolean = GuildOnly,
     RU extends boolean = RefuseUncached,
     RT = void,
+    ResolveType extends NonNullable<unknown> | null = null,
   >(
-    command: Command<T, GO, RU, RT>,
-  ): Command<T, GO, RU, RT> => {
+    command: Command<T, GO, RU, RT, ResolveType>,
+  ): Command<T, GO, RU, RT, ResolveType> => {
     const filterInheritable = ([, value]: [string, unknown]) => {
       if (typeof value === 'undefined') {
         return false;
@@ -410,7 +429,7 @@ class CommandBase<
         enabled: inheritProp('enabled'),
         interactions: inheritProp('interactions'),
         throttle: inheritProp('throttle'),
-      } as unknown as CommandOptions<T, GO, RU, RT>) as AnyCommand,
+      } as unknown as CommandOptions<T, GO, RU, RT, ResolveType>) as AnyCommand,
     );
 
     return command;
@@ -1033,14 +1052,26 @@ class Command<
   GuildOnly extends boolean = boolean,
   RefuseUncached extends boolean = boolean,
   ReturnType = void,
-> extends CommandBase<Type, GuildOnly, RefuseUncached, ReturnType> {
+  ResolveType extends NonNullable<unknown> | null = null,
+> extends CommandBase<
+  Type,
+  GuildOnly,
+  RefuseUncached,
+  ReturnType,
+  ResolveType
+> {
   public constructor(
-    options: CommandOptions<Type, GuildOnly, RefuseUncached, ReturnType>,
+    options: CommandOptions<
+      Type,
+      GuildOnly,
+      RefuseUncached,
+      ReturnType,
+      ResolveType
+    >,
   ) {
     super(options);
   }
 }
-
 type AnyTypedCommand = {
   [Type in CommandType]: Command<Type, boolean, boolean, unknown>;
 };

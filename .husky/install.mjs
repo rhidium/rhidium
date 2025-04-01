@@ -6,5 +6,6 @@ if (
   process.exit(0);
 }
 
+const logger = console;
 const husky = (await import('husky')).default;
-console.info(husky());
+logger.info(husky());

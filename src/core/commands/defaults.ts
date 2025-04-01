@@ -5,6 +5,7 @@ import type {
   CommandInteractionOptions,
   CommandPermissionOptions,
 } from './options';
+import { appConfig } from '@core/config';
 
 const permissions: CommandPermissionOptions = {
   level: PermLevel.User,
@@ -38,9 +39,10 @@ const enabled: CommandEnabledOptions<false> = {
   nsfw: false,
   guildOnly: false,
   guilds:
-    process.env.NODE_ENV === 'production'
+    process.env.NODE_ENV === 'production' ||
+    !appConfig.client.development_server_id
       ? []
-      : ['process.env.DEVELOPMENT_GUILD_ID'],
+      : [appConfig.client.development_server_id],
   dm: false,
   privateChannel: false,
 } as const;
