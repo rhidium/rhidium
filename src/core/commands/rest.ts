@@ -453,7 +453,7 @@ class RESTClient implements AbstractRESTClient {
         this.REST.put(
           Routes.applicationGuildCommands(this.client.application.id, guildId),
           {
-            body: putCommandData,
+            body: this.data, // PUT requests "overwrite" the commands, so we need to send all of them
           },
         ),
         deleteCommandData.length > 0
@@ -474,7 +474,7 @@ class RESTClient implements AbstractRESTClient {
       await Promise.all([
         this.syncCommandsToDatabase(null, putCommandData, synced),
         this.REST.put(Routes.applicationCommands(this.client.application.id), {
-          body: putCommandData,
+          body: this.data,
         }),
         deleteCommandData.length > 0
           ? this.REST.delete(
