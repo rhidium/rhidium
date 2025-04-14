@@ -1,4 +1,5 @@
 import fs from 'fs';
+import path from 'path';
 import i18n, { TOptions } from 'i18next';
 import { Guild, Interaction, Locale } from 'discord.js';
 import { UnitConstants } from '@core/constants';
@@ -12,34 +13,31 @@ import nlCommon from '../../../locales/nl/common.json';
 import nlCore from '../../../locales/nl/core.json';
 
 const getFiles = (
-  path: string,
+  dir: string,
   extensions: string[],
   recursive = false,
 ): string[] => {
   const files = fs
-    .readdirSync(path)
+    .readdirSync(dir)
     .filter((file: string) => extensions.some((ext) => file.endsWith(ext)));
 
   if (recursive) {
     const subdirs = fs
-      .readdirSync(path)
-      .filter((file: string) => fs.statSync(`${path}/${file}`).isDirectory());
+      .readdirSync(dir)
+      .filter((file: string) => fs.statSync(`${dir}/${file}`).isDirectory());
     for (const subdir of subdirs) {
-      const subdirFiles = getFiles(`${path}/${subdir}`, extensions, true);
+      const subdirFiles = getFiles(`${dir}/${subdir}`, extensions, true);
       files.push(...subdirFiles);
     }
   }
 
-  return files.map((file: string) => `${path}/${file}`);
+  return files.map((file: string) => `${dir}/${file}`);
 };
 
-const localizedCommands = getFiles('./locales/en-US/commands', ['.json']).map(
-  (file) =>
-    [
-      file.replace('.json', '').replace('./locales/en-US/commands/', ''),
-      '../../../' + file,
-    ] as const,
-);
+const localizedCommands = getFiles(
+  path.resolve(__dirname, '../../../locales/en-US/commands'),
+  ['.json'],
+).map((file) => [path.basename(file, '.json'), path.resolve(file)] as const);
 
 export enum Locales {
   EnglishUS = Locale.EnglishUS,

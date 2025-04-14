@@ -8,9 +8,9 @@ COPY .husky/ .husky/
 COPY prisma/ prisma/
 COPY package.json pnpm-lock.yaml /app/
 RUN corepack prepare pnpm@9.15.4 --activate \
-  && corepack enable
-RUN apt-get update -y \
-  && apt-get install -y openssl # OpenSSL is required for Prisma to work
+  && corepack enable \
+  && apt-get update -y \
+  && apt-get install -y openssl
 
 
 FROM base AS prod-deps
