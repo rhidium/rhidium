@@ -137,7 +137,10 @@ class I18n {
 
   public static readonly timeKey = (ms: number) => {
     const [amount, unit] = I18n.msToTime(ms);
-    return `common:time.${amount === 1 ? 'singular' : 'plural'}.${unit}` as const;
+    return [
+      amount,
+      `common:time.${amount === 1 ? 'singular' : 'plural'}.${unit}`,
+    ] as const;
   };
 
   public static readonly genericErrorDecline = (interaction: Interaction) => {

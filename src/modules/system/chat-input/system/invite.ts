@@ -24,7 +24,7 @@ const InviteCommand = new Command({
       interaction,
       Embeds.primary({
         description: I18n.localize('commands:invite.prompt', interaction, {
-          link: client.manager.generateInvite(
+          url: client.manager.generateInvite(
             client,
             commandDeploymentEnvironment,
           ),

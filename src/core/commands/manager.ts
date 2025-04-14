@@ -391,6 +391,9 @@ class ClientManager {
           Logger.error(
             `Command ${command.id} is being throttled, refusing interaction`,
           );
+          const [count, translationKey] = I18n.timeKey(
+            consumerResult.expiresAt - Date.now(),
+          );
           await tryErrorReply({
             title: I18n.localize('common:errors.rateLimit.title', interaction),
             description: I18n.localize(
@@ -398,10 +401,7 @@ class ClientManager {
               interaction,
               {
                 time: bold(
-                  I18n.localize(
-                    I18n.timeKey(consumerResult.expiresAt - Date.now()),
-                    interaction,
-                  ),
+                  I18n.localize(translationKey, interaction, { count }),
                 ),
               },
             ),
