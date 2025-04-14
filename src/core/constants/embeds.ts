@@ -1,5 +1,5 @@
 /**
- * @link https://discord.com/developers/docs/resources/message#embed-object-embed-limits
+ * @see https://discord.com/developers/docs/resources/message#embed-object-embed-limits
  */
 export class EmbedConstants {
   /**

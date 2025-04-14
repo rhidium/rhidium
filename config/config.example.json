@@ -2,18 +2,7 @@
   "client": {
     "id": "Replace with your bot ID from https://discord.dev/application",
     "token": "Replace with your bot token from https://discord.dev/application",
-    "development_server_id": "Replace with the ID of your development server or primary server/guild",
-    "presence": {
-      "active": true,
-      "status": "online",
-      "activities": [
-        {
-          "name": "Exploring Rhidium",
-          "type": "CUSTOM",
-          "url": "https://rhidium.xyz"
-        }
-      ]
-    }
+    "development_server_id": "Replace with the ID of your development server or primary server/guild"
   },
   "permissions": {
     "owner_id": "Replace with the Discord user ID of the bot owner",

@@ -96,7 +96,7 @@ class NumberUtils {
   static readonly calculateStandardDeviation = calculateStandardDeviation;
   /**
    * A replacer function to handle bigints when stringifying JSON.
-   * @param key The key of the value
+   * @param _ The key of the value
    * @param value The value to stringify
    * @returns The stringified value
    */

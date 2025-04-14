@@ -7,5 +7,6 @@ export * from './manager';
 export * from './options';
 export * from './permissions';
 export * from './required-resources';
+export * from './rest';
 export * from './throttle';
 export * from './types';

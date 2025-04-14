@@ -1,7 +1,5 @@
 {
-  "typescript.preferences.autoImportFileExcludePatterns": [
-    "**/*.namespaces.ts"
-  ],
+  "typescript.preferences.autoImportFileExcludePatterns": ["**/*.namespace.ts"],
   "typescript.format.enable": true,
   "typescript.referencesCodeLens.enabled": true,
   "typescript.implementationsCodeLens.enabled": true,

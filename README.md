@@ -17,19 +17,13 @@
 
 Rhidium is built out of love for Discord bot development, and has 1 primary goal: to make your life easier. Whether you're just getting started or a seasoned developer, Rhidium is designed to simplify your workflow and help you create bots you can be proud of.
 
-<a href="/.github/documentation/installation.md">
-  <button>
-    🛠️ Installation
-  </button>
-</a>
-
 ## 🤝 About
 
 Rhidium is **not** a lightweight framework. It is built on top of the [discord.js](https://discord.js.org/#/) library, and aims to provide most of the core functionality required to bootstrap a powerful, modern Discord bot. Written in TypeScript, it provides the benefits of static type-checking and code completion in modern editors.
 
 > With Rhidium, you can focus on what's really important: **Creating meaningful features**
 
-Excited to begin? [Get started](/.github/documentation/installation.md) or try [the demo](#-support)!
+Excited to begin? [Get started](#-installation) or try [the demo](#-support)!
 
 ## 🤩 Features (non-exhaustive)
 
@@ -51,6 +45,76 @@ Available adapters: `cockroachdb`, `mongodb`, `postgresql`
 
 > **Note**: When using CockroachDB, the `autoincrement()` default function is defined only on BigInt fields. Change `autoincrement()` to `sequence()` if you want an sequential Int field.
 
+## 🛠️ Installation
+
+<details>
+
+<summary>Collapse/Expand</summary>
+
+Please note, a [Discord Application](https://wiki.mirasaki.dev/docs/discord-create-application#go-to-discord-developer-portal) is required for both installation methods.
+
+### 📦 Run as a Docker container (preferred)
+
+The quickest, and easiest, way to host/use this bot template is by deploying it inside of a [Docker](https://www.docker.com/) container. We recommend [Docker Desktop](https://www.docker.com/products/docker-desktop/).
+
+1. Download the [latest release](https://github.com/rhidium/rhidium/releases`) or `git clone git@github.com:rhidium/rhidium.git` the repo
+2. Run `pnpm setup:linux` or `pnpm setup:windows` (depending on your OS) in the project root folder
+3. Edit the newly created `.env` and `/config/config.json` files and provide your configuration
+4. Start the application: `docker compose up`
+
+### 🖥️ Run as a plain NodeJS app
+
+1. Install the additional pre-requisites:
+   - [Node.js](https://nodejs.org/en/) v16.6.0 or newer
+   - [PostgreSQL](https://www.postgresql.org/) v13 or newer
+2. Download the [latest release](https://github.com/rhidium/rhidium/releases`) or `git clone git@github.com:rhidium/rhidium.git` the repo
+3. Run `pnpm setup:linux` or `pnpm setup:windows` in the project root folder
+4. Edit the newly created `.env` and `/config/config.json` files and provide your configuration
+5. Start the application: `pnpm start` for production, and `pnpm dev` for local development
+
+## ⚙️ Configuration
+
+The configuration for this project can be found [here](/config/config.example.json), and should be very straight-forward.
+
+```json
+{
+  "client": {
+    "id": "", // Client id from https://discord.dev/application
+    "token": "", // Client/bot token from https://discord.dev/application
+    "development_server_id": "" // Only needed for developers/development environments
+  },
+  "permissions": {
+    "owner_id": "1148597817498140774", // The discord user id of the bot owner
+    "system_administrator_ids": [], // List of discord user ids for system administrators
+    "developer_ids": [] // List of discord user ids for developers
+  }
+}
+```
+
+> Additionally, feel free to explore the [personalization options](/config/extended-config.example.json).
+
+### dotenv
+
+The `.env` file holds your secrets and other environmental values. Let's explain the different keys here:
+
+```bash
+NODE_ENV=production # The node environment your bot is running in. Available values: production, development
+
+# ---------------------------------- Database ---------------------------------- #
+POSTGRES_HOST=localhost # Change to "database" if using docker (compose)
+POSTGRES_PORT=5432 # The port your PostgreSQL server is running on. Default is 5432.
+POSTGRES_USER=postgres # The username for your PostgreSQL server. Default is "postgres".
+POSTGRES_PASSWORD=CHANGE_ME # The password for your PostgreSQL server.
+POSTGRES_DB=rhidium # The name of the database to connect to. Default is "rhidium".
+
+# The database URL for connecting to the (PostgreSQL) database. You generally don't
+# need to change this, but you can if you want to use a different database or schema.
+DATABASE_URL="postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}?schema=public"
+
+```
+
+</details>
+
 ## 📚 Documentation
 
 We provide multiple resources to help get you started on your project quickly:
@@ -71,10 +135,11 @@ Join our [support server](https://discord.gg/mirasaki) if you have any questions
 
 - [ ] Localization for `prompts/interactions`
 - [ ] Add documentation for `COMPONENT_HANDLER_IDENTIFIER`
-- [ ] Refactor (now-required) `(as unknown) as Command/AnyCommandApiCommand`
+- [ ] Refactor (now-required) `(as unknown) as (Any)(Typed/API)Command`
 - [ ] Apply `data#setDefaultMemberPermissions` to relevant commands
 - [ ] Implement (+ refactor) `embeds` and `placeholders` from previous version
 - [ ] Implement (global) reusable command middleware, refactor from previous version
+- [ ] Resolve or otherwise review Typedoc warnings
 
 ### Low Priority
 

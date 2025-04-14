@@ -37,7 +37,7 @@ class ConfirmationInput {
 
   /**
    * Get the confirmation button row for prompts
-   * @param client The client instance
+   * @param interaction The interaction to use for localization
    * @returns The confirmation button row
    */
   static readonly buttonRow = (interaction: Interaction) =>

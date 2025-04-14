@@ -169,9 +169,7 @@ class StringUtils {
   /**
    * Truncate an array of items into a string
    * @param arr The array to truncate
-   * @param length The maximum number of items to include
-   * @param stringify The function to convert each item to a string
-   * @param joinString The string to join the items with
+   * @param options The options to use
    * @returns The truncated string
    */
   static readonly stringifyArray = stringifyArray;

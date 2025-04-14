@@ -172,6 +172,7 @@ const embeds = new Embeds({
 });
 
 export {
+  Embeds as _Embeds,
   embeds as Embeds,
   type EmbedType,
   type EmbedTimestampStyle,
