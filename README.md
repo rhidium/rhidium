@@ -3,20 +3,19 @@
 
 ![Font_PNG](https://github.com/rhidium/core/assets/57721238/9ccc5763-8336-4d1e-8187-a738bafdc519)
 
+[![semantic-release: angular](https://img.shields.io/badge/semantic--release-angular-e10079?logo=semantic-release)](https://github.com/semantic-release/semantic-release)
+![GitHub Release](https://img.shields.io/github/v/release/rhidium/rhidium)
+![GitHub License](https://img.shields.io/github/license/rhidium/rhidium)
+
   <p>
     <a href="https://discord.gg/mirasaki"><img src="https://img.shields.io/discord/793894728847720468?color=5865F2&logo=discord&logoColor=white" alt="Discord server" /></a>
-    <a href="https://www.npmjs.com/package/@rhidium/core"><img src="https://img.shields.io/npm/v/@rhidium/core.svg?maxAge=3600" alt="npm version" /></a>
-    <a href="https://www.npmjs.com/package/@rhidium/core"><img src="https://img.shields.io/npm/dt/@rhidium/core.svg?maxAge=3600" alt="npm downloads" /></a>
   </p>
-
-[![semantic-release: angular](https://img.shields.io/badge/semantic--release-angular-e10079?logo=semantic-release)](https://github.com/semantic-release/semantic-release)
-![GitHub License](https://img.shields.io/github/license/rhidium/rhidium)
 
 </div>
 
 # 👋 Introduction
 
-Rhidium is built out of love for Discord bot development, and has 1 primary goal: to make your life easier. Whether you're just getting started, or you're a seasoned developer, Rhidium is designed to simplify your workflow and help you create bots you can be proud of.
+Rhidium is built out of love for Discord bot development, and has 1 primary goal: to make your life easier. Whether you're just getting started or a seasoned developer, Rhidium is designed to simplify your workflow and help you create bots you can be proud of.
 
 <a href="/.github/documentation/installation.md">
   <button>
