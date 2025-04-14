@@ -261,7 +261,7 @@ class ClientManager {
     );
   }
 
-  public readonly generateInvite = async (
+  public readonly generateInvite = (
     client: Client<true>,
     guildId?: string | null,
   ) => {
