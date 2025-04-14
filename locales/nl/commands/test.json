@@ -1,0 +1,39 @@
+{
+  "name": "test",
+  "description": "Testcommando voor ontwikkelingsdoeleinden",
+  "options": {
+    "subcommand-group": {
+      "name": "subcommand-groep",
+      "description": "Test subcommando-groep",
+      "options": {
+        "subcommand": {
+          "name": "subcommando",
+          "description": "Test subcommando",
+          "options": {
+            "test-autocomplete": {
+              "name": "test-autocompleet",
+              "description": "Test autocompleet-optie"
+            }
+          }
+        }
+      }
+    },
+    "direct-subcommand": {
+      "name": "direct-subcommando",
+      "description": "Direct subcommando",
+      "options": {
+        "test-choices": {
+          "name": "test-keuzes",
+          "description": "Test keuzes in een string-optie",
+          "choices": {
+            "test_select_1": "Testkeuze 1",
+            "test_select_2": "Testkeuze 2",
+            "test_select_3": "Testkeuze 3",
+            "test_select_4": "Testkeuze 4",
+            "test_select_5": "Testkeuze 5"
+          }
+        }
+      }
+    }
+  }
+}

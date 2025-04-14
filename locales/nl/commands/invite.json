@@ -1,0 +1,5 @@
+{
+  "name": "invite",
+  "description": "Krijg een link om de bot aan je server toe te voegen.",
+  "prompt": "Je kunt me aan je server toevoegen door [hier]({{url}}) te klikken."
+}

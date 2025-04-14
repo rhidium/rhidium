@@ -1,0 +1,67 @@
+services:
+  client:
+    container_name: rhidium-client
+    build:
+      context: ./
+      dockerfile: ./Dockerfile
+      args:
+        - CI=true
+    restart: unless-stopped
+    depends_on:
+      - database
+    env_file: ./.env
+    environment:
+      CI: true
+      NODE_ENV: production
+    volumes:
+      - ./logs:/app/logs:rw
+      - ./docs:/app/docs:rw
+      - ./config:/app/config:r
+      - ./prisma:/app/prisma:r # Prisma is included as a volume to allow for database migrations without having to rebuild the client container.
+      - ./locales:/app/locales:r # Locales are included as a volume because not all json files are directly imported in the project/source.
+    ports:
+      - 9000:9000
+    networks:
+      - app-network
+
+  database:
+    container_name: rhidium-database
+    image: postgres:15
+    restart: always
+    shm_size: 128mb
+    command: postgres -c listen_addresses='*'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}']
+      interval: 5s
+      timeout: 2s
+      retries: 20
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    networks:
+      - app-network
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    logging:
+      options:
+        max-size: '10m'
+        max-file: '3'
+
+  # Web interface for database management
+  # adminer:
+  # container_name: rhidium-adminer
+  # image: adminer
+  # restart: always
+  # ports:
+  # - 8080:8080
+
+networks:
+  app-network:
+    name: rhidium-network
+    driver: bridge
+
+volumes:
+  pg-data:
+    name: rhidium-pg-data
+    driver: local

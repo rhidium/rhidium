@@ -1,0 +1,309 @@
+generator client {
+  provider = "prisma-client-js"
+  // Note: You will need to declare a binary target for the Prisma Client when you
+  // deploy to Docker, Vercel, AWS Lambda, Google Cloud Functions, Azure Functions, etc.
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// 
+// Start of Enums
+// 
+
+enum Severity {
+  LOW // Low severity warning, by default counts as 1 warning.
+  MEDIUM // Medium severity warning, by default counts as 2 warnings.
+  HIGH // High severity warning, by default counts as 3 warnings.
+}
+
+enum ModerationAction {
+  KICK // Kicks the member from the guild, they will have to manually rejoin the server.
+  BAN_DURATION // Bans the member from the guild until the actionDurationMs has passed.
+  BAN_PERMANENT // Permanently bans the member from the guild/server.
+  MUTE_DURATION // Mutes the member until the actionDurationMs has passed.
+  MUTE_PERMANENT // Permanently mutes the member on the guild/server.
+}
+
+enum RiskLevel {
+  NONE // No risk level, the user has never been moderated.
+  LOW // Low risk level, the user has been moderated at least once.
+  MEDIUM // Medium risk level, the user has been moderated multiple times.
+  HIGH // High risk level, the user has been moderated frequently.
+  SEVERE // Severe risk level, the user has been moderated frequently, across multiple guilds.
+}
+
+// 
+// Start of base models
+// 
+
+model User {
+  id      String   @id @unique                                    // The Discord id of the user
+  timezone String?                                                // The timezone of the user, used for time-based commands and input
+  risk    RiskLevel @default(NONE)                                // The risk level of the user, based on their moderation history
+  riskOriginGuildIds String[]                                     // The guilds where the user has been moderated, contributing to their risk level
+  Members Member[]                                                // A user can be a member of multiple guilds
+  AuditLogs AuditLog[]                                            // A member can perform actions on/across multiple guilds
+  Reminders Reminder[]                                            // A user can have multiple reminders
+}
+
+model Member {
+  id     String   @unique @default(uuid(7))                       // The internal id of the member
+
+  UserId String                                                   // The id of the Discord user
+  User    User @relation(fields: [UserId], references: [id])      // The Discord user for the guild member
+  GuildId String                                                  // The id of the guild this member belongs to
+  Guild   Guild @relation(fields: [GuildId], references: [id])    // A member belongs to a single guild
+
+  ReceivedWarnings Warning[] @relation("ReceivedWarnings")        // A member can receive multiple warnings
+  IssuedWarnings Warning[] @relation("IssuedWarnings")            // A member can issue multiple warnings\
+  RemovedWarnings Warning[] @relation("RemovedWarnings")          // A member can remove multiple warnings
+
+  @@id(name: "GuildId_UserId", fields: [UserId, GuildId])         // Define a composite primary key
+}
+
+model Guild {
+  id      String   @id @unique                                    // The Discord id of the guild (server)
+  Members Member[]                                                // A guild can have multiple members
+  AuditLogs AuditLog[]                                            // A guild can have multiple audit logs
+  Commands Command[]                                              // A guild can have multiple commands
+
+  CaseCounterId Int @unique                                       // A guild has a case counter for moderation records
+  CaseCounter GuildCaseCounter @relation(fields: [CaseCounterId], references: [id])
+
+  // Permissions and audit
+  adminRoleIds      String[]                                      // Ids of roles that can perform administrative actions
+  adminUserIds      String[]                                      // Ids of users that can perform administrative actions
+  auditLogChannelId String?                                       // The id of the channel where audit logs are sent
+  disabledCommands  String[]                                      // List of command names that are disabled in the guild
+  modRoleIds         String[]                                     // Ids of roles that can perform moderation actions
+  modLogChannelId   String?                                       // The id of the channel where moderation actions are logged
+  modsCanModerateMods Boolean @default(false)                     // Whether moderators can moderate other moderators
+
+  // Moderation
+  SeverityConfiguration SeverityConfiguration?                    // Custom severity configuration for the guild
+  AutoModerationActions AutoModerationAction[]                    // The actions to take when a member reaches a certain number of warnings
+
+  // Utility
+  autoRoleIds       String[]                                      // List of role ids that are automatically assigned to new members
+  memberJoinChannelId String?                                     // The id of the channel to send member join messages to
+  memberLeaveChannelId String?                                    // The id of the channel to send member leave messages to
+
+  // Allow guilds to customize embeds
+  MemberJoinEmbed     Embed? @relation("MemberJoinEmbed", fields: [MemberJoinEmbedId], references: [id])
+  MemberJoinEmbedId   Int?
+  MemberLeaveEmbed     Embed? @relation("MemberLeaveEmbed", fields: [MemberLeaveEmbedId], references: [id])
+  MemberLeaveEmbedId   Int?
+}
+
+// 
+// Start of moderation models
+// 
+
+model GuildCaseCounter {
+  id      Int   @id @default(autoincrement())                     // The unique (internal) id of the case counter
+  caseNumber  Int                                                 // Incremented for each moderation record in the guild/server
+
+  GuildId String @unique                                          // The guild this case counter belongs to
+  Guild   Guild?
+
+  @@index([GuildId], name: "GuildInd")                            // Create an index for quering case counters by guild
+}
+
+model SeverityConfiguration {
+  GuildId String @id @unique                                      // The guild this configuration belongs to         
+  Guild  Guild @relation(fields: [GuildId], references: [id])
+  LOW Int @default(1)                                             // This model allows the guild to customize the severity of warnings,
+  MEDIUM Int @default(2)                                          // which determines how many warnings/strikes/points a warning counts as.
+  HIGH Int @default(3)                                            // All possible enum values should be present/defined here.
+}
+
+model Warning {
+  id      Int   @id @default(autoincrement())                     // The unique (internal) id of the warning
+
+  caseNumber Int                                                  // The case number of the warning, incremented for each moderation record in the guild
+  @@unique([MemberGuildId, caseNumber], name: "MemberGuildCase")  // Require that the case number is unique per guild
+
+  severity Severity                                               // Determines how many warnings this warning counts as
+  message String                                                  // The message/reason that was sent with the warning
+  date    DateTime                                                // The date the warning was issued
+  validUntil DateTime?                                            // The date the warning is valid until. If null, the warning is valid indefinitely
+  removedAt DateTime?                                             // The date the warning was removed (if any)
+
+  MemberUserId  String                                            // The member that the warning is for / was issued to
+  MemberGuildId String                                            // The guild the member is in
+  Member    Member @relation("ReceivedWarnings", fields: [MemberUserId, MemberGuildId], references: [UserId, GuildId])
+
+  IssuedByUserId String                                           // The member that issued the warning
+  IssuedByGuildId String                                          // The guild the issuer is in
+  IssuedBy   Member @relation("IssuedWarnings", fields: [IssuedByUserId, IssuedByGuildId], references: [UserId, GuildId])
+
+  RemovedByUserId String?                                         // The member that removed the warning
+  RemovedByGuildId String?                                        // The guild the remover is in
+  RemovedBy   Member? @relation("RemovedWarnings", fields: [RemovedByUserId, RemovedByGuildId], references: [UserId, GuildId])
+
+  TriggeredActions AutoModerationAction[]                         // The (auto-moderation) actions that were triggered by this warning
+
+  @@index([MemberUserId, MemberGuildId], name: "MemberInd")       // Create an index for quering warnings by member
+  @@index([IssuedByUserId, IssuedByGuildId], name: "IssuedByInd") // Create an index for quering warnings by issuer
+}
+
+model AutoModerationAction {
+  id      Int   @id @default(autoincrement())
+
+  action ModerationAction                                         // The action to take when the triggerThreshold is reached
+  triggerThreshold Int                                            // The triggerThreshold is the number of warnings (severity) a member can have before the action is taken
+  actionDurationMs Int?                                           // The duration of the action in milliseconds. Only used for actions ending in "_UNTIL"
+  deleteMessageSeconds Int?                                       // How long to go back when deleting messages for the action (if applicable)
+  oncePerMember Boolean                                           // Whether the action should only be taken once per member, action is triggered again each time the threshold is reached
+
+  GuildId String                                                  // The guild this action belongs to
+  Guild  Guild @relation(fields: [GuildId], references: [id])
+
+  ExecutedWarnings Warning[]                                      // The warnings this action was executed for
+
+  @@index([GuildId])
+  @@unique([GuildId, action, triggerThreshold], name: "GuildId_Action")
+}
+
+// 
+// Start of User models/relations
+// 
+
+model Reminder {
+  id  Int    @id @default(autoincrement())                        // The unique (internal) id of the reminder
+
+  UserId  String                                                  // The user that created the reminder
+  User  User @relation(fields: [UserId], references: [id])        // The user that created the reminder
+  GuildId String?                                                 // The guild the reminder was created in, if applicable
+
+  message String                                                  // The message to send in the reminder
+  channelId String?                                               // The channel to send the reminder to/in
+  shouldDM Boolean @default(false)                                // Whether the reminder should be sent as a DM to the user instead of using the channelId
+  remindAt  DateTime                                              // When the reminder should be sent
+  repeatEvery BigInt?                                             // How often the reminder should repeat (in milliseconds)
+  repeatUntil DateTime?                                           // When the reminder should stop repeating
+}
+
+
+// 
+// Start of internal/core models
+//
+
+model AuditLog {
+  id      Int     @id @default(autoincrement())
+  type    String                                                  // The type of action that was performed
+  date    DateTime                                                // The date the action was performed
+  data    Json                                                    // The data associated with the action
+  UserId String                                                   // The user that performed the action
+  User    User @relation(fields: [UserId], references: [id])
+  GuildId String?                                                 // The guild the action was performed in, if applicable
+  Guild   Guild? @relation(fields: [GuildId], references: [id])
+}
+
+model Embed {
+  id            Int          @id @default(autoincrement())
+  messageText   String?
+  color         Int?
+  authorName    String?
+  authorIconURL String?
+  authorURL     String?
+  title         String?
+  description   String?
+  url           String?
+  imageURL      String?
+  thumbnailURL  String?
+  footerText    String?
+  footerIconURL String?
+  fields        EmbedField[]
+
+  // Embeds can be user-customized through relations
+  GuildId String
+  MemberJoinEmbed  Guild[] @relation("MemberJoinEmbed")
+  MemberLeaveEmbed Guild[] @relation("MemberLeaveEmbed")
+}
+
+model EmbedField {
+  id      Int     @id @unique @default(autoincrement())
+  Embed   Embed? @relation(fields: [EmbedId], references: [id])
+  EmbedId Int?
+
+  name    String
+  value   String
+  inline  Boolean
+}
+
+model CommandUsage {
+  key              String       @id
+
+  CommandId String
+  Command Command @relation(fields: [CommandId], references: [id], onDelete: Cascade)
+
+  userId         String
+  channelId      String?
+  guildId        String?
+
+  // When the usage is safe to be transferred to the summary table, aka. no longer used
+  // for processing, like command cooldowns/throttling, etc. The record is merged
+  // into CommandUsageSummary when this date is reached, or the next mightnight UTC after
+  // `timestamp` if not set. The value should be set to  the cooldown's expiry if it applies,
+  // or ommitted if not. CommandUsage records are processed every night at 00:00 UTC.
+  expireThreshold       DateTime?
+
+  usages DateTime[] @default([])
+  consumedUsageCount Int @default(0)
+  runtime       Float
+  runtimeErrors  String[]
+
+  @@index([expireThreshold], name: "ExpireThresholdInd")
+}
+
+model CommandUsageSummary {
+  // id              Int       @id @default(autoincrement())
+
+  CommandId String
+  Command Command @relation(fields: [CommandId], references: [id], onDelete: Cascade)
+
+  date            DateTime
+  totalUsages Int @default(0)
+  uniqueUsers Int     @default(0)
+  uniqueChannels Int   @default(0)
+  uniqueGuilds   Int   @default(0)
+  uniqueErrors   String[]
+
+  runtimeTot Float? // Total
+  runtimeAvg Float? // Average
+  runtimeMin Float? // Minimum
+  runtimeMax Float? // Maximum
+  runtimeMea Float? // Mean
+  runtimeMed Float? // Median
+  runtimeVar Float? // Variance
+  runtimeStD Float? // Standard Deviation
+
+  @@id([CommandId, date], name: "CommandId_date")
+}
+
+model Command {
+  id          String  @id @unique
+  data        Json
+
+  GuildId     String?
+  Guild       Guild? @relation(fields: [GuildId], references: [id])
+
+  Usages      CommandUsage[] // Active command usage, used for processing
+  UsagesSummary CommandUsageSummary[] // Last 2 years of command usage
+
+  createdAt DateTime @default(now()) // The date the command was created
+  updatedAt DateTime @updatedAt // The date the command was last updated
+  firstUsed DateTime? // The date the command was first used
+  lastUsed DateTime? // The date the command was last used
+}
+
+model Settings {
+  @@unique([id])
+  id  String @id @default("singleton")
+  commandUsageSummaryLastProcessedAt DateTime? // The date the command usage summary was last processed
+}

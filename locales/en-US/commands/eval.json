@@ -1,0 +1,23 @@
+{
+  "name": "eval",
+  "description": "Evaluate arbitrary JavaScript code.",
+  "noEmbed": "I was unable to resolve the code from the message. Please try again.",
+  "noCode": "No code was provided to evaluate.",
+  "evaluated": {
+    "label": "Evaluated",
+    "title": "Evaluated Code",
+    "description": "The code was evaluated successfully.",
+    "input": {
+      "title": "Input",
+      "description": "The code that was evaluated."
+    },
+    "output": {
+      "title": "Output",
+      "description": "The result of the evaluation."
+    },
+    "error": {
+      "title": "Error",
+      "description": "An error occurred while evaluating the code."
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "name": "perm-level",
+  "description": "Get your permission level, or the permission level of a user.",
+  "options": {
+    "user": {
+      "name": "user",
+      "description": "The user to get the permission level of."
+    }
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "name": "ondersteuning",
+  "description": "Ontvang ondersteuning voor de bot.",
+  "noSupportServer": "Er is momenteel geen ondersteuningsserver geconfigureerd.",
+  "prompt": "Om ondersteuning te ontvangen, een functie aan te vragen, een bug te melden of een vraag te stellen, bezoek dan de [ondersteuningsserver]({{link}})."
+}

@@ -1,0 +1,23 @@
+{
+  "name": "eval",
+  "description": "Evalueer willekeurige JavaScript-code.",
+  "noEmbed": "Ik kon de code uit het bericht niet oplossen. Probeer het opnieuw.",
+  "noCode": "Er is geen code opgegeven om te evalueren.",
+  "evaluated": {
+    "label": "Geëvalueerd",
+    "title": "Geëvalueerde Code",
+    "description": "De code is succesvol geëvalueerd.",
+    "input": {
+      "title": "Invoer",
+      "description": "De code die is geëvalueerd."
+    },
+    "output": {
+      "title": "Uitvoer",
+      "description": "Het resultaat van de evaluatie."
+    },
+    "error": {
+      "title": "Fout",
+      "description": "Er is een fout opgetreden tijdens het evalueren van de code."
+    }
+  }
+}

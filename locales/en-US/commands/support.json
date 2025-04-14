@@ -1,0 +1,6 @@
+{
+  "name": "support",
+  "description": "Receive support for the bot.",
+  "noSupportServer": "No support server is currently configured.",
+  "prompt": "To receive support, request a feature, report a bug, or ask a question, please visit the [support server]({{link}})."
+}

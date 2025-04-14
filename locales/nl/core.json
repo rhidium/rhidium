@@ -1,0 +1,49 @@
+{
+  "commands": {
+    "error": "Er is iets misgegaan bij het uitvoeren van dit commando.",
+    "disabled": "Dit commando is momenteel uitgeschakeld.",
+    "guildOnly": "Dit commando kan alleen in een server worden gebruikt.",
+    "cachedGuildOnly": "Jouw servers zijn nog niet in de cache geladen. Probeer het later opnieuw.",
+    "nsfwChannelOnly": "Dit commando is alleen beschikbaar in NSFW-kanalen.",
+    "notTargerUser": "Dit commando/deze component is bedoeld voor een specifieke gebruiker, het kan niet door jou worden gebruikt."
+  },
+  "permissions": {
+    "levelTooLow": "Je machtigingsniveau is te laag om dit commando te gebruiken.",
+    "missingBotScope": "Ik ben niet in deze server, of ik ben toegevoegd zonder de `bot`-machtiging.",
+    "missingPermissions": "Je hebt niet de vereiste machtigingen om dit commando te gebruiken: {{permissions}}.",
+    "botMissingPermissions": "Ik heb niet de vereiste machtigingen om dit commando uit te voeren: {{permissions}}.",
+    "unavailable": {
+      "cachedGuild": "Ik kan momenteel de vereiste machtigingen voor deze server niet controleren. Probeer het later opnieuw.",
+      "guild": "Dat commando is niet beschikbaar in deze server.",
+      "channel": "Dat commando is niet beschikbaar in dit kanaal.",
+      "channelCategory": "Dat commando is niet beschikbaar in deze kanaalcategorie.",
+      "missingRoles": "Je hebt niet de vereiste rol(len) om dit commando te gebruiken.",
+      "unauthorized": "Je bent niet gemachtigd om dit commando te gebruiken.",
+      "disabledByServer": "Dit commando is uitgeschakeld door een beheerder en kan niet worden gebruikt."
+    },
+    "levels": {
+      "User": "Gebruiker",
+      "Moderator": "Moderator",
+      "Administrator": "Beheerder",
+      "Server Owner": "Server Eigenaar",
+      "Developer": "Ontwikkelaar",
+      "Bot Administrator": "Bot Beheerder",
+      "Bot Owner": "Bot Eigenaar"
+    }
+  },
+  "discord": {
+    "joinedServer": "Server Toegevoegd",
+    "joinedDiscord": "Discord Toegevoegd",
+    "accountCreated": "Account Aangemaakt",
+    "memberCount": "Leden Telling",
+    "messageHasNoEmbeds": "Dit bericht heeft geen embeds.",
+    "memberJoined": {
+      "title": "Nieuw Lid",
+      "description": "{{user}} is lid geworden van {{guild}}."
+    },
+    "memberLeft": {
+      "title": "Lid Verlaat",
+      "description": "{{user}} heeft {{guild}} verlaten."
+    }
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "commands": {
+    "error": "Something went wrong while executing this command.",
+    "disabled": "This command is currently disabled.",
+    "guildOnly": "This command can only be used in a server.",
+    "cachedGuildOnly": "Your servers hasn't been cached yet. Please try again later.",
+    "nsfwChannelOnly": "This command is only available in NSFW channels.",
+    "notTargetUser": "This command/component is meant for a specific user, it cannot be used by you."
+  },
+  "permissions": {
+    "yourLevel": "Your permission level is {{level}}.",
+    "theirLevel": "{{user}}'s permission level is {{level}}.",
+    "levelTooLow": "Your permission level is too low to use this command.",
+    "missingBotScope": "I am not in this server, or I have been added to the server without the `bot` scope.",
+    "missingPermissions": "You do not have the required permissions to use this command: {{permissions}}.",
+    "botMissingPermissions": "I do not have the required permissions to execute this command: {{permissions}}.",
+    "unavailable": {
+      "cachedGuild": "I am currently unable to check required permissions for this server. Please try again later.",
+      "guild": "That command is not available in this server.",
+      "channel": "That command is not available in this channel.",
+      "channelCategory": "That command is not available in this channel (category).",
+      "missingRoles": "You do not have the required role(s) to use this command.",
+      "unauthorized": "You are not authorized to use this command.",
+      "disabledByServer": "This command has been disabled by an administrator, and cannot be used."
+    },
+    "levels": {
+      "User": "User",
+      "Moderator": "Moderator",
+      "Administrator": "Administrator",
+      "Server Owner": "Server Owner",
+      "Developer": "Developer",
+      "Bot Administrator": "Bot Administrator",
+      "Bot Owner": "Bot Owner"
+    }
+  },
+  "discord": {
+    "joinedServer": "Joined Server",
+    "joinedDiscord": "Joined Discord",
+    "accountCreated": "Account Created",
+    "memberCount": "Member Count",
+    "messageHasNoEmbeds": "This message has no embeds.",
+    "memberJoined": {
+      "title": "Member Joined",
+      "description": "Member {{user}} joined {{guild}}."
+    },
+    "memberLeft": {
+      "title": "Member Left",
+      "description": "Member {{user}} left {{guild}}."
+    }
+  }
+}
