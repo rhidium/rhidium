@@ -31,7 +31,7 @@ const main = async () => {
     client.login(appConfig.client.token, {
       guildId: appConfig.client.development_server_id,
       clearOtherEnvironment: true,
-      forceSync: false,
+      forceSync: true,
     }),
   ]);
 };

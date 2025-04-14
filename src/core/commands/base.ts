@@ -482,9 +482,9 @@ class CommandBase<
           contexts.push(InteractionContextType.PrivateChannel);
         }
         if (
-          ('guilds' in command.enabled && command.enabled.guilds === true) ||
-          (Array.isArray(command.enabled.guilds) &&
-            command.enabled.guilds.length > 0)
+          'guilds' in command.enabled &&
+          (command.enabled.guilds === true ||
+            Array.isArray(command.enabled.guilds))
         ) {
           contexts.push(InteractionContextType.Guild);
         }
