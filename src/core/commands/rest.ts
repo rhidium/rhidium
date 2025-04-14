@@ -150,9 +150,7 @@ class RESTClient implements AbstractRESTClient {
     return this._instance;
   }
 
-  public async checkCommandsSynced(
-    guildId: string | null,
-  ): Promise<CommandCheckResponse> {
+  public async checkCommandsSynced(): Promise<CommandCheckResponse> {
     const commandApiIds = this.data.map((command) =>
       CommandBase.resolveId(command),
     );
@@ -162,7 +160,6 @@ class RESTClient implements AbstractRESTClient {
         id: {
           in: commandApiIds,
         },
-        GuildId: guildId,
       },
     });
 
@@ -250,7 +247,6 @@ class RESTClient implements AbstractRESTClient {
         resolvedNew.map(async (command) => {
           await Database.Command.create({
             id: CommandBase.resolveId(command),
-            GuildId: guildId,
             data: JSON.stringify(command),
           });
         }),
@@ -267,7 +263,6 @@ class RESTClient implements AbstractRESTClient {
           const original = await Database.Command.findFirst({
             where: {
               id: CommandBase.resolveId(command),
-              GuildId: guildId,
             },
           });
 
@@ -278,7 +273,6 @@ class RESTClient implements AbstractRESTClient {
           await Database.Command.update({
             where: {
               id: CommandBase.resolveId(command),
-              GuildId: guildId,
             },
             data: {
               data: JSON.stringify(command),
@@ -308,7 +302,6 @@ class RESTClient implements AbstractRESTClient {
             in: this.data.map((command) => CommandBase.resolveId(command)),
           },
         },
-        GuildId: guildId,
       },
     });
 
@@ -376,7 +369,6 @@ class RESTClient implements AbstractRESTClient {
 
   private async syncComponentsToDatabase(
     components: Collection<string, NonAPICommand>,
-    guildId?: string | null,
   ) {
     this.debug(
       'Syncing component commands to database: %o',
@@ -389,11 +381,9 @@ class RESTClient implements AbstractRESTClient {
         return await Database.Command.upsert({
           where: {
             id,
-            GuildId: guildId,
           },
           create: {
             id,
-            GuildId: guildId ?? null,
             data: false,
           },
           update: {
@@ -413,9 +403,9 @@ class RESTClient implements AbstractRESTClient {
     const { guildId, clearOtherEnvironment, forceSync } = options ?? {};
 
     const [synced, apiCommands] = await Promise.all([
-      this.checkCommandsSynced(guildId ?? null),
+      this.checkCommandsSynced(),
       this.fetchApiCommands(guildId ?? null),
-      this.syncComponentsToDatabase(components, guildId),
+      this.syncComponentsToDatabase(components),
     ]);
 
     const environmentIsDesynced = Array.isArray(apiCommands)
