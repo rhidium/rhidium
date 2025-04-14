@@ -81,6 +81,7 @@
     }
   },
   "time": {
+    "runtime": "Runtime",
     "singular": {
       "seconds": "{{count}} second",
       "minutes": "{{count}} minute",

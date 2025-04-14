@@ -59,7 +59,7 @@ const PurgeCommand = new Command({
           required: false,
         }),
       ),
-  run: async (client, interaction) => {
+  run: async ({ client, interaction }) => {
     const { options, guild: discordGuild } = interaction;
 
     const amount = options.getInteger('amount');

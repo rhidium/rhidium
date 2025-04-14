@@ -22,7 +22,7 @@ import {
 } from './prompts';
 import { CacheManager } from '@core/data-structures';
 import Client from '@core/client';
-import { GuildInteraction, Permissions } from '@core/commands';
+import { GuildInteraction, Permissions, PermLevel } from '@core/commands';
 import { EmbedConstants, UnitConstants } from '@core/constants';
 import { AuditLogType, Database, PopulatedGuild } from '@core/database';
 import {
@@ -47,7 +47,12 @@ type CommandChoices = {
   value: string;
 }[];
 
-const commandChoicesCache = new CacheManager<CommandChoices>();
+const commandChoicesCache = CacheManager.fromStore<CommandChoices>({
+  max: 1000,
+  ttl: UnitConstants.MS_IN_ONE_MINUTE * 5,
+  updateAgeOnGet: true,
+  updateAgeOnHas: true,
+});
 
 const commandChoicesFromCache = async (
   client: Client<true>,
@@ -68,31 +73,21 @@ const commandChoicesFromCache = async (
   // Note: We only include commands with Adminstrator permission level or lower,
   // If we include Guild Owner commands, the admin submission values (select menu)
   // would not include any guild owner commands, unsetting them.
-  const commandData = [
-    ...client.manager.apiCommands.filter(
-      (c) => c.enabled.global && c.permissions.level <= memberPermLevel,
-    ),
-  ];
-
+  const maxLevel = Math.min(memberPermLevel, PermLevel.Administrator);
   const data =
-    commandData
-      // .slice(0, 25)
-      .map(([, cmd]) => ({
+    client.manager.apiCommands
+      .filter((c) => c.enabled.global && c.permissions.level <= maxLevel)
+      .map((cmd) => ({
         name: cmd.data.name,
-        value: cmd.data.name,
+        value: cmd.id,
       })) ?? [];
 
-  await commandChoicesCache.set(
-    cacheId,
-    data,
-    UnitConstants.MS_IN_ONE_MINUTE * 5,
-  );
+  await commandChoicesCache.set(cacheId, data);
 
   return data;
 };
 
 export const settingsEmbed = async (
-  client: Client<true>,
   i: GuildInteraction<RepliableInteraction>,
   guild: PopulatedGuild,
   defaultCategoryInd?: number,
@@ -153,7 +148,6 @@ export const settingsEmbed = async (
     }));
 
   await InteractionPagination.paginator({
-    client,
     interaction: i,
     type: 'select',
     ephemeral: true,
@@ -238,6 +232,7 @@ export const handleSettingsUpdate = async (
 
         if (permissionSettings.includes(prompt.accessor as PermissionSetting)) {
           await commandChoicesCache.clearByPrefix(`${interaction.guildId}:`);
+          await Permissions.clearCacheForGuild(interaction.guildId);
         }
 
         return guildUpdater(
@@ -279,7 +274,6 @@ export const handleSettingsUpdate = async (
     {
       async onFinish(_promptValues, i) {
         await settingsEmbed(
-          client,
           i,
           await Database.Guild.resolve(i.guildId),
           guildSettingPrompt ? categoryIndForSetting(guildSettingPrompt) : 0,

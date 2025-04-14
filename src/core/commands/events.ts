@@ -10,9 +10,7 @@ export interface ClientEventListenerOptions<K extends keyof ClientEvents> {
   /** The function to run when the event is emitted */
   run: K extends Events.ClientReady // Omit args for "ClientReady"
     ? (client: Client<true>) => void
-    : ClientEvents[K] extends [] // Omit args if ClientEvents has no args
-      ? (client: Client<true>) => void
-      : (client: Client<true>, ...args: ClientEvents[K]) => void;
+    : (client: Client<true>, ...args: ClientEvents[K]) => void;
 }
 
 export class ClientEventListener<
@@ -20,12 +18,12 @@ export class ClientEventListener<
 > {
   private readonly once: boolean;
   public readonly event: K;
-  private readonly run: ClientEventListenerOptions<K>['run'];
   private readonly debug: Debugger;
   private static readonly defaults = {
     once: false,
   };
 
+  public readonly run: ClientEventListenerOptions<K>['run'];
   public constructor(options: ClientEventListenerOptions<K>) {
     this.once = options.once ?? ClientEventListener.defaults.once;
     this.event = options.event;
@@ -43,12 +41,13 @@ export class ClientEventListener<
     (this.once ? client.once : client.on).bind(client)(
       this.event,
       (...args) => {
-        const run = this.run as ClientEventListenerOptions<K>['run'];
-        if (this.event === Events.ClientReady) {
-          // @ts-expect-error - Expression too complex
-          run(client);
+        if (this.event === Events.ClientReady || args.length === 0) {
+          (this.run as (client: Client<true>) => void)(client);
         } else {
-          run(client, ...args);
+          (this.run as (client: Client<true>, ...args: unknown[]) => void)(
+            client,
+            ...args,
+          );
         }
         this.debug(
           `Event ${this.event} fired with args: ${JSON.stringify(args)}`,

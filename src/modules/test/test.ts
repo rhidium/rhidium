@@ -35,7 +35,7 @@ const data = new SlashCommandStringOption()
 const TestAutoComplete = new Command({
   data,
   type: CommandType.AutoComplete,
-  run: async (_client, interaction) => {
+  run: async ({ interaction }) => {
     const query = interaction.options.getFocused();
     const filtered = choices.filter((choice) =>
       choice.label.toLowerCase().includes(query.toLowerCase()),
@@ -46,7 +46,7 @@ const TestAutoComplete = new Command({
     }));
     await interaction.respond(options);
   },
-  resolver: async (interaction, options) => {
+  resolver: async ({ interaction, options }) => {
     const { optionName = data.name, optionRequired = data.required } =
       options || {};
     return interaction.options.getString(optionName, optionRequired) ?? '';
@@ -133,7 +133,7 @@ const TestChatInput = new Command({
       ),
   controllers: {
     group: {
-      subcommand: async (client, interaction) => {
+      subcommand: async ({ client, interaction }) => {
         Logger.debug(client.user.username, TestChatInput.data.name);
 
         const context = Placeholder.parseContext({
@@ -185,7 +185,7 @@ const TestButton = TestChatInput.extend({
       .setStyle(ButtonStyle.Primary)
       .setEmoji('✅')
       .setDisabled(false),
-  run: async (_client, interaction) => {
+  run: async ({ interaction }) => {
     const currentCount = testMap.get(interaction.user.id) ?? 0;
     const isPrompt =
       currentCount !== 0 && (currentCount % 3 === 0 || currentCount % 5 === 0);
@@ -239,7 +239,7 @@ const TestModal = TestChatInput.extend({
           .setRequired(true),
       ),
     ),
-  run: async (_client, interaction) => {
+  run: async ({ interaction }) => {
     const input = interaction.fields.getTextInputValue('Test input');
     const currentCount = testMap.get(interaction.user.id) ?? 0;
     const newCount = currentCount + 1;
@@ -274,7 +274,7 @@ const TestSelect = TestChatInput.extend({
     .setMaxValues(1)
     .setDisabled(false)
     .setOptions(choices),
-  run: async (_client, interaction) => {
+  run: async ({ interaction }) => {
     const selected = interaction.values[0];
     const currentCount = testMap.get(interaction.user.id) ?? 0;
     const newCount = currentCount + 1;

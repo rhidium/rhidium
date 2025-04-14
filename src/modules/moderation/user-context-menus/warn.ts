@@ -15,7 +15,7 @@ const WarnContextMenu = new Command({
     refuseUncached: true,
     replyEphemeral: true,
   },
-  run: async (_client, interaction) => {
+  run: async ({ interaction }) => {
     await interaction.showModal(warnModal(interaction.targetUser));
   },
 });

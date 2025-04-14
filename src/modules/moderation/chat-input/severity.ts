@@ -40,7 +40,7 @@ const SeverityCommand = new Command({
           .setMinValue(1)
           .setMaxValue(25),
       ),
-  run: async (_client, interaction) => {
+  run: async ({ interaction }) => {
     const { options, guild: discordGuild } = interaction;
     const severity = options.getString('severity', true) as Severity;
     const _value = options.getInteger('value', true);

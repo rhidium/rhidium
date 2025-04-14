@@ -17,7 +17,7 @@ const AutoModerationAutoComplete = new Command({
   interactions: {
     refuseUncached: true,
   },
-  run: async (_client, interaction) => {
+  run: async ({ interaction }) => {
     const query = interaction.options.getFocused().toLowerCase();
     const { guild: discordGuild } = interaction;
     const guild = await Database.Guild.resolve(discordGuild.id);
@@ -57,7 +57,7 @@ const AutoModerationAutoComplete = new Command({
       })),
     );
   },
-  resolver: async (interaction, options) => {
+  resolver: async ({ interaction, options }) => {
     const { optionName = data.name, optionRequired = data.required } =
       options || {};
     const { guild: discordGuild } = interaction;

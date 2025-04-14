@@ -16,17 +16,41 @@ class MemberWrapper extends DatabaseWrapper<Model.Member> {
     super(Model.Member);
   }
 
-  // @ts-expect-error - Insufficient overlap for tuple type
-  readonly resolve: {
-    (options: FindMemberOptions, returnGuild?: false): Promise<PopulatedMember>;
-    (
-      options: FindMemberOptions,
-      returnGuild: true,
-    ): Promise<[PopulatedMember, PopulatedGuild]>;
-  } = async (
+  readonly resolve = async (
     options: FindMemberOptions,
-    returnGuild = false,
-  ): Promise<PopulatedMember | [PopulatedMember, PopulatedGuild]> => {
+  ): Promise<PopulatedMember> => {
+    const {
+      userId,
+      guildId,
+      resolveGuild = true,
+      resolveUser = true,
+    } = options;
+
+    const member = await this.findUnique({
+      GuildId_UserId: {
+        GuildId: guildId,
+        UserId: userId,
+      },
+    });
+
+    const guildPromise = resolveGuild
+      ? guildWrapper.resolve(guildId)
+      : Promise.resolve(null);
+    const userPromise = resolveUser
+      ? userWrapper.resolve(userId)
+      : Promise.resolve(null);
+
+    await Promise.all([guildPromise, userPromise]);
+
+    const resolvedMember =
+      member ?? (await this.create({ GuildId: guildId, UserId: userId }));
+
+    return resolvedMember;
+  };
+
+  readonly resolveAndReturnGuild = async (
+    options: FindMemberOptions,
+  ): Promise<[PopulatedMember, PopulatedGuild]> => {
     const {
       userId,
       guildId,
@@ -53,11 +77,10 @@ class MemberWrapper extends DatabaseWrapper<Model.Member> {
     const resolvedMember =
       member ?? (await this.create({ GuildId: guildId, UserId: userId }));
 
-    if (returnGuild) {
-      return [resolvedMember, guild ?? (await guildWrapper.resolve(guildId))]; // Enforce tuple return
-    }
-
-    return resolvedMember;
+    return [
+      resolvedMember,
+      guild ?? (await guildWrapper.resolve(guildId)),
+    ] as const;
   };
 }
 

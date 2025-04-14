@@ -1,4 +1,4 @@
-import { bold, Collection, Events } from 'discord.js';
+import { bold, Collection, Events, OAuth2Scopes } from 'discord.js';
 import { AnyCommand, APICommand, Command, CommandBase } from './base';
 import { debug, Debugger, Logger } from '@core/logger';
 import { Embeds } from '@core/config';
@@ -231,6 +231,50 @@ class ClientManager {
     }:${apiCommand.id}>`;
   }
 
+  /** A list of unique permissions that are required by the client across all commands. */
+  public get flatCommandPermissions() {
+    this.debug('Getting flat command permissions');
+
+    return Array.from(
+      new Set(
+        this.apiCommands
+          // Note: No need to filter by enabled, as disabled implies the
+          // command will be made available again at some point.
+          // .filter(CommandBase.isEnabled)
+          .map((command) => command.permissions.client)
+          .flat(),
+      ),
+    );
+  }
+
+  /** A list of unique categories across all active commands. */
+  public get flatCommandCategories() {
+    this.debug('Getting flat command categories');
+
+    return Array.from(
+      new Set(
+        this.apiCommands
+          .filter(CommandBase.isEnabled)
+          .map((command) => command.category)
+          .filter((category): category is string => !!category?.trim()),
+      ),
+    );
+  }
+
+  public readonly generateInvite = async (
+    client: Client<true>,
+    guildId?: string,
+  ) => {
+    this.debug('Generating invite link');
+
+    return client.generateInvite({
+      scopes: [OAuth2Scopes.Bot, OAuth2Scopes.ApplicationsCommands],
+      permissions: this.flatCommandPermissions,
+      disableGuildSelect: !!guildId,
+      guild: guildId,
+    });
+  };
+
   /**
    * Initializes the command manager with a ready/logged in client.
    * This function should be called *after* registering all commands.
@@ -255,7 +299,7 @@ class ClientManager {
       const commandIdentifier = CommandBase.commandIdentifierFor(interaction);
 
       this.debug(
-        `Received ${interaction.isAutocomplete() ? 'autocomplete' : ''} interaction for command ${commandIdentifier}`,
+        `Received ${interaction.isAutocomplete() ? 'autocomplete ' : ''}interaction for command ${commandIdentifier}`,
       );
 
       const command = this.commands.get(commandIdentifier);
@@ -337,7 +381,7 @@ class ClientManager {
           () => {
             cmdRunStart = Date.now();
 
-            return fn(client, safeInteraction);
+            return fn({ client, interaction: safeInteraction });
           },
         );
 
@@ -386,7 +430,7 @@ class ClientManager {
           ? command.reply(safeInteraction, result)
           : Promise.resolve(),
         interaction.isAutocomplete()
-          ? null
+          ? Promise.resolve()
           : Database.Command.afterCommandRun(
               command,
               safeInteraction,
@@ -404,8 +448,7 @@ class ClientManager {
       this.listeners.forEach((listener) => {
         listener.register(client);
         if (listener.event === Events.ClientReady) {
-          // @ts-expect-error Expression too complex
-          listener.run(client);
+          (listener as ClientEventListener<Events.ClientReady>).run(client);
         }
       });
     }

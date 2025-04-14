@@ -141,7 +141,7 @@ const RemindersCommand = new Command({
           .setDescription('Displays when a reminder is set to remind you')
           .addStringOption(ReminderAutoComplete.data),
       ),
-  run: async (client, interaction) => {
+  run: async ({ client, interaction }) => {
     const { options } = interaction;
     const subcommand = options.getSubcommand();
 
@@ -183,8 +183,12 @@ const RemindersCommand = new Command({
     };
 
     if (subcommand === 'when') {
-      const reminder = await ReminderAutoComplete.resolver(interaction, {
-        optionRequired: true,
+      const reminder = await ReminderAutoComplete.resolver({
+        client,
+        interaction,
+        options: {
+          optionRequired: true,
+        },
       });
 
       if (!reminder) {
@@ -453,8 +457,12 @@ const RemindersCommand = new Command({
         ],
       });
     } else if (subcommand === 'cancel') {
-      const reminder = await ReminderAutoComplete.resolver(interaction, {
-        optionRequired: true,
+      const reminder = await ReminderAutoComplete.resolver({
+        client,
+        interaction,
+        options: {
+          optionRequired: true,
+        },
       });
       const all = options.getBoolean('all') ?? false;
       const allForServer = options.getBoolean('all-for-server') ?? false;

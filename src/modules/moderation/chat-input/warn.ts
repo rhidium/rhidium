@@ -77,7 +77,7 @@ const WarnCommand = new Command({
               .setRequired(false),
           ),
       ),
-  run: async (_client, interaction) => {
+  run: async ({ client, interaction }) => {
     // Resolve the interaction data
     const { options, member: issuerMember, guild: discordGuild } = interaction;
     const subcommand = options.getSubcommand(true);
@@ -111,7 +111,10 @@ const WarnCommand = new Command({
     // Handle warn removal
     if (subcommand === 'remove') {
       const targetUser = options.getUser('user', true);
-      const warning = await WarningAutoComplete.resolver(interaction);
+      const warning = await WarningAutoComplete.resolver({
+        client,
+        interaction,
+      });
       const deleteWarning = options.getBoolean('delete', false) ?? false;
 
       // Function handled the response

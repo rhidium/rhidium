@@ -1,7 +1,7 @@
 import { Command, CommandType, PermLevel } from '@core/commands';
 import { Embeds } from '@core/config';
-import { settingsPrompts } from '../chat-input/settings/prompts';
-import { handleSettingsUpdate } from '../chat-input/settings/shared';
+import { settingsPrompts } from '../chat-input/administrator/settings/prompts';
+import { handleSettingsUpdate } from '../chat-input/administrator/settings/shared';
 
 const SettingsUpdateCommand = new Command({
   type: CommandType.Button,
@@ -17,7 +17,7 @@ const SettingsUpdateCommand = new Command({
     refuseUncached: true,
   },
   data: (builder) => builder.setCustomId('settings-update').setEmoji('⚙️'),
-  run: async (client, interaction) => {
+  run: async ({ client, interaction }) => {
     const { customId } = interaction;
     const [, promptId] = customId.split('@');
     const prompt = settingsPrompts.find((p) => p.id === promptId);

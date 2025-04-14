@@ -137,7 +137,7 @@ type CommandInteraction<
 type CommandRunFunction<
   ReturnType,
   I extends BaseInteraction = BaseInteraction,
-> = (client: Client<true>, interaction: I) => ReturnType;
+> = (ctx: { client: Client<true>; interaction: I }) => ReturnType;
 
 type CacheTypeResolver<
   GuildOnly extends boolean,

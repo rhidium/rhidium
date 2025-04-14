@@ -1,6 +1,7 @@
 import { ClientEventListener } from '@core/commands';
 import { appConfig, Embeds } from '@core/config';
 import { Database } from '@core/database';
+import { I18n } from '@core/i18n';
 import { Logger } from '@core/logger';
 import { Placeholder } from '@core/placeholders';
 import { TimeUtils } from '@core/utils';
@@ -17,7 +18,7 @@ const GuildMemberRemove = new ClientEventListener({
     const { guild: discordGuild } = member;
 
     const guild = await Database.Guild.resolve(discordGuild.id);
-    if (!guild || !guild.memberLeaveChannelId) return;
+    if (!guild.memberLeaveChannelId) return;
 
     const channel = discordGuild.channels.cache.get(guild.memberLeaveChannelId);
     if (
@@ -41,9 +42,9 @@ const GuildMemberRemove = new ClientEventListener({
         name: member.user.username,
         iconURL: member.user.displayAvatarURL({ forceStatic: false }),
       })
-      .setTitle(client.Lang.t('core:discord.memberLeft.title'))
+      .setTitle(I18n.localize('core:discord.memberLeft.title', discordGuild))
       .setDescription(
-        client.Lang.t('core:discord.memberLeft.description', {
+        I18n.localize('core:discord.memberLeft.description', discordGuild, {
           user: member.toString(),
           guild: discordGuild.name,
         }),
@@ -51,17 +52,17 @@ const GuildMemberRemove = new ClientEventListener({
       .setThumbnail(member.user.displayAvatarURL({ forceStatic: false }))
       .addFields(
         {
-          name: client.Lang.t('core:discord.accountCreated'),
+          name: I18n.localize('core:discord.accountCreated', discordGuild),
           value: accountCreatedOutput,
           inline: true,
         },
         {
-          name: client.Lang.t('core:discord.joinedServer'),
+          name: I18n.localize('core:discord.joinedServer', discordGuild),
           value: joinedAtOutput,
           inline: true,
         },
         {
-          name: client.Lang.t('core:discord.memberCount'),
+          name: I18n.localize('core:discord.memberCount', discordGuild),
           value: discordGuild.memberCount.toLocaleString(),
           inline: true,
         },

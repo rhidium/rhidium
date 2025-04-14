@@ -7,6 +7,10 @@ on:
     types:
       - completed
 
+concurrency:
+  group: rhidium-deploy
+  cancel-in-progress: false
+
 jobs:
   notify-start:
     runs-on: ubuntu-latest
@@ -30,8 +34,6 @@ jobs:
           embed-description: "⌛ Deploying **`@${{ github.repository }}`**...\n📤 Service is now temporarily unavailable."
 
   deploy:
-    strategy: # Only run one deploy job at a time
-      max-parallel: 1
     permissions:
       # The "id-token: write" permission is required or Machine ID will not be
       # able to authenticate with the cluster.

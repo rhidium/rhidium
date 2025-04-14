@@ -10,7 +10,7 @@ const data = new SlashCommandStringOption()
 const ReminderAutoComplete = new Command({
   data,
   type: CommandType.AutoComplete,
-  run: async (_client, interaction) => {
+  run: async ({ interaction }) => {
     const query = interaction.options.getFocused().toLowerCase();
     const reminders = await Database.Reminder.forUser(interaction.user.id);
 
@@ -24,7 +24,7 @@ const ReminderAutoComplete = new Command({
         })),
     );
   },
-  resolver: async (interaction, options) => {
+  resolver: async ({ interaction, options }) => {
     const { optionName = data.name, optionRequired = data.required } =
       options || {};
     const value = interaction.options.getString(optionName, optionRequired);

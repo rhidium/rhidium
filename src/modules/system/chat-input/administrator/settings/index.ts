@@ -185,7 +185,7 @@ const SettingsCommand = new Command({
   },
   data: commandData,
   category: 'Administrator',
-  run: async (client, interaction) => {
+  run: async ({ client, interaction }) => {
     const { options } = interaction;
     const subcommandGroup = options.getSubcommandGroup(false);
     const subcommand = options.getSubcommand(true);
@@ -352,7 +352,6 @@ const SettingsCommand = new Command({
 
                 await i.deferUpdate();
                 await settingsEmbed(
-                  client,
                   i,
                   updatedGuild,
                   prompts.length === 1 ? categoryIndForSetting(prompts[0]!) : 0,
@@ -374,14 +373,9 @@ const SettingsCommand = new Command({
         ]);
 
         if (!categoryIndStr) {
-          await settingsEmbed(client, interaction, guild);
+          await settingsEmbed(interaction, guild);
         } else {
-          await settingsEmbed(
-            client,
-            interaction,
-            guild,
-            parseInt(categoryIndStr),
-          );
+          await settingsEmbed(interaction, guild, parseInt(categoryIndStr));
         }
 
         break;

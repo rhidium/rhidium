@@ -39,7 +39,6 @@
     "commit": "cz",
     "setup:linux": "pnpm install && cp .env.example .env && cp config/config.example.json config/config.json && cp config/extended-config.example.json config/extended-config.json",
     "setup:windows": "pnpm install && copy .env.example .env && copy config/config.example.json config/config.json && cp config/extended-config.example.json config/extended-config.json",
-    "setup:config": "pnpm add -D @rhidium/json-editor",
     "db:format": "prisma format",
     "db:generate": "prisma generate",
     "db:deploy": "prisma migrate deploy && prisma generate",

@@ -1,4 +1,4 @@
-import { EmbedBuilder, type EmbedData } from 'discord.js';
+import { APIEmbed, EmbedBuilder, type EmbedData } from 'discord.js';
 import { StringUtils, TimeUtils } from '../utils';
 import { EmbedConstants } from '../constants';
 import { appConfig } from './app';
@@ -9,7 +9,7 @@ type EmbedType = keyof typeof appConfig.colors;
 
 type EmbedTimestampStyle = 'short' | 'long';
 
-type CreateEmbedData = string | Omit<EmbedData, 'color'>;
+type CreateEmbedData = string | Omit<EmbedData, 'color'> | APIEmbed;
 
 type EmbedsOptions = {
   useSafeEmbeds?: boolean;
@@ -65,7 +65,18 @@ class Embeds implements EmbedsOptions {
       typeof data === 'string' ? { description: data } : data;
     const options = this.embedBase;
     delete options.author;
-    const embed = this.build({ ...this.embedBase, ...resolvedData });
+    const embed = this.build({
+      ...this.embedBase,
+      ...resolvedData,
+      timestamp:
+        typeof resolvedData.timestamp === 'number'
+          ? new Date(resolvedData.timestamp).toISOString()
+          : undefined,
+      fields: [
+        ...(this.embedBase.fields ?? []),
+        ...(resolvedData.fields ?? []),
+      ],
+    });
     embed.setColor(appConfig.colors[status]);
 
     let statusText = `### ${appConfig.emojis[status]} `;

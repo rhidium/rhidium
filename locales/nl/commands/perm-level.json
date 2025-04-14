@@ -1,0 +1,10 @@
+{
+  "name": "permissie-niveau",
+  "description": "Check je permissie-niveau, of het permissie-niveau van een gebruiker.",
+  "options": {
+    "user": {
+      "name": "gebruiker",
+      "description": "De gebruiker waarvan je het permissie-niveau wilt weten."
+    }
+  }
+}

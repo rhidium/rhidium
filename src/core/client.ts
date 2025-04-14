@@ -4,12 +4,10 @@ import {
   Events,
 } from 'discord.js';
 import { ClientManager, CommandBase } from './commands';
-import { i18n } from 'i18next';
 import { SyncCommandOptions } from './commands/rest';
 
 type ClientOptions = {
   manager: ClientManager;
-  Lang: i18n;
 };
 
 class Client<Ready extends boolean = boolean>
@@ -17,15 +15,12 @@ class Client<Ready extends boolean = boolean>
   implements ClientOptions
 {
   public readonly manager: ClientManager;
-  public readonly Lang: i18n;
   public syncOptions: SyncCommandOptions | undefined;
 
   constructor(options: DiscordClientOptions & ClientOptions) {
     super(options);
     this.manager = options.manager;
-    this.Lang = options.Lang;
   }
-
   public override readonly login = (
     token: string | undefined,
     syncOptions?: SyncCommandOptions,

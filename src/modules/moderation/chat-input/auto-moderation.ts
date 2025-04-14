@@ -92,7 +92,7 @@ const AutoModerationCommand = new Command({
           .setDescription('Remove an auto-moderation action.')
           .addStringOption(AutoModerationActionOption.data),
       ),
-  run: async (_client, interaction) => {
+  run: async ({ client, interaction }) => {
     const { options, guild: discordGuild } = interaction;
     const subcommand = options.getSubcommand(true);
 
@@ -213,7 +213,10 @@ const AutoModerationCommand = new Command({
       }
 
       case 'remove': {
-        const action = await AutoModerationActionOption.resolver(interaction);
+        const action = await AutoModerationActionOption.resolver({
+          client,
+          interaction,
+        });
 
         if (!action) {
           await AutoModerationCommand.reply(interaction, {

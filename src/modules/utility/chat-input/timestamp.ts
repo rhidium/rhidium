@@ -63,6 +63,9 @@ const TimestampCommand = new Command({
     dm: true,
     privateChannel: true,
   },
+  interactions: {
+    replyEphemeral: true,
+  },
   data: (builder) =>
     builder
       .setName('timestamp')
@@ -104,7 +107,7 @@ const TimestampCommand = new Command({
           .setDescription('Set your timezone for the timestamp command')
           .addStringOption(TimezoneAutocomplete.data),
       ),
-  run: async (client, interaction) => {
+  run: async ({ client, interaction }) => {
     const { options, channel } = interaction;
     const subcommand = options.getSubcommand();
 
@@ -112,7 +115,7 @@ const TimestampCommand = new Command({
       case 'timezone': {
         const [user, timezone] = await Promise.all([
           Database.User.resolve(interaction.user.id),
-          TimezoneAutocomplete.resolver(interaction),
+          TimezoneAutocomplete.resolver({ client, interaction }),
         ]);
 
         if (timezone === null) {
@@ -161,7 +164,7 @@ const TimestampCommand = new Command({
       case 'convert': {
         const date = options.getString('date') ?? 'now';
         let [timezone] = await Promise.all([
-          TimezoneAutocomplete.resolver(interaction),
+          TimezoneAutocomplete.resolver({ client, interaction }),
         ]);
         const type = (options.getString('type') ?? 'full') as TimestampType;
 

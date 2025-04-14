@@ -5,6 +5,7 @@ import { Embeds } from '@core/config';
 import { ArrayUtils, StringUtils, TimeUtils } from '@core/utils';
 import { Database } from '@core/database';
 import { EmbedConstants } from '@core/constants';
+import { I18n } from '@core/i18n';
 
 const UserInfoContextMenu = new Command({
   type: CommandType.UserContextMenu,
@@ -20,7 +21,7 @@ const UserInfoContextMenu = new Command({
     refuseUncached: true,
     replyEphemeral: true,
   },
-  run: async (client, interaction) => {
+  run: async ({ interaction }) => {
     const { guild, targetUser } = interaction;
 
     if (!guild) {
@@ -42,8 +43,8 @@ const UserInfoContextMenu = new Command({
       return;
     }
 
-    const unknown = client.Lang.t('common:word.unknown');
-    const none = client.Lang.t('common:word.none');
+    const unknown = I18n.localize('common:word.unknown', interaction);
+    const none = I18n.localize('common:word.none', interaction);
 
     const maxRoles = 25;
     const roles = target.roles.cache
@@ -64,13 +65,10 @@ const UserInfoContextMenu = new Command({
       target.displayAvatarURL() !== null &&
       target.displayAvatarURL() !== targetUser.displayAvatarURL();
 
-    const [dbMember, dbGuild] = await Database.Member.resolve(
-      {
-        userId: target.id,
-        guildId: guild.id,
-      },
-      true,
-    );
+    const [dbMember, dbGuild] = await Database.Member.resolveAndReturnGuild({
+      userId: target.id,
+      guildId: guild.id,
+    });
 
     const resolvedWarns = WarnServices.resolveWarns(dbMember, dbGuild);
     const receivedWarningsString = StringUtils.displayArray(
@@ -93,12 +91,12 @@ const UserInfoContextMenu = new Command({
       },
       fields: [
         {
-          name: client.Lang.t('core:discord.joinedServer'),
+          name: I18n.localize('core:discord.joinedServer', interaction),
           value: joinedServer,
           inline: true,
         },
         {
-          name: client.Lang.t('core:discord.joinedDiscord'),
+          name: I18n.localize('core:discord.joinedDiscord', interaction),
           value: joinedDiscord,
           inline: true,
         },

@@ -45,7 +45,7 @@ import type {
   PartialCommandOptions,
 } from './options';
 import { CommandThrottleOptions } from './throttle';
-import { Permissions } from '@core/commands/permissions';
+import { Permissions, PermLevel } from '@core/commands/permissions';
 import {
   InteractionUtils,
   ResponseContent,
@@ -53,8 +53,9 @@ import {
 } from '@core/utils';
 import { CommandController } from './controllers';
 import { LocalizedLabelKey } from '@core/i18n/i18next';
-import { defaultLocale, I18n, locales } from '@core/i18n';
+import { I18n, locales } from '@core/i18n';
 import { InteractionConstants } from '@core/constants';
+import { Database } from '@core/database';
 
 const isStringArray = (value: unknown): value is string[] =>
   Array.isArray(value) && value.every((item) => typeof item === 'string');
@@ -114,14 +115,14 @@ class CommandBase<
     >,
   ) {
     const data = CommandBase.dataResolver(options.type, options.data);
-    const id: string | null =
+    const id: string | null | undefined =
       'name' in data
         ? data.name
         : 'custom_id' in data.data && typeof data.data.custom_id === 'string'
           ? data.data.custom_id
           : null;
 
-    if (id === null) {
+    if (id === null || typeof id === 'undefined') {
       let json;
       try {
         json = JSON.stringify(data, null, 2);
@@ -375,7 +376,7 @@ class CommandBase<
     T extends CommandType,
     GO extends boolean = GuildOnly,
     RU extends boolean = RefuseUncached,
-    RT = void,
+    RT = unknown,
     RST extends NonNullable<unknown> | null = null,
   >(
     options: CommandOptions<T, GO, RU, RT, RST>,
@@ -404,7 +405,7 @@ class CommandBase<
     T extends CommandType,
     GO extends boolean = GuildOnly,
     RU extends boolean = RefuseUncached,
-    RT = void,
+    RT = unknown,
     RST extends NonNullable<unknown> | null = null,
   >(
     command: Command<T, GO, RU, RT, RST>,
@@ -564,8 +565,7 @@ class CommandBase<
       key: `commands:${string}`,
       onSuccess?: (localizations: Record<string, string>) => void,
     ) => {
-      const defaultValue = I18n.instance.t(key, {
-        lng: defaultLocale,
+      const defaultValue = I18n.localize(key, null, {
         defaultValue: '__NOT_TRANSLATED__',
       });
 
@@ -577,8 +577,7 @@ class CommandBase<
         locales
           .map((locale) => [
             locale,
-            I18n.instance.t(key, {
-              lng: locale,
+            I18n.localize(key, locale, {
               defaultValue: '__NOT_TRANSLATED__',
             }),
           ])
@@ -873,15 +872,16 @@ class CommandBase<
   ): Promise<true | [LocalizedLabelKey, Record<string, string> | null]> => {
     command.debug('Handling permissions');
 
-    if (command.permissions.level > 0) {
-      const memberPermLevel = await Permissions.resolveForMember(
-        interaction.member,
-        interaction.guild,
-      );
+    const memberPermLevel = await Permissions.resolveForMember(
+      interaction.member,
+      interaction.guild,
+    );
 
-      if (memberPermLevel < command.permissions.level) {
-        return ['core:permissions.levelTooLow', null];
-      }
+    if (
+      command.permissions.level > 0 &&
+      memberPermLevel < command.permissions.level
+    ) {
+      return ['core:permissions.levelTooLow', null];
     }
 
     if (command.permissions.client.length > 0 && interaction.inGuild()) {
@@ -982,6 +982,13 @@ class CommandBase<
         )
       ) {
         return ['core:permissions.unavailable.channelCategory', null];
+      }
+    }
+
+    if (interaction.guildId && memberPermLevel <= PermLevel['Server Owner']) {
+      const guild = await Database.Guild.resolve(interaction.guildId);
+      if (guild.disabledCommands.includes(command.id)) {
+        return ['core:permissions.unavailable.disabledByServer', null];
       }
     }
 
@@ -1124,7 +1131,7 @@ class Command<
   Type extends CommandType = CommandType,
   GuildOnly extends boolean = boolean,
   RefuseUncached extends boolean = boolean,
-  ReturnType = void,
+  ReturnType = unknown,
   ResolveType extends NonNullable<unknown> | null = null,
 > extends CommandBase<
   Type,

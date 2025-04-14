@@ -17,6 +17,7 @@ import {
 } from './types';
 import { CommandThrottleOptions } from './throttle';
 import { CommandController } from './controllers';
+import Client from '@core/client';
 
 type CommandInteractionOptions<RefuseUncached extends boolean> = {
   /**
@@ -138,7 +139,7 @@ type CommandRunOptions<
   Type extends CommandType = CommandType,
   GuildOnly extends boolean = false,
   RefuseUncached extends boolean = false,
-  ReturnType = void,
+  ReturnType = unknown,
 > = {
   run: CommandRunFunction<
     ReturnType,
@@ -151,7 +152,7 @@ type CommandControllerOptions<
   Type extends CommandType = CommandType,
   GuildOnly extends boolean = false,
   RefuseUncached extends boolean = false,
-  ReturnType = void,
+  ReturnType = unknown,
 > = {
   run?: never;
   controllers: Record<
@@ -174,15 +175,16 @@ type AutoCompleteResolver<
   GuildOnly extends boolean,
   RefuseUncached extends boolean,
   ResolveType extends NonNullable<unknown> | null = null,
-> = (
+> = (ctx: {
+  client: Client<true>;
   interaction: ChatInputCommandInteraction<
     CacheTypeResolver<GuildOnly, RefuseUncached>
-  >,
+  >;
   options?: {
     optionName?: string;
     optionRequired?: boolean;
-  },
-) => ResolveType;
+  };
+}) => ResolveType;
 
 type AutoCompleteCommandOptions<
   Type extends CommandType,

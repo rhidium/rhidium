@@ -1,4 +1,3 @@
-import Client from '@core/client';
 import { UnitConstants } from '@core/constants';
 import {
   ActionRowBuilder,
@@ -24,7 +23,6 @@ type PaginationPage = BaseMessageOptions & {
 type PaginationOptions = {
   selectId?: string;
   type?: PaginationType;
-  client: Client;
   pages: PaginationPage[];
   interaction: RepliableInteraction;
   duration?: number;
@@ -38,7 +36,6 @@ class InteractionPagination {
     const {
       selectId: _selectId,
       type = 'button',
-      client,
       pages,
       interaction,
       duration = UnitConstants.MS_IN_ONE_HOUR,
@@ -162,7 +159,10 @@ class InteractionPagination {
     collector.on('collect', async (i) => {
       if (i.user.id !== interaction.user.id) {
         void InteractionUtils.replyDynamic(interaction, {
-          content: client.Lang.t('core:permissions.unavailable.unauthorized'),
+          content: I18n.localize(
+            'core:permissions.unavailable.unauthorized',
+            interaction,
+          ),
         });
         return;
       }

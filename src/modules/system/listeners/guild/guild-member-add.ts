@@ -1,6 +1,7 @@
 import { ClientEventListener } from '@core/commands';
 import { appConfig, Embeds } from '@core/config';
-import { Database } from '@core/database';
+import { AuditLogType, Database } from '@core/database';
+import { I18n } from '@core/i18n';
 import { Logger } from '@core/logger';
 import { Placeholder } from '@core/placeholders';
 import { TimeUtils } from '@core/utils';
@@ -17,7 +18,38 @@ const GuildMemberAdd = new ClientEventListener({
     const { guild: discordGuild } = member;
 
     const guild = await Database.Guild.resolve(discordGuild.id);
-    if (!guild || !guild.memberJoinChannelId) return;
+
+    if (guild.autoRoleIds.length) {
+      const me =
+        discordGuild.members.me ?? (await discordGuild.members.fetchMe());
+      const rolesToAdd = guild.autoRoleIds.filter(
+        (roleId) =>
+          !member.roles.cache.has(roleId) &&
+          me.roles.highest.comparePositionTo(roleId) > 0,
+      );
+      if (rolesToAdd.length) {
+        await member.roles
+          .add(rolesToAdd)
+          .then(async () => {
+            await Database.AuditLog.util({
+              client,
+              guild,
+              data: {
+                target: member.id,
+                added: rolesToAdd,
+                roles: guild.autoRoleIds,
+              },
+              type: AuditLogType.AUTO_ROLES_ADDED,
+              user: client.user.id,
+            });
+          })
+          .catch((error) => {
+            Logger.error('Error encountered while adding auto roles', error);
+          });
+      }
+    }
+
+    if (!guild.memberJoinChannelId) return;
 
     const channel = discordGuild.channels.cache.get(guild.memberJoinChannelId);
     if (
@@ -38,9 +70,9 @@ const GuildMemberAdd = new ClientEventListener({
         name: member.user.username,
         iconURL: member.user.displayAvatarURL({ forceStatic: false }),
       })
-      .setTitle(client.Lang.t('core:discord.memberJoined.title'))
+      .setTitle(I18n.localize('core:discord.memberJoined.title', discordGuild))
       .setDescription(
-        client.Lang.t('core:discord.memberJoined.description', {
+        I18n.localize('core:discord.memberJoined.description', discordGuild, {
           user: member.toString(),
           guild: discordGuild.name,
         }),
@@ -48,12 +80,12 @@ const GuildMemberAdd = new ClientEventListener({
       .setThumbnail(member.user.displayAvatarURL({ forceStatic: false }))
       .addFields(
         {
-          name: client.Lang.t('core:discord.accountCreated'),
+          name: I18n.localize('core:discord.accountCreated', discordGuild),
           value: accountCreatedOutput,
           inline: true,
         },
         {
-          name: client.Lang.t('core:discord.memberCount'),
+          name: I18n.localize('core:discord.memberCount', discordGuild),
           value: discordGuild.memberCount.toLocaleString(),
           inline: true,
         },

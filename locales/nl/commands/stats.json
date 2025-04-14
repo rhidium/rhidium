@@ -1,0 +1,28 @@
+{
+  "name": "statistieken",
+  "description": "Krijg de statistieken van de bot.",
+  "pinging": "Pingen...",
+  "statistics": {
+    "name": "Statistieken",
+    "latency": "Latentie",
+    "memory": "Geheugen",
+    "uptime": "Uptime",
+    "counts": {
+      "label": "Hoeveelheden",
+      "servers": "Servers",
+      "members": "Leden",
+      "channels": "Kanalen",
+      "roles": "Rollen"
+    },
+    "versions": {
+      "label": "Versies",
+      "node": "Node.js",
+      "discordJs": "Discord.js"
+    },
+    "webSocketLatency": "WebSocket Latentie",
+    "apiLatency": "API Latentie",
+    "roundTripLatency": "Rondreis Latentie",
+    "memoryUsage": "Geheugen Gebruik",
+    "cacheSize": "Cache Grootte"
+  }
+}

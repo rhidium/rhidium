@@ -19,10 +19,9 @@ const WarningAutoComplete = new Command({
     refuseUncached: true,
   },
   permissions: {
-    // [DEV] We should still check permissions for AC
     level: PermLevel.Moderator,
   },
-  run: async (_client, interaction) => {
+  run: async ({ interaction }) => {
     const query = interaction.options.getFocused().toLowerCase();
     const { guild: discordGuild, options } = interaction;
     const userId = options.data
@@ -67,7 +66,7 @@ const WarningAutoComplete = new Command({
       })),
     );
   },
-  resolver: async (interaction, options) => {
+  resolver: async ({ interaction, options }) => {
     const { optionName = data.name, optionRequired = data.required } =
       options || {};
     const value = interaction.options.getString(optionName, optionRequired);

@@ -18,7 +18,32 @@
       "channel": "Dat commando is niet beschikbaar in dit kanaal.",
       "channelCategory": "Dat commando is niet beschikbaar in deze kanaalcategorie.",
       "missingRoles": "Je hebt niet de vereiste rol(len) om dit commando te gebruiken.",
-      "unauthorized": "Je bent niet gemachtigd om dit commando te gebruiken."
+      "unauthorized": "Je bent niet gemachtigd om dit commando te gebruiken.",
+      "disabledByServer": "Dit commando is uitgeschakeld door een beheerder en kan niet worden gebruikt."
+    },
+    "levels": {
+      "User": "Gebruiker",
+      "Moderator": "Moderator",
+      "Administrator": "Beheerder",
+      "Server Owner": "Server Eigenaar",
+      "Developer": "Ontwikkelaar",
+      "Bot Administrator": "Bot Beheerder",
+      "Bot Owner": "Bot Eigenaar"
+    }
+  },
+  "discord": {
+    "joinedServer": "Server Toegevoegd",
+    "joinedDiscord": "Discord Toegevoegd",
+    "accountCreated": "Account Aangemaakt",
+    "memberCount": "Leden Telling",
+    "messageHasNoEmbeds": "Dit bericht heeft geen embeds.",
+    "memberJoined": {
+      "title": "Nieuw Lid",
+      "description": "{{user}} is lid geworden van {{guild}}."
+    },
+    "memberLeft": {
+      "title": "Lid Verlaat",
+      "description": "{{user}} heeft {{guild}} verlaten."
     }
   }
 }

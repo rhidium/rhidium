@@ -11,7 +11,7 @@ const data = new SlashCommandStringOption()
 const TimezoneAutocomplete = new Command({
   data,
   type: CommandType.AutoComplete,
-  run: async (_client, interaction) => {
+  run: async ({ interaction }) => {
     const query = interaction.options.getFocused().toLowerCase();
     const filtered = InputUtils.DateTime.lowercasedTimezones.filter(
       (tz) => tz.indexOf(query) >= 0,
@@ -26,7 +26,7 @@ const TimezoneAutocomplete = new Command({
         })),
     );
   },
-  resolver: async (interaction, options) => {
+  resolver: async ({ interaction, options }) => {
     const { optionName = data.name, optionRequired = data.required } =
       options || {};
     const value = interaction.options.getString(optionName, optionRequired);

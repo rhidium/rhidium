@@ -101,14 +101,13 @@ class InteractionUtils {
           ? { embeds: [castContent] }
           : castContent;
 
-    if (InteractionUtils.isAcknowledged(interaction)) {
-      if (
-        resolvedContent.preferUpdate &&
-        interaction.type === InteractionType.MessageComponent
-      ) {
-        return castResponse(interaction.update(resolvedContent));
-      }
-
+    if (
+      resolvedContent.preferUpdate &&
+      interaction.type === InteractionType.MessageComponent &&
+      !InteractionUtils.isAcknowledged(interaction)
+    ) {
+      return castResponse(interaction.update(resolvedContent));
+    } else if (InteractionUtils.isAcknowledged(interaction)) {
       return castResponse(interaction.editReply(resolvedContent));
     }
 

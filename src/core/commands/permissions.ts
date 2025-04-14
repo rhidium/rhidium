@@ -1,4 +1,6 @@
 import { appConfig } from '@core/config';
+import { UnitConstants } from '@core/constants';
+import { CacheManager } from '@core/data-structures';
 import { Database } from '@core/database';
 import { EmojiUtils, StringUtils } from '@core/utils';
 import {
@@ -8,6 +10,7 @@ import {
   GuildMember,
   GuildTextBasedChannel,
   PermissionFlagsBits,
+  PermissionResolvable,
   PermissionsBitField,
   Snowflake,
 } from 'discord.js';
@@ -22,8 +25,10 @@ enum PermLevel {
   'Bot Owner' = 6,
 }
 
+type PermissionLevelName = keyof typeof PermLevel;
+
 interface PermissionLevelConfiguration {
-  name: keyof typeof PermLevel;
+  name: PermissionLevelName;
   level: PermLevel;
   hasLevel(
     config: ClientPermissionOptions,
@@ -119,11 +124,35 @@ class Permissions {
     (a, b) => b.level - a.level,
   );
 
+  private static readonly cache = CacheManager.fromStore<PermLevel>({
+    ttl: UnitConstants.MS_IN_ONE_HOUR,
+    max: 1000,
+  });
+  public static readonly clearCacheForGuild = async (guildId: string) => {
+    await Permissions.cache.clearByPrefix(`${guildId}:`);
+  };
+
   public static readonly validPermissions = Object.values(
     PermissionsBitField.Flags,
   );
   public static readonly filterInvalidPermissions = (perms: bigint[]) =>
     perms.filter((perm) => !Permissions.validPermissions.includes(perm));
+
+  public static readonly intToString = (
+    level: PermLevel,
+  ): PermissionLevelName => {
+    const foundLevel = Permissions.sortedLevels.find((e) => e.level === level);
+
+    if (!foundLevel) {
+      throw new Error(
+        `Invalid permission level provided: ${level}. Valid levels are: ${Permissions.sortedLevels
+          .map((e) => e.level)
+          .join(', ')}`,
+      );
+    }
+
+    return foundLevel.name;
+  };
 
   public static readonly resolveForMember = async (
     member: GuildMember | APIInteractionGuildMember | null,
@@ -131,6 +160,13 @@ class Permissions {
   ): Promise<PermLevel> => {
     if (member === null || guild === null) {
       return PermLevel.User;
+    }
+
+    const cacheKey = `${guild.id}-${member.user.id}`;
+    const cacheData = await Permissions.cache.get(cacheKey);
+
+    if (cacheData) {
+      return cacheData;
     }
 
     const resolvedMember = !(member instanceof GuildMember)
@@ -141,11 +177,17 @@ class Permissions {
       return PermLevel.User;
     }
 
+    let resolvedLevel = PermLevel.User;
     for await (const { level, hasLevel } of Permissions.sortedLevels) {
-      if (await hasLevel(Permissions.config, resolvedMember)) return level;
+      if (await hasLevel(Permissions.config, resolvedMember)) {
+        resolvedLevel = level;
+        break;
+      }
     }
 
-    return PermLevel.User;
+    await Permissions.cache.set(cacheKey, resolvedLevel);
+
+    return resolvedLevel;
   };
 
   public static readonly hasChannelPermissions = (
@@ -174,7 +216,7 @@ class Permissions {
   };
 
   public static readonly displayPermissions = (
-    perms: bigint[] | string[],
+    perms: bigint[] | string[] | PermissionResolvable[],
     joinStr = ', ',
     noneStr = 'None',
   ) => {

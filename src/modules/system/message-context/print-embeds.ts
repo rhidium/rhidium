@@ -1,21 +1,24 @@
 import { Command, CommandType } from '@core/commands';
 import { Embeds } from '@core/config';
 import { EmbedConstants } from '@core/constants';
+import { I18n } from '@core/i18n';
 import { AttachmentBuilder, EmbedBuilder, escapeCodeBlock } from 'discord.js';
 
 const PrintEmbedsCommand = new Command({
   type: CommandType.MessageContextMenu,
   data: (builder) => builder.setName('Print Embed Data'),
   category: 'Testing & Development',
-  run: async (client, interaction) => {
-    const { targetMessage } = interaction;
+  run: async ({ interaction }) => {
+    const { targetMessage, guild: discordGuild } = interaction;
     const hasEmbeds = targetMessage.embeds.length > 0;
 
     if (!hasEmbeds) {
       // Might be missing MessageContent scope
       await PrintEmbedsCommand.reply(
         interaction,
-        Embeds.error(client.Lang.t('core:discord.messageHasNoEmbeds')),
+        Embeds.error(
+          I18n.localize('core:discord.messageHasNoEmbeds', discordGuild),
+        ),
       );
       return;
     }

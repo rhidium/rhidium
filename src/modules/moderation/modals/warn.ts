@@ -88,7 +88,7 @@ const WarnModalCommand = new Command({
     deferReply: true,
     refuseUncached: true,
   },
-  run: async (_client, interaction) => {
+  run: async ({ interaction }) => {
     const {
       member: issuerMember,
       fields,

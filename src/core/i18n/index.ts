@@ -1,18 +1,44 @@
-import _i18n, { InterpolationMap, TOptions } from 'i18next';
-import { Interaction, Locale } from 'discord.js';
+import fs from 'fs';
+import i18n, { TOptions } from 'i18next';
+import { Guild, Interaction, Locale } from 'discord.js';
 import { UnitConstants } from '@core/constants';
-import { LocalizedLabelKey, LocalizedReturnType } from './i18next';
+import { Logger } from '@core/logger';
+import { LocalizedLabelKey } from './i18next';
 
 import enUSCommon from '../../../locales/en-US/common.json';
 import enUSCore from '../../../locales/en-US/core.json';
 
 import nlCommon from '../../../locales/nl/common.json';
 import nlCore from '../../../locales/nl/core.json';
-import { Logger } from '@core/logger';
 
-export const localizedCommands = ['test'] as const;
-export const commandNamespaces = localizedCommands.map(
-  (command) => `commands.${command}` as const,
+const getFiles = (
+  path: string,
+  extensions: string[],
+  recursive = false,
+): string[] => {
+  const files = fs
+    .readdirSync(path)
+    .filter((file: string) => extensions.some((ext) => file.endsWith(ext)));
+
+  if (recursive) {
+    const subdirs = fs
+      .readdirSync(path)
+      .filter((file: string) => fs.statSync(`${path}/${file}`).isDirectory());
+    for (const subdir of subdirs) {
+      const subdirFiles = getFiles(`${path}/${subdir}`, extensions, true);
+      files.push(...subdirFiles);
+    }
+  }
+
+  return files.map((file: string) => `${path}/${file}`);
+};
+
+const localizedCommands = getFiles('./locales/en-US/commands', ['.json']).map(
+  (file) =>
+    [
+      file.replace('.json', '').replace('./locales/en-US/commands/', ''),
+      '../../../' + file,
+    ] as const,
 );
 
 export enum Locales {
@@ -30,9 +56,8 @@ const commandsLocalization = (
 ) => {
   return Object.fromEntries(
     localizedCommands
-      .map((command) => {
+      .map(([command, path]) => {
         let data;
-        const path = `../../../locales/${locale}/commands/${command}.json`;
 
         try {
           data = require(path);
@@ -42,10 +67,7 @@ const commandsLocalization = (
           }
 
           Logger.warn(
-            `Missing command localization for ${command} in ${locale}.json at ${path.replaceAll(
-              '../../../',
-              '',
-            )}`,
+            `Missing command localization for ${command} in ${locale}.json at ${path}`,
           );
         }
 
@@ -55,13 +77,7 @@ const commandsLocalization = (
   );
 };
 
-export const ns = [
-  'core',
-  'common',
-  'glossary',
-  'validation',
-  ...commandNamespaces,
-] as const;
+export const ns = ['core', 'common', 'glossary', 'validation'] as const;
 
 export const defaultNS = 'void';
 export const resources = {
@@ -79,9 +95,8 @@ export const resources = {
 } as const;
 
 class I18n {
-  public static readonly instance = _i18n;
-  public static readonly init = async (): Promise<typeof _i18n> => {
-    await this.instance.init({
+  public static readonly init = async (): Promise<typeof i18n> => {
+    await i18n.init({
       debug: true,
       initAsync: false,
       ns,
@@ -92,7 +107,7 @@ class I18n {
       resources,
     });
 
-    return this.instance;
+    return i18n;
   };
 
   public static readonly msToTime = (ms: number) => {
@@ -139,28 +154,28 @@ class I18n {
   };
 
   public static readonly localize = <
-    Key extends LocalizedLabelKey | LocalizedLabelKey[],
-    Topt extends TOptions,
-    Ret extends LocalizedReturnType<Key, Topt>,
+    Key extends LocalizedLabelKey | LocalizedLabelKey[] | `commands:${string}`,
   >(
     key: Key,
-    interaction: Interaction,
-    options?: Omit<Topt & InterpolationMap<Ret>, 'lng'>,
+    ctx: Interaction | Guild | Locales | null,
+    options?: Omit<TOptions, 'lng'>,
   ) => {
-    // @ts-expect-error Expression too complex
-    return this.instance.t(key, {
-      lng: interaction.locale,
-      fallbackLng: defaultLocale,
+    // @ts-expect-error - Incompatible type signatures
+    return i18n.t(key, {
       ...options,
-    });
+      lng: !ctx
+        ? defaultLocale
+        : typeof ctx === 'string'
+          ? ctx
+          : 'locale' in ctx
+            ? ctx.locale
+            : ctx.preferredLocale,
+      fallbackLng: defaultLocale,
+    }) as string;
   };
 
-  public static readonly isLocalizedCommand = (
-    command: string,
-  ): command is (typeof localizedCommands)[number] => {
-    return localizedCommands.includes(
-      command as (typeof localizedCommands)[number],
-    );
+  public static readonly isLocalizedCommand = (command: string): boolean => {
+    return localizedCommands.find(([file]) => file === command) !== undefined;
   };
 }
 

@@ -1,0 +1,5 @@
+{
+  "name": "invite",
+  "description": "Get a link to invite the bot to your server.",
+  "prompt": "You can add me to your server by clicking [here]({{url}})."
+}

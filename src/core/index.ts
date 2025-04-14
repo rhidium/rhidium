@@ -14,11 +14,11 @@ import systemRegistry from '../modules/system';
 import moderationRegistry from '../modules/moderation';
 
 const main = async () => {
+  await I18n.init();
   const manager = new ClientManager();
   const client = new Client({
     intents: [GatewayIntentBits.Guilds],
     manager,
-    Lang: await I18n.init(),
   });
 
   manager.register(
@@ -27,11 +27,13 @@ const main = async () => {
     ...moderationRegistry,
   );
 
-  await client.login(appConfig.client.token, {
-    guildId: appConfig.client.development_server_id,
-    clearOtherEnvironment: true,
-    forceSync: false,
-  });
+  await Promise.all([
+    client.login(appConfig.client.token, {
+      guildId: appConfig.client.development_server_id,
+      clearOtherEnvironment: true,
+      forceSync: false,
+    }),
+  ]);
 };
 
 void main();
