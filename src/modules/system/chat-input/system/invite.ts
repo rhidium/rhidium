@@ -24,11 +24,11 @@ const InviteCommand = new Command({
       interaction,
       Embeds.primary({
         description: I18n.localize('commands:invite.prompt', interaction, {
-          url: client.manager.generateInvite(
-            client,
-            commandDeploymentEnvironment,
-          ),
-        }),
+          url: 'URL_REPLACER',
+        }).replace(
+          'URL_REPLACER',
+          client.manager.generateInvite(client, commandDeploymentEnvironment),
+        ),
       }),
     );
   },
