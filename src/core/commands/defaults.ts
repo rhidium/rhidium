@@ -35,7 +35,7 @@ const throttle: CommandThrottleOptions = {
 
 const interactions: CommandInteractionOptions<false> = {
   deferReply: false,
-  replyEphemeral: false,
+  replyEphemeral: true,
   refuseUncached: false,
 } as const;
 
