@@ -201,7 +201,7 @@ class RESTClient implements AbstractRESTClient {
       (id) => !commandApiIds.includes(id),
     );
 
-    return {
+    const synced = {
       isSynced:
         newCommands.length === 0 &&
         updatedCommands.length === 0 &&
@@ -210,6 +210,10 @@ class RESTClient implements AbstractRESTClient {
       updated: updatedCommands,
       deleted: deletedCommands,
     };
+
+    this.debug('Commands synced: %o', synced);
+
+    return synced;
   }
 
   public readonly syncCommandsToDatabase = async (
@@ -353,18 +357,20 @@ class RESTClient implements AbstractRESTClient {
     );
 
     if (guildId) {
-      if (!(await this.client.guilds.fetch(guildId).catch(() => null))) {
+      const guild = this.client.guilds.cache.get(guildId);
+
+      if (!guild) {
         Logger.warn(`Guild ${guildId} not found, skipping command fetch`);
         return new Collection<
           string,
           ApplicationCommand<{ guild: GuildResolvable }>
         >();
       }
+
+      return guild.commands.fetch();
     }
 
-    return this.client.application.commands.fetch({
-      guildId: guildId ?? undefined,
-    });
+    return this.client.application.commands.fetch();
   }
 
   private async syncComponentsToDatabase(
@@ -402,51 +408,29 @@ class RESTClient implements AbstractRESTClient {
 
     const { guildId, clearOtherEnvironment, forceSync } = options ?? {};
 
-    const [synced, apiCommands] = await Promise.all([
+    const [synced] = await Promise.all([
       this.checkCommandsSynced(),
-      this.fetchApiCommands(guildId ?? null),
       this.syncComponentsToDatabase(components),
     ]);
 
-    const environmentIsDesynced = Array.isArray(apiCommands)
-      ? apiCommands.length !== this.data.length
-      : true;
-
-    if (synced.isSynced && !forceSync && !environmentIsDesynced) {
+    if (synced.isSynced && !forceSync) {
       this.debug('Commands are already in sync, skipping');
       return;
     }
 
-    if (environmentIsDesynced) {
-      this.debug(
-        'Environment API data is desynced, syncing commands to Discord API',
-        {
-          guildId,
-          forceSync,
-          apiCommandsIsArray: Array.isArray(apiCommands),
-          apiCommandsLength: Array.isArray(apiCommands)
-            ? apiCommands.length
-            : null,
-          dataLength: this.data.length,
-        },
-      );
-    }
+    const putCommandData = forceSync
+      ? this.data
+      : this.data.filter(
+          (command) =>
+            synced.new.includes(CommandBase.resolveId(command)) ||
+            synced.updated.includes(CommandBase.resolveId(command)),
+        );
 
-    const putCommandData =
-      forceSync || environmentIsDesynced
-        ? this.data
-        : this.data.filter(
-            (command) =>
-              synced.new.includes(CommandBase.resolveId(command)) ||
-              synced.updated.includes(CommandBase.resolveId(command)),
-          );
-
-    const deleteCommandData =
-      forceSync || environmentIsDesynced
-        ? []
-        : synced.deleted
-            .map((id) => CommandBase.findInApiData(id, this.data) ?? null)
-            .filter((command) => command !== null);
+    const deleteCommandData = forceSync
+      ? []
+      : synced.deleted
+          .map((id) => CommandBase.findInApiData(id, this.data) ?? null)
+          .filter((command) => command !== null);
 
     this.debug(
       'Commands to put: %o',
