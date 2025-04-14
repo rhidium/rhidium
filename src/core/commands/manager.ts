@@ -263,7 +263,7 @@ class ClientManager {
 
   public readonly generateInvite = async (
     client: Client<true>,
-    guildId?: string,
+    guildId?: string | null,
   ) => {
     this.debug('Generating invite link');
 
@@ -271,7 +271,7 @@ class ClientManager {
       scopes: [OAuth2Scopes.Bot, OAuth2Scopes.ApplicationsCommands],
       permissions: this.flatCommandPermissions,
       disableGuildSelect: !!guildId,
-      guild: guildId,
+      guild: guildId ?? undefined,
     });
   };
 

@@ -1,6 +1,7 @@
 import Client from '@core/client';
 import {
   Command,
+  commandDeploymentEnvironment,
   CommandThrottle,
   CommandType,
   Permissions,
@@ -88,7 +89,7 @@ class EmbedResolver {
     commands: Collection<string, Command>,
   ) => {
     const apiCommandData = await client.manager.REST.fetchApiCommands(
-      appConfig.client.development_server_id,
+      commandDeploymentEnvironment,
     );
     const allFields = commands
       .toJSON()
