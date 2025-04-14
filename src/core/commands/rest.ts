@@ -26,7 +26,7 @@ type CommandCheckResponse = {
 
 type SyncCommandOptions = {
   /**
-   * The guild ID to sync commands for, or `null` for global
+   * The guild ID to sync commands for, or none for global
    */
   guildId?: string | null;
   /**
@@ -48,7 +48,7 @@ type AbstractRESTClient = {
   data: APICommandData[];
   /**
    * Checks if local commands are in sync with the database & Discord API
-   * @param guildId The guild ID to check commands for, or `null` for global
+   * @param guildId The guild ID to check commands for, or none for global
    * @returns A response object with the sync status, consisting of new, updated, and deleted commands
    */
   checkCommandsSynced: (
@@ -56,7 +56,7 @@ type AbstractRESTClient = {
   ) => Promise<CommandCheckResponse>;
   /**
    * Syncs the local commands to the database
-   * @param guildId The guild ID to sync commands for, or `null` for global
+   * @param guildId The guild ID to sync commands for, or none for global
    * @param commandData The command data to sync
    * @param diff The diff response from `checkCommandsSynced`
    * @returns A promise that resolves when the commands are synced
@@ -68,7 +68,7 @@ type AbstractRESTClient = {
   ) => Promise<void>;
   /**
    * Clears commands from the Discord API
-   * @param guildId The guild ID to clear commands for, or `null` for global
+   * @param guildId The guild ID to clear commands for, or none for global
    * @returns A promise that resolves when the commands are cleared
    */
   clearCommands: (guildId?: string | null) => Promise<void>;
@@ -84,7 +84,7 @@ type AbstractRESTClient = {
   ) => Promise<void>;
   /**
    * Fetches commands from the Discord API
-   * @param guildId The guild ID to fetch commands for, or `null` for global
+   * @param guildId The guild ID to fetch commands for, or none for global
    * @returns A promise that resolves with the command data
    */
   fetchApiCommands: (

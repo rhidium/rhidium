@@ -30,8 +30,8 @@ const SupportCommand = new Command({
       interaction,
       Embeds.primary({
         description: I18n.localize('commands:support.prompt', interaction, {
-          url: 'URL_REPLACER',
-        }).replace('URL_REPLACER', appConfig.urls.support_server),
+          url: appConfig.urls.support_server,
+        }),
       }),
     );
   },

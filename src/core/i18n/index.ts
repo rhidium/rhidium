@@ -103,6 +103,9 @@ class I18n {
       supportedLngs: locales,
       defaultNS,
       resources,
+      interpolation: {
+        escapeValue: false,
+      },
     });
 
     return i18n;
