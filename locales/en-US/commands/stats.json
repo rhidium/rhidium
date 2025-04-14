@@ -1,0 +1,28 @@
+{
+  "name": "stats",
+  "description": "Get the bot's statistics.",
+  "pinging": "Pinging...",
+  "statistics": {
+    "name": "Statistics",
+    "latency": "Latency",
+    "memory": "Memory",
+    "uptime": "Uptime",
+    "counts": {
+      "label": "Amounts",
+      "servers": "Servers",
+      "members": "Members",
+      "channels": "Channels",
+      "roles": "Roles"
+    },
+    "versions": {
+      "label": "Versions",
+      "node": "Node.js",
+      "discordJs": "Discord.js"
+    },
+    "webSocketLatency": "WebSocket Latency",
+    "apiLatency": "API Latency",
+    "roundTripLatency": "Round Trip Latency",
+    "memoryUsage": "Memory Usage",
+    "cacheSize": "Cache Size"
+  }
+}

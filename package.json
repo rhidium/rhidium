@@ -1,96 +1,125 @@
 {
-  "name": "discord.js-bot-template",
-  "description": "A discord bot template using discord.js",
-  "version": "3.4.0",
-  "main": "src/index.js",
-  "scripts": {
-    "start": "node .",
-    "dev": "nodemon run node --trace-warnings .",
-    "test": "node . mode=test",
-    "commit": "cz",
-    "docker:build": "docker build --tag discord-bot-template .",
-    "docker:shell": "docker run -it --rm discord-bot-template sh",
-    "docker:start": "docker run -it -p 3000:3000 --env-file ./.env -d --name discord-bot-template discord-bot-template",
-    "docker:restart": "docker restart discord-bot-template",
-    "docker:stop": "docker stop discord-bot-template",
-    "docker:kill": "docker rm -f discord-bot-template",
-    "docker:purge": "docker rm -fv discord-bot-template",
-    "docker:logs": "docker logs discord-bot-template -f",
-    "docker:image": "docker image tag discord-bot-template mirasaki/discord-bot-template",
-    "docker:push": "docker push mirasaki/discord-bot-template",
-    "docker:update": "git pull && npm install && npm run docker:stop && npm run docker:kill && npm run docker:build && npm run docker:start",
-    "docker:dev:build": "docker build --tag discord-bot-template-dev -f development.Dockerfile .",
-    "docker:dev:start": "docker run -it --rm -v $(pwd):/app -v /app/node_modules -p 3000:3000 -p 9229:9229 -w /app discord-bot-template-dev",
-    "pm2:start": "pm2 start --name=discord.js-bot-template npm -- run start",
-    "pm2:stop": "pm2 stop discord.js-bot-template",
-    "pm2:purge": "pm2 stop discord.js-bot-template && pm2 delete discord.js-bot-template && pm2 reset discord.js-bot-template",
-    "pm2:logs": "pm2 logs --lines 300 discord.js-bot-template",
-    "pm2:logsError": "pm2 logs --err --lines 300 discord.js-bot-template",
-    "lint": "eslint src",
-    "linter": "eslint src --fix",
-    "writeLinter": "eslint src --output-file linter-output.txt",
-    "docs": "jsdoc -u ./tutorials --readme README.md -c jsdoc.json",
-    "types": "npx -p typescript tsc src/**/*.js --declaration --allowJs --emitDeclarationOnly --outDir types"
-  },
-  "dependencies": {
-    "@discordjs/rest": "^2.3.0",
-    "@mirasaki/logger": "^1.0.5",
-    "common-tags": "^1.8.2",
-    "discord.js": "^14.16.2",
-    "dotenv": "^16.4.5"
-  },
-  "devDependencies": {
-    "@semantic-release/changelog": "^6.0.3",
-    "@semantic-release/commit-analyzer": "^13.0.0",
-    "@semantic-release/git": "^10.0.1",
-    "@semantic-release/github": "^10.3.5",
-    "@semantic-release/npm": "^12.0.1",
-    "@semantic-release/release-notes-generator": "^14.0.1",
-    "commitizen": "^4.3.0",
-    "cz-conventional-changelog": "^3.3.0",
-    "docdash": "^2.0.2",
-    "eslint": "^9.11.1",
-    "jsdoc": "^4.0.3",
-    "jsdoc-to-markdown": "^9.0.1",
-    "nodemon": "^3.1.7",
-    "semantic-release": "^24.1.1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Mirasaki/discord.js-bot-template.git"
-  },
-  "keywords": [
-    "nodejs",
-    "bot-template",
-    "template",
-    "boilerplate",
-    "discord-api",
-    "typings",
-    "discord",
-    "discordjs",
-    "v14",
-    "discord-bot",
-    "discord-bot-template",
-    "slash-commands",
-    "buttons",
-    "modals",
-    "autocomplete",
-    "context-menus",
-    "select-menus",
-    "documented"
-  ],
-  "author": "Richard Hillebrand (Mirasaki)",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/Mirasaki/discord.js-bot-template/issues"
-  },
-  "homepage": "https://github.com/Mirasaki/discord.js-bot-template#readme",
-  "optionalDependencies": {
-    "fsevents": "^2.3.3"
+  "name": "rhidium",
+  "license": "ISC",
+  "version": "2.2.0",
+  "description": "Quickly and easily create powerful Discord bots using a powerful, opinionated, all-in-one framework.",
+  "main": "dist/src/core/index.js",
+  "packageManager": "pnpm@9.15.4",
+  "engines": {
+    "node": ">=16.6.0",
+    "npm": ">=7.0.0",
+    "vscode": "^1.22.0"
   },
   "config": {
     "commitizen": {
       "path": "./node_modules/cz-conventional-changelog"
     }
-  }
+  },
+  "prisma": {
+    "schema": "prisma/schema.prisma",
+    "seed": "ts-node-dev ./prisma/seed.ts"
+  },
+  "scripts": {
+    "build": "tsc",
+    "prebuild": "rimraf dist",
+    "clean": "gts clean; rimraf docs",
+    "clean:full": "npm run clean; rimraf logs node_modules",
+    "dev": "npm run start:dev",
+    "docs": "npx typedoc",
+    "docs:watch": "npx typedoc --watch",
+    "fix": "gts fix",
+    "lint": "gts lint",
+    "pretest": "npm run build",
+    "posttest": "npm run lint",
+    "start": "node --enable-source-maps dist/src/core/index.js",
+    "start:dev": "DEBUG=app:* ts-node-dev -r tsconfig-paths/register --respawn --notify --transpile-only src/core/index.ts",
+    "test": "mocha dist/test/**/*.js",
+    "test:dev": "ts-mocha test/**/*.spec.ts -w --watch-files '**/*.ts'",
+    "typecheck": "tsc --noEmit",
+    "typecheck:watch": "tsc --noEmit --watch",
+    "commit": "cz",
+    "setup:linux": "pnpm install && cp .env.example .env && cp config/config.example.json config/config.json && cp config/extended-config.example.json config/extended-config.json",
+    "setup:windows": "pnpm install && copy .env.example .env && copy config/config.example.json config/config.json && cp config/extended-config.example.json config/extended-config.json",
+    "db:format": "prisma format",
+    "db:generate": "prisma generate",
+    "db:deploy": "prisma migrate deploy && prisma generate",
+    "db:reset": "prisma migrate reset",
+    "db:push": "prisma db push",
+    "db:seed": "prisma db seed",
+    "db:migrate": "prisma migrate dev",
+    "prepare": "node .husky/install.mjs",
+    "checks": "gts check && turbo run typecheck && turbo run test",
+    "ci:cs": "pnpm changeset",
+    "ci:publish": "pnpm publish -r",
+    "ci:version": "pnpm changeset version"
+  },
+  "pnpm": {
+    "overrides": {
+      "undici": ">=6.21.1"
+    }
+  },
+  "dependencies": {
+    "@prisma/client": "6.5.0",
+    "cache-manager": "^6.4.2",
+    "chrono-node": "^2.8.0",
+    "colors": "^1.4.0",
+    "common-tags": "^1.8.2",
+    "cron": "^4.1.4",
+    "date-fns-tz": "^3.2.0",
+    "debug": "^4.4.0",
+    "deep-object-diff": "^1.1.9",
+    "discord.js": "^14.18.0",
+    "i18next": "^24.2.3",
+    "keyv": "^5.3.2",
+    "lru-cache": "^11.1.0",
+    "module-alias": "^2.2.3",
+    "object-property-extractor": "^1.0.13",
+    "winston": "^3.17.0"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.29.0",
+    "@commitlint/cli": "^19.8.0",
+    "@commitlint/config-conventional": "^19.8.0",
+    "@types/common-tags": "^1.8.4",
+    "@types/debug": "^4.1.12",
+    "@types/module-alias": "^2.0.4",
+    "@types/node": "^22.14.1",
+    "commitizen": "^4.3.1",
+    "cz-conventional-changelog": "^3.3.0",
+    "gts": "^6.0.2",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.5.1",
+    "prisma": "^6.6.0",
+    "rimraf": "^6.0.1",
+    "ts-json-schema-generator": "^2.4.0",
+    "ts-node-dev": "^2.0.0",
+    "tsconfig-paths": "^4.2.0",
+    "tslib": "^2.8.1",
+    "typedoc": "^0.27.9",
+    "typescript": "^5.8.3"
+  },
+  "author": {
+    "name": "Richard Hillebrand (Mirasaki)",
+    "email": "me@mirasaki.dev",
+    "url": "https://mirasaki.dev"
+  },
+  "keywords": [
+    "discord",
+    "template",
+    "bot-template",
+    "node",
+    "discordapp",
+    "typescript",
+    "rhidium",
+    "framework",
+    "discord.js"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:rhidium/rhidium.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rhidium/rhidium/issues"
+  },
+  "homepage": "https://github.com/rhidium/rhidium#readme"
 }

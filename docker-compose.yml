@@ -1,9 +1,0 @@
-services:
-  client:
-    build: .
-    restart: always
-    volumes:
-      - ./config:/app/config
-      - ./docs:/app/docs
-    env_file:
-      - ./.env

@@ -1,232 +1,155 @@
-<br />
-<br />
-
 <div align="center">
   <a href="https://rhidium.xyz"><img src="https://github.com/rhidium/core/assets/57721238/e6d25fa1-07cb-4284-a02a-f73fe7ef3878" width="100" alt="logo" /></a>
 
-  ![Font_PNG](https://github.com/rhidium/core/assets/57721238/9ccc5763-8336-4d1e-8187-a738bafdc519)
+![Font_PNG](https://github.com/rhidium/core/assets/57721238/9ccc5763-8336-4d1e-8187-a738bafdc519)
+
+[![semantic-release: angular](https://img.shields.io/badge/semantic--release-angular-e10079?logo=semantic-release)](https://github.com/semantic-release/semantic-release)
+![GitHub Release](https://img.shields.io/github/v/release/rhidium/rhidium)
+![GitHub License](https://img.shields.io/github/license/rhidium/rhidium)
 
   <p>
     <a href="https://discord.gg/mirasaki"><img src="https://img.shields.io/discord/793894728847720468?color=5865F2&logo=discord&logoColor=white" alt="Discord server" /></a>
-    <a href="https://www.npmjs.com/package/@rhidium/core"><img src="https://img.shields.io/npm/v/@rhidium/core.svg?maxAge=3600" alt="npm version" /></a>
-    <a href="https://www.npmjs.com/package/@rhidium/core"><img src="https://img.shields.io/npm/dt/@rhidium/core.svg?maxAge=3600" alt="npm downloads" /></a>
   </p>
 
-  <p align="center">
-    <a href="https://github.com/rhidium/template">Rhidium</a> has been released! Even though this template will be maintained as a token of appreciation, you should definitely check our Rhidium. It's the upgraded, modern, version of this template - and all in TypeScript.
-  </p>
 </div>
 
-<br />
-<br />
-<br />
+# 👋 Introduction
 
-# discord.js-bot-template
+Rhidium is built out of love for Discord bot development, and has 1 primary goal: to make your life easier. Whether you're just getting started or a seasoned developer, Rhidium is designed to simplify your workflow and help you create bots you can be proud of.
 
-[![semantic-release: angular](https://img.shields.io/badge/semantic--release-angular-e10079?logo=semantic-release)](https://github.com/semantic-release/semantic-release)
-![build](https://img.shields.io/github/actions/workflow/status/Mirasaki/discord.js-bot-template/test.yml?branch=main)
-[![CodeFactor](https://www.codefactor.io/repository/github/mirasaki/discord.js-bot-template/badge)](https://www.codefactor.io/repository/github/mirasaki/discord.js-bot-template)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-![Docker Pulls](https://img.shields.io/docker/pulls/mirasaki/discord-bot-template)
-![version](https://img.shields.io/github/v/release/Mirasaki/discord.js-bot-template)
+## 🤝 About
 
----
+Rhidium is **not** a lightweight framework. It is built on top of the [discord.js](https://discord.js.org/#/) library, and aims to provide most of the core functionality required to bootstrap a powerful, modern Discord bot. Written in TypeScript, it provides the benefits of static type-checking and code completion in modern editors.
 
-This is a bot template using [discord.js](https://github.com/discordjs/discord.js "discord.js on Github") for quickly and easily creating powerful [Discord](https://discord.com/ "Official Discord Website") bots. You don't need much Javascript experience to get started on a project using this template. Not sure where to start? Come join my [Discord Server](https://discord.mirasaki.dev "Mirasaki Development on Discord"), where I'll try and answer all the questions you have.
+> With Rhidium, you can focus on what's really important: **Creating meaningful features**
 
----
+Excited to begin? [Get started](#-installation) or try [the demo](#-support)!
 
-With [Message Content Access becoming a privileged intent](https://support-dev.discord.com/hc/en-us/articles/4404772028055-Message-Content-Access-Deprecation-for-Verified-Bots "source") I thought I'd build a template where you're ready to start working on commands after installing it. This template currently doesn't listen to the `messageCreate` event. Update Slash Commands by using the `/deploy` command or altering the environmental variables. It also uses the latest Discord features, like auto-complete, buttons, modals, and other components.
+## 🤩 Features (non-exhaustive)
 
----
+We've compromised a list of some of the core functionality provided by Rhidium:
 
-Uses [Semantic Release](https://github.com/semantic-release/semantic-release) so you can easily determine if it's appropriate for you to [update](#updating) the bot
+- [x] Type-safe, re-usable [controllers](https://rhidium.xyz/modules/Commands.Controllers.html)
+- [x] Dynamic [component](https://rhidium.xyz/modules/Commands.html) handlers
+- [x] Synchronized local & API commands, automatic refreshes
+- [x] Fully localized (through [i18next](https://www.npmjs.com/package/i18next)), convenience localization for commands
+- [x] Colorful console logging & verbose, organized file logging
+- [x] Wide range of everyday utilities and functionality
+- [x] [CRON](https://crontab.guru/) and interval-based jobs
 
----
+## 💽 Database
 
-## Table of Contents
+This TypeScript project uses [Prisma](https://www.prisma.io/docs/getting-started/quickstart) TypeORM using the `postgresql` adapter.
 
-- [Showcase](#showcase)
-- [Documentation](#documentation)
-- [Features](#features)
-  - [Dynamic Command Handler](#dynamic-command-handler)
-  - [Dynamic Component Handler](#dynamic-component-handler)
-  - [Dynamic Event Handler](#dynamic-event-handler)
-  - [RESTful API](#restful-api)
-  - [Others](#others)
-- [Notes](#notes)
-- [Installation & Usage](#installation--usage)
-  - [Prerequisites](#prerequisites)
-  - [Docker](#run-as-a-docker-container-preferred)
-  - [Node](#run-as-a-plain-nodejs-app)
-  - [Updating](#updating)
+Available adapters: `cockroachdb`, `mongodb`, `postgresql`
 
----
+> **Note**: When using CockroachDB, the `autoincrement()` default function is defined only on BigInt fields. Change `autoincrement()` to `sequence()` if you want an sequential Int field.
 
-<h2 id="showcase">Showcase / Projects using this template</h2>
+## 🛠️ Installation
 
-- [Green Mountain Trader - over 300,000 users](https://mirasaki.dev/gmt)
-- [DayZ Leaderboard bot](https://github.com/Mirasaki/dayz-leaderboard-bot "DayZ Leaderboard bot on GitHub")
-- Create an issue if you want to have your project showcased here
+<details>
 
-<h2 id="documentation">Documentation</h2>
+<summary>Collapse/Expand</summary>
 
-- The client (bot) code is documented at [djs.mirasaki.dev](https://djs.mirasaki.dev "Client Documentation")
-- The API is documented at [djs.mirasaki.dev/api-docs](https://djs.mirasaki.dev/tutorial-api-docs "Backend/API Documentation")
-- Source code is well documented with comments, explaining what's going on
-- With the use of JSDoc for client documentation, enjoy code-completion (IntelliSense) in your favorite code editor
+Please note, a [Discord Application](https://wiki.mirasaki.dev/docs/discord-create-application#go-to-discord-developer-portal) is required for both installation methods.
 
-<h2 id="features">Features</h2>
+### 📦 Run as a Docker container (preferred)
 
-<h3 id="dynamic-command-handler">Dynamic Command Handler</h3>
+The quickest, and easiest, way to host/use this bot template is by deploying it inside of a [Docker](https://www.docker.com/) container. We recommend [Docker Desktop](https://www.docker.com/products/docker-desktop/).
 
-- This template comes with a powerful, yet simple to understand and modify, dynamic command handler. You can go straight to adding new commands without having to worry about client internals.
-- [Message Content Access is becoming a privileged intent](https://support-dev.discord.com/hc/en-us/articles/4404772028055-Message-Content-Access-Deprecation-for-Verified-Bots "source") and that's why this template focuses on Discord's [Application Commands](https://discord.com/developers/docs/interactions/receiving-and-responding#interactions "Discord Application Command Documentation"). In fact, we don't even activity listen to the `messageCreate` event.
-- Every module in the [command root folder](/src/commands/) will be loaded as a [ChatInputCommand](https://djs.mirasaki.dev/ChatInputCommand.html "ChatInputCommand Documentation"), taking care of default configuration.
-    1. Default command name is the name of the file without extension.
-    2. Default command category is the name of the parent folder.
-- Every module in the [context-menus folder](/src/context-menus/) will be loaded as either a [UserContextCommand](https://djs.mirasaki.dev/UserContextCommand.html "UserContextCommand Documentation") or a [MessageContextCommand](https://djs.mirasaki.dev/UserContextCommand.html "MessageContextCommand Documentation"), depending on which folder it's located in.
-- Deep nest to your heart's content. Deep nesting files in folders for all [ChatInputCommand](https://djs.mirasaki.dev/ChatInputCommand.html "ChatInputCommand Documentation"), and **any** API Components is supported for 25 levels.
-- Configure internal permission levels, and define any additional (optional) Discord permissions required to execute the command. Useful for Moderation tools.
-- Enable commands globally, restrict them to a single testing server, or even disable it all together if you've discovered a major bug in your code.
-- Throttle your command usage, configure a `{{usages}} in {{duration}}` cooldown to individual commands. With the 5 different available cooldown types (user, member, channel, guild, global), you can configure an appropriate cooldown for all your commands and components.
-- Configure aliases for all your Application Commands. (ChatInput, UserContextMenu, and MessageContextMenu)
+1. Download the [latest release](https://github.com/rhidium/rhidium/releases`) or `git clone git@github.com:rhidium/rhidium.git` the repo
+2. Run `pnpm setup:linux` or `pnpm setup:windows` (depending on your OS) in the project root folder
+3. Edit the newly created `.env` and `/config/config.json` files and provide your configuration
+4. Start the application: `docker compose up`
 
-<h3 id="dynamic-component-handler">Dynamic Component Handler</h3>
+### 🖥️ Run as a plain NodeJS app
 
-- Ignores component actions where the custom id starts with `@` - so you can use in-command listeners along side the built-in component handler
-- Supports, and uses, all the latest Discord API features, like buttons, modals, context-menus, select-menus, and is autocomplete-enabled!
-- The same configuration as your command files. Apply a cooldown to any component, and manage permissions and all the other configuration you're used to from this template.
-- Examples on how to implement all the different API components.
-    1. [`/info`](/src/context-menus/user/info.js) - User Context Menu Command, displays detailed information about the user. (Right-click a user -> Apps)
-    2. [`/print-embeds`](/src/context-menus/message/print-embed.js) - Message Context Menu Command, grabs and prints raw Embed JSON data from a message and sends it to the member. (Right-click a message -> Apps)
-    3. [Autocomplete-enabled `/help` command](src/interactions/autocomplete/help.js) - The template is auto-complete enabled, just return an array of any size in the files `run()` function
-    4. [`/eval` button-integration](/src/interactions/buttons/eval/acceptEval.js) - Manage buttons and button-groups easily, and apply additional permissions and cooldown for **all** components. (except `autocomplete`)
-    5. [`/eval` modal-integration](/src/interactions/modals/evalSubmit.js) - Manage modals, we have unique identifier declared in our [constants file](/src/constants.js) to make sure we use the same `customId` field across all components and different files. Not required, but strongly recommended.
-    6. [`/help` select-menu-integration](/src/interactions/select-menus/help.js) - Integrating seamlessly with the code in our main [`/help` command](/src/commands/system/help.js)
+1. Install the additional pre-requisites:
+   - [Node.js](https://nodejs.org/en/) v16.6.0 or newer
+   - [PostgreSQL](https://www.postgresql.org/) v13 or newer
+2. Download the [latest release](https://github.com/rhidium/rhidium/releases`) or `git clone git@github.com:rhidium/rhidium.git` the repo
+3. Run `pnpm setup:linux` or `pnpm setup:windows` in the project root folder
+4. Edit the newly created `.env` and `/config/config.json` files and provide your configuration
+5. Start the application: `pnpm start` for production, and `pnpm dev` for local development
 
-<h3 id="dynamic-event-handler">Dynamic Event Handler</h3>
+## ⚙️ Configuration
 
-Every file in [the `listeners` folder](/src/listeners/) will be registered as an event listener where the file name without extension is the name of the event. Creating a file named `messageCreate.js` will listen to the `messageCreate` event, achieving the same as using `client.on()`. It listens for events, not much more to say about it.
+The configuration for this project can be found [here](/config/config.example.json), and should be very straight-forward.
 
-<h3 id="restful-api">RESTful API</h3>
-
-This template comes with a REST API (OpenAPI spec 3.0.0). By default, this only serves the client's command data, which can be used to easily fetch your command data and build a dynamic command table/overview on your personal website. As this project is meant to be newbie-friendly, I thought I would include a **very** basic API template, so new developers are free to play around with it without having to set-up anything themselves. Change `USE_API` to `true` in the [env file](/.env.example) to enable this feature.
-
-<h3 id="others">Others</h3>
-
-- Supports VSCode IntelliSense for auto-complete during local development.
-- Uses Discord's Autocomplete API, and showcases it in the `/help` command.
-- All the template files have comments explaining what's going on, making it easy for new JavaScript developers to jump in.
-- Comes with a [utility file](https://djs.mirasaki.dev/module-Utils.html "Utility file documentation"), which exports utility functions to make your common tasks easier/faster.
-- Extensions to `discord.js` have been containerized. Everything is documented in the [typings file](/typings.d.ts), or check out the [client-extension](https://djs.mirasaki.dev/module-Client.html "Client-extension documentation") file, which is served as `client.container`.
-- Automatically (environmental variable dependent) deploy changes to your API commands, or use the [/deploy](/src/commands/developer/deploy.js) command.
-
-<h3 id="notes">Notes</h3>
-
-- Don't like the folder structure? Jump into the [environmental file](/.env.example) and configure where your commands and components are loaded from
-- Every embed color code and emoji are grabbed from their respective [configuration file](/src/config/), meaning you can personalize the bot without having to go over a plethora of files
-- Comes with a [constants file](/src/constants.js) to manage your unique ids and previously hard-coded values
-- Comes with many example scripts for `pm2` and `docker`, including a docker development build - to get you started using these awesome services
-- And lastly...
-
-You don't **have** to use the built-in component command (buttons, modals, etc) handler. Alternatively, you can use the following (vanilla `discord.js`) code to achieve the same, but within a ChatInput/UserContextMenu/MessageContextMenu command file:
-
-```javascript
-// In any scope with a valid interaction object
-const { ComponentType } = require('discord.js');
-// Fetching the message attached to the received interaction
-const interactionMessage = await interaction.fetchReply();
-
-// Button reply/input collector
-const acceptEvalCollector = interactionMessage.createMessageComponentCollector({
-    filter: (i) => (
-        // Filter out custom ids
-        i.customId === 'customId' || i.customId === 'customIdTwo'
-    ) && i.user.id === interaction.user.id, // Filter out people without access to the command
-    componentType: ComponentType.Button,
-    time: 60000
-});
-
-// And finally, running code when it collects an interaction (defined as "i" in this callback)
-acceptEvalCollector.on('collect', (i) => { /* The callback to run */ });
+```json
+{
+  "client": {
+    "id": "", // Client id from https://discord.dev/application
+    "token": "", // Client/bot token from https://discord.dev/application
+    "development_server_id": "" // Only needed for developers/development environments
+  },
+  "permissions": {
+    "owner_id": "1148597817498140774", // The discord user id of the bot owner
+    "system_administrator_ids": [], // List of discord user ids for system administrators
+    "developer_ids": [] // List of discord user ids for developers
+  }
+}
 ```
 
-<h2 id="installation--usage">Installation & Usage</h2>
+> Additionally, feel free to explore the [personalization options](/config/extended-config.example.json).
 
-<h3 id="prerequisites">Prerequisites</h3>
+### dotenv
 
-- A [Discord Bot account](https://discord.com/developers/applications "Discord Developer Portal")
-    1) Head over to the page linked above
-    2) Click "New Application" in the top right
-    3) Give it a cool name and click "Create"
-    4) Click "Bot" in the left hand panel
-    5) Click "Add Bot" -> "Yes, do it!"
-    6) Click "Reset Token" and copy it to your clipboard, you will need it later
+The `.env` file holds your secrets and other environmental values. Let's explain the different keys here:
 
-> If you're planning on hosting the backend, be sure to run the command `npm run docs` after installing, otherwise the root/index at `http://localhost:3000/` will return a 404 | Not Found error.
+```bash
+NODE_ENV=production # The node environment your bot is running in. Available values: production, development
 
-<h3 id="run-as-a-docker-container-preferred">Run as a Docker container (preferred)</h3>
+# ---------------------------------- Database ---------------------------------- #
+POSTGRES_HOST=localhost # Change to "database" if using docker (compose)
+POSTGRES_PORT=5432 # The port your PostgreSQL server is running on. Default is 5432.
+POSTGRES_USER=postgres # The username for your PostgreSQL server. Default is "postgres".
+POSTGRES_PASSWORD=CHANGE_ME # The password for your PostgreSQL server.
+POSTGRES_DB=rhidium # The name of the database to connect to. Default is "rhidium".
 
-The quickest, and easiest, way to host/use this bot is by deploying it inside of a [Docker](https://docs.docker.com/engine/install/ "Official Docker Website") container.
+# The database URL for connecting to the (PostgreSQL) database. You generally don't
+# need to change this, but you can if you want to use a different database or schema.
+DATABASE_URL="postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}?schema=public"
 
-1. Clone this repository: `git clone https://github.com/Mirasaki/discord.js-bot-template.git`
-2. Navigate inside the new folder: `cd discord.js-bot-template`
-3. Rename `.env.example` to `.env` and provide your environmental variables
-4. Rename `config.example.js` to `config.js` and provide your configuration
+```
 
-    - Alternatively, you can now use the `docker compose up` command to finish setting up the project if you have the [Docker Compose CLI](https://docs.docker.com/compose/) installed
+</details>
 
-5. Build the project: `docker build --tag my-discord-bot .`
-6. Start the bot: `docker run -it --env-file .env --name my-discord-bot mirasaki/discord-bot-template:main`
+## 📚 Documentation
 
-There's a plethora of Docker scripts included in the `/package.json` file, including a development environment - take a look to get started if you've never used Docker before!
+We provide multiple resources to help get you started on your project quickly:
 
-<h3 id="run-as-a-plain-nodejs-app">Run as a plain NodeJS app</h3>
+- Explore the [Template / Example](https://github.com/rhidium/rhidium) - If you're new here, the best way to determine if Rhidium is a fit for you is by exploring this complete example.
+- Check out the [API Documentation](https://rhidium.xyz/modules.html) - Once you're convinced, clone the example/template and check out the API docs to learn more about the inner workings and possibilities.
+- Made with [TypeScript](https://www.typescriptlang.org/) and [discord.js](https://discord.js.org/) - comes with [PM2](https://pm2.io/), [Docker](https://www.docker.com/), [docker compose](https://docs.docker.com/compose/) configurations
 
-<h4 id="prerequisites">Prerequisites</h4>
+## 🙋 Support
 
-- [NodeJS](https://nodejs.org/en/download/ "Node official website") (if you're running as a plain NodeJS app)
-    1) Head over to the download page
-    2) Download the current build (latest features) available for your OS
-    3) Be sure to check the box that says "Automatically install the necessary tools" when you're running the installation wizard
+Join our [support server](https://discord.gg/mirasaki) if you have any questions, feature requests or other feedback:
 
-You can also clone this repository or download a release, and host the project directly. You will need [Node/NodeJS](https://nodejs.org/en/ "Node official website") (Be sure to check the box that says "Automatically install the necessary tools" when you're running the installation wizard)
+[![banner](https://invidget.switchblade.xyz/mirasaki)](https://discord.gg/mirasaki)
 
-1. Head over to [the download page](https://github.com/Mirasaki/discord.js-bot-template/releases/)
-    - Alternatively, clone this repository by using `git clone https://github.com/Mirasaki/discord.js-bot-template.git` and skip to step 4 if you have [Git](https://git-scm.com/downloads "Git Download Section") installed.
-2. Download either the `zip` or `zip.gz` source code
-3. Extract it using [your favorite zip tool](https://www.rarlab.com/download.htm "It's WinRar, duh")
-4. Open a new console/terminal/shell window in the newly created project folder.
-5. Run `npm i --include-dev` to install all dependencies, including development dependencies.
-6. Rename [`.env.example`](/.env.example "View .env.example file in current repository") to `.env` and configure your environmental variables
-7. Rename [`config.example.js`](/config.example.js "View config.example.js file in current repository") to `config.js` and go through your bot configuration
-8. Use the command `node .` to start the application, or alternatively:
-    - `npm run start` to keep the process alive with [PM2](https://pm2.io/ "PM2 | Official Website"), suitable for production environments. (`npm i -g pm2` to install)
-    - `npm run start:dev` if you have `nodemon` installed for automatic restarts on changes, suitable for development environments.
+## 🗺️ Roadmap / To-Do
 
-<h3 id="updating">Updating</h3>
+### High Priority
 
-This project uses [Semantic Release](https://github.com/semantic-release/semantic-release) so you can update your own bot to the new standards of the template using a relatively simple and easy workflow:
+- [ ] Localization for `prompts/interactions`
+- [ ] Add documentation for `COMPONENT_HANDLER_IDENTIFIER`
+- [ ] Refactor (now-required) `(as unknown) as (Any)(Typed/API)Command`
+- [ ] Apply `data#setDefaultMemberPermissions` to relevant commands
+- [ ] Implement (+ refactor) `embeds` and `placeholders` from previous version
+- [ ] Implement (global) reusable command middleware, refactor from previous version
+- [ ] Resolve or otherwise review Typedoc warnings
 
-1. Add a new remote repository, called `upstream` here
+### Low Priority
 
-    - `git remote add upstream git@github.com:Mirasaki/discord.js-bot-template.git`
+- [ ] Dashboard for _command usage statistics_ and _database metrics_
+- [ ] Refactor `Prompts` into a standalone, opt-in, NPM package
 
-2. Pull changes from the upstream repo:
+## 🙋 Support
 
-    - `git pull upstream main --allow-unrelated-histories`
-    - `--allow-unrelated-histories` is a dangerous flag, and you should only use this if you know what you're doing!
-    - Now, you should see some merge conflicts - I recommended resolving the merge in the VSCode Merge Editor
-    - If you just want it to download the changes without automatically merging, use `git fetch` instead of `git pull`
+Join our [support server](https://discord.gg/mirasaki) if you have any questions, feature requests or other feedback:
 
-3. If you want to disable/prevent pushing to the remote repository, set the push URL to an invalid URL using something like
+[![banner](https://invidget.switchblade.xyz/mirasaki)](https://discord.gg/mirasaki)
 
-    - `git config remote.upstream.pushurl "PREVENTS_PUSH_TO_REMOTE_UPSTREAM"`
-
-That's it! You're done!
-If you know of a better workflow to pull remote changes, like `git merge -/- --squash etc` (not ideal) - please let us know by creating an issue or pull request.
-
----
-
-> Open source, self-hosted, and MIT licensed, meaning you're in full control.
+> Open-source and ISC licensed, meaning you're in full control.

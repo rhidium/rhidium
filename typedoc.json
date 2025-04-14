@@ -1,0 +1,9 @@
+{
+  "name": "Rhidium",
+  "entryPoints": ["./src/core/index.namespace.ts"],
+  "out": "./docs",
+  "theme": "default",
+  "tsconfig": "./tsconfig.json",
+  "includeVersion": false,
+  "exclude": ["**/node_modules/**"]
+}

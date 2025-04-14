@@ -1,0 +1,98 @@
+{
+  "word": {
+    "unknown": "Unknown",
+    "none": "None",
+    "loading": "Loading",
+    "error": "Error",
+    "success": "Success",
+    "warning": "Warning",
+    "info": "Info",
+    "yes": "Yes",
+    "no": "No",
+    "on": "On",
+    "off": "Off",
+    "enabled": "Enabled",
+    "disabled": "Disabled",
+    "active": "Active",
+    "inactive": "Inactive",
+    "online": "Online",
+    "offline": "Offline",
+    "available": "Available",
+    "unavailable": "Unavailable",
+    "connected": "Connected",
+    "disconnected": "Disconnected",
+    "completed": "Completed",
+    "pending": "Pending",
+    "failed": "Failed",
+    "cancelled": "Cancelled",
+    "accepted": "Accepted",
+    "rejected": "Rejected",
+    "created": "Created",
+    "updated": "Updated",
+    "deleted": "Deleted",
+    "archived": "Archived",
+    "restored": "Restored",
+    "added": "Added",
+    "removed": "Removed",
+    "changed": "Changed",
+    "modified": "Modified",
+    "viewed": "Viewed",
+    "opened": "Opened",
+    "closed": "Closed",
+    "started": "Started",
+    "stopped": "Stopped",
+    "paused": "Paused",
+    "resumed": "Resumed",
+    "finished": "Finished",
+    "startedAt": "Started at {{time}}",
+    "stoppedAt": "Stopped at {{time}}",
+    "pausedAt": "Paused at {{time}}",
+    "resumedAt": "Resumed at {{time}}",
+    "finishedAt": "Finished at {{time}}"
+  },
+  "actions": {
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "delete": "Delete",
+    "edit": "Edit",
+    "save": "Save",
+    "close": "Close"
+  },
+  "confirmation": {
+    "prompt": {
+      "title": "Are you sure?",
+      "message": "This action cannot be undone."
+    },
+    "cancel": {
+      "title": "Cancelled",
+      "message": "The action has been cancelled."
+    },
+    "confirm": {
+      "title": "Confirmed",
+      "message": "The action has been confirmed."
+    }
+  },
+  "errors": {
+    "tryAgainLater": "Please try again later.",
+    "issueReportedToSupport": "This issue has been reported to the developers/support team.",
+    "rateLimit": {
+      "title": "Rate Limit",
+      "message": "You are being rate-limited, please wait {{time}} before trying again."
+    }
+  },
+  "time": {
+    "runtime": "Runtime",
+    "singular": {
+      "seconds": "{{count}} second",
+      "minutes": "{{count}} minute",
+      "hours": "{{count}} hour",
+      "days": "{{count}} day"
+    },
+    "plural": {
+      "seconds": "{{count}} seconds",
+      "minutes": "{{count}} minutes",
+      "hours": "{{count}} hours",
+      "days": "{{count}} days"
+    }
+  }
+}
