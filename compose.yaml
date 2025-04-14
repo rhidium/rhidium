@@ -18,7 +18,6 @@ services:
       - ./docs:/app/docs:rw
       - ./config:/app/config:r
       - ./prisma:/app/prisma:r # Prisma is included as a volume to allow for database migrations without having to rebuild the client container.
-      - ./locales:/app/locales:r # Locales are included as a volume because not all json files are directly imported in the project/source.
     ports:
       - 9000:9000
     networks:
