@@ -57,15 +57,20 @@ const commandsLocalization = (
       .map(([command, path]) => {
         let data;
 
+        const resolvedPath = path.replace(
+          /en-US/g,
+          locale === Locales.EnglishUS ? 'en-US' : locale,
+        );
+
         try {
-          data = require(path);
+          data = require(resolvedPath);
         } catch (err) {
           if (isRequired) {
             throw err;
           }
 
           Logger.warn(
-            `Missing command localization for ${command} in ${locale}.json at ${path}`,
+            `Missing command localization for ${command} in ${locale}.json at ${resolvedPath}`,
           );
         }
 
