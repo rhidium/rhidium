@@ -30,8 +30,8 @@ const main = async () => {
   await Promise.all([
     client.login(appConfig.client.token, {
       guildId: commandDeploymentEnvironment,
-      clearOtherEnvironment: true,
-      forceSync: true,
+      clearOtherEnvironment: process.env.NODE_ENV !== 'production',
+      forceSync: false,
     }),
   ]);
 };
