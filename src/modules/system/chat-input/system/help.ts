@@ -11,6 +11,7 @@ import { EmbedConstants } from '@core/constants';
 import { StringUtils, TimeUtils } from '@core/utils';
 import { ApplicationCommandOptionType, Collection } from 'discord.js';
 import CommandOrCategoryCommand from '../../auto-completes/command-or-category';
+import { I18n } from '@core/i18n';
 
 class EmbedResolver {
   static readonly commandEmbed = (cmd: Command) => {
@@ -189,8 +190,14 @@ const HelpCommand = new Command({
       interaction,
     });
 
-    // Handle general help command / overview / bot introduction / getting started :)
     if (!result) {
+      await HelpCommand.reply(
+        interaction,
+        Embeds.error(
+          I18n.localize('commands:help.noCommandOrCategory', interaction),
+        ),
+      );
+
       return;
     }
 

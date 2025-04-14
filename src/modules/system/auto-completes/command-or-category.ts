@@ -7,7 +7,7 @@ type CommandOrCategory = APICommand | string;
 const data = new SlashCommandStringOption()
   .setName('command-or-category')
   .setDescription('Select a command or category')
-  .setRequired(false)
+  .setRequired(true)
   .setAutocomplete(true);
 
 const CommandOrCategoryCommand = new Command({
