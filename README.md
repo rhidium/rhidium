@@ -136,6 +136,7 @@ Join our [support server](https://discord.gg/mirasaki) if you have any questions
 
 ### High Priority
 
+- [ ] Command **deployment** currently doesn't respect `enabled#guilds`, meaning they are registered as global commands
 - [ ] Localization for `prompts/interactions`
 - [ ] Add documentation for `COMPONENT_HANDLER_IDENTIFIER`
 - [ ] Refactor (now-required) `(as unknown) as (Any)(Typed/API)Command`

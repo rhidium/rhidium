@@ -79,7 +79,7 @@ class CommandBase<
 > {
   public readonly id: string;
   public readonly idWithoutPrefix: string;
-  public readonly category: string | null;
+  public readonly category: string;
   public readonly type: Type;
   public readonly data: CommandData<Type>;
   private readonly run: null | CommandRunFunction<
@@ -140,7 +140,7 @@ class CommandBase<
     this.id = `${this.type === CommandType.ChatInputPlain ? CommandType.ChatInput : this.type}/${id}`;
     this.idWithoutPrefix = this.id.split('/').slice(1).join('/');
     this.data = data;
-    this.category = options?.category ?? null;
+    this.category = options?.category ?? 'Uncategorized';
     this.run =
       'run' in options && typeof options.run !== 'undefined'
         ? options.run.bind(this)

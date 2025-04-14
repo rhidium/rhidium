@@ -255,8 +255,7 @@ class ClientManager {
       new Set(
         this.apiCommands
           .filter(CommandBase.isEnabled)
-          .map((command) => command.category)
-          .filter((category): category is string => !!category?.trim()),
+          .map((command) => command.category.trim()),
       ),
     );
   }

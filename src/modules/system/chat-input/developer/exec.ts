@@ -1,5 +1,5 @@
 import { Command, CommandType, PermLevel } from '@core/commands';
-import { Embeds } from '@core/config';
+import { appConfig, Embeds } from '@core/config';
 import { EmbedConstants, UnitConstants } from '@core/constants';
 import { TimeUtils } from '@core/utils';
 import { exec } from 'child_process';
@@ -14,12 +14,18 @@ const ExecCommand = new Command({
     replyEphemeral: true,
     deferReply: true,
   },
+  enabled: {
+    guilds: appConfig.client.development_server_id
+      ? [appConfig.client.development_server_id]
+      : false,
+  },
   data: (builder) =>
     builder
       .setName('exec')
       .setDescription(
         'Execute a console/terminal command, rejects after 15 minutes',
       )
+      .setDefaultMemberPermissions(0)
       .addStringOption((option) =>
         option
           .setName('command')
