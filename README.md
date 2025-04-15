@@ -61,7 +61,7 @@ The quickest, and easiest, way to host/use this bot template is by deploying it 
 2. Run `pnpm setup:linux` or `pnpm setup:windows` (depending on your OS) in the project root folder
 3. Edit the newly created `.env` and `/config/config.json` files and provide your configuration
 4. Sync the database: `docker compose run --rm client sh -c "npx prisma db push"`
-5. Start the application: `docker compose up -d` (you can view logs with `docker compose logs -f`)
+5. Start the application: `docker compose up -d client` (you can view logs with `docker compose logs -f client`)
 
 ### 🖥️ Run as a plain NodeJS app
 

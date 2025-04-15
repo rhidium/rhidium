@@ -25,7 +25,7 @@
     "clean": "gts clean; rimraf docs",
     "clean:full": "npm run clean; rimraf logs node_modules",
     "dev": "npm run start:dev",
-    "docs": "npx typedoc",
+    "docs:build": "npx typedoc",
     "docs:watch": "npx typedoc --watch",
     "fix": "gts fix",
     "lint": "gts lint",

@@ -1,7 +1,6 @@
 /.changeset
 /.github
 /.vscode
-/config/*.example.json
 /dist
 /docs
 /logs
@@ -23,3 +22,7 @@
 *.md
 **/*.md
 **/*.log
+
+# The following are required for the docs image/container
+!README.md
+!/config/*.example.json
