@@ -5,7 +5,8 @@
     "guildOnly": "This command can only be used in a server.",
     "cachedGuildOnly": "Your servers hasn't been cached yet. Please try again later.",
     "nsfwChannelOnly": "This command is only available in NSFW channels.",
-    "notTargetUser": "This command/component is meant for a specific user, it cannot be used by you."
+    "notTargetUser": "This command/component is meant for a specific user, it cannot be used by you.",
+    "noOptionSelected": "You must select an option from the list that is displayed when using this command."
   },
   "permissions": {
     "yourLevel": "Your permission level is {{level}}.",

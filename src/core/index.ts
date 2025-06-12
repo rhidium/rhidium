@@ -6,7 +6,7 @@ moduleAlias.addAliases({
 });
 
 import { appConfig } from './config';
-import { ClientManager } from './commands';
+import { ClientManager, commandDeploymentEnvironment } from './commands';
 import Client from './client';
 import { I18n } from './i18n';
 import utilityRegistry from '../modules/utility';
@@ -29,8 +29,8 @@ const main = async () => {
 
   await Promise.all([
     client.login(appConfig.client.token, {
-      guildId: appConfig.client.development_server_id,
-      clearOtherEnvironment: true,
+      guildId: commandDeploymentEnvironment,
+      clearOtherEnvironment: process.env.NODE_ENV !== 'production',
       forceSync: false,
     }),
   ]);

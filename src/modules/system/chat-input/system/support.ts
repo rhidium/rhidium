@@ -30,7 +30,7 @@ const SupportCommand = new Command({
       interaction,
       Embeds.primary({
         description: I18n.localize('commands:support.prompt', interaction, {
-          link: appConfig.urls.support_server,
+          url: appConfig.urls.support_server,
         }),
       }),
     );

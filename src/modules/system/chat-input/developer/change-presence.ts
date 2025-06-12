@@ -1,5 +1,5 @@
 import { Command, CommandThrottleType, CommandType } from '@core/commands';
-import { Embeds } from '@core/config';
+import { appConfig, Embeds } from '@core/config';
 import { UnitConstants } from '@core/constants';
 import { ActivitiesOptions, ActivityType, PresenceData } from 'discord.js';
 
@@ -18,6 +18,11 @@ const ChangePresenceCommand = new Command({
     limit: 2,
     type: CommandThrottleType.Global,
   },
+  enabled: {
+    guilds: appConfig.client.development_server_id
+      ? [appConfig.client.development_server_id]
+      : false,
+  },
   interactions: {
     replyEphemeral: true,
     deferReply: true,
@@ -26,6 +31,7 @@ const ChangePresenceCommand = new Command({
     builder
       .setName('change-presence')
       .setDescription("Change the bot's status/presence")
+      .setDefaultMemberPermissions(0)
       .addStringOption((option) =>
         option
           .setName('activity')

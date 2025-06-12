@@ -2,6 +2,8 @@ import {
   Command,
   CommandInteraction,
   CommandThrottleType,
+  Permissions,
+  PermLevel,
   ThrottleConsumerResult,
 } from '@core/commands';
 import { Model } from '../models';
@@ -75,6 +77,18 @@ class CommandWrapper extends DatabaseWrapper<Model.Command> {
     const options = command.throttle;
 
     if (!options.enabled) {
+      return {
+        ok: true,
+        expiresAt: interaction.createdTimestamp,
+      };
+    }
+
+    const memberPermLevel = await Permissions.resolveForMember(
+      interaction.member,
+      interaction.guild,
+    );
+
+    if (memberPermLevel > PermLevel['Server Owner']) {
       return {
         ok: true,
         expiresAt: interaction.createdTimestamp,

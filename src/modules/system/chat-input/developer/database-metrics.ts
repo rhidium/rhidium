@@ -1,5 +1,5 @@
 import { Command, CommandType, PermLevel } from '@core/commands';
-import { Embeds } from '@core/config';
+import { appConfig, Embeds } from '@core/config';
 import {
   Database,
   modelEntries,
@@ -34,6 +34,11 @@ for (const [key, value] of modelEntries) {
 
 const DatabaseMetricsCommand = new Command({
   type: CommandType.ChatInput,
+  enabled: {
+    guilds: appConfig.client.development_server_id
+      ? [appConfig.client.development_server_id]
+      : false,
+  },
   permissions: {
     level: PermLevel['Bot Administrator'],
   },
@@ -41,6 +46,7 @@ const DatabaseMetricsCommand = new Command({
     builder
       .setName('database')
       .setDescription('View database information and metrics')
+      .setDefaultMemberPermissions(0)
       .addSubcommandGroup(modelMetricsSubcommand)
       .addSubcommandGroup((group) =>
         group

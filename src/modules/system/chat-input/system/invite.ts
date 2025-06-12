@@ -1,5 +1,10 @@
-import { Command, CommandThrottleType, CommandType } from '@core/commands';
-import { appConfig, Embeds } from '@core/config';
+import {
+  Command,
+  commandDeploymentEnvironment,
+  CommandThrottleType,
+  CommandType,
+} from '@core/commands';
+import { Embeds } from '@core/config';
 import { UnitConstants } from '@core/constants';
 import { I18n } from '@core/i18n';
 
@@ -19,9 +24,9 @@ const InviteCommand = new Command({
       interaction,
       Embeds.primary({
         description: I18n.localize('commands:invite.prompt', interaction, {
-          link: client.manager.generateInvite(
+          url: client.manager.generateInvite(
             client,
-            appConfig.client.development_server_id ?? undefined,
+            commandDeploymentEnvironment,
           ),
         }),
       }),

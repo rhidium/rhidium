@@ -1,4 +1,5 @@
 import fs from 'fs';
+import path from 'path';
 import i18n, { TOptions } from 'i18next';
 import { Guild, Interaction, Locale } from 'discord.js';
 import { UnitConstants } from '@core/constants';
@@ -12,34 +13,31 @@ import nlCommon from '../../../locales/nl/common.json';
 import nlCore from '../../../locales/nl/core.json';
 
 const getFiles = (
-  path: string,
+  dir: string,
   extensions: string[],
   recursive = false,
 ): string[] => {
   const files = fs
-    .readdirSync(path)
+    .readdirSync(dir)
     .filter((file: string) => extensions.some((ext) => file.endsWith(ext)));
 
   if (recursive) {
     const subdirs = fs
-      .readdirSync(path)
-      .filter((file: string) => fs.statSync(`${path}/${file}`).isDirectory());
+      .readdirSync(dir)
+      .filter((file: string) => fs.statSync(`${dir}/${file}`).isDirectory());
     for (const subdir of subdirs) {
-      const subdirFiles = getFiles(`${path}/${subdir}`, extensions, true);
+      const subdirFiles = getFiles(`${dir}/${subdir}`, extensions, true);
       files.push(...subdirFiles);
     }
   }
 
-  return files.map((file: string) => `${path}/${file}`);
+  return files.map((file: string) => `${dir}/${file}`);
 };
 
-const localizedCommands = getFiles('./locales/en-US/commands', ['.json']).map(
-  (file) =>
-    [
-      file.replace('.json', '').replace('./locales/en-US/commands/', ''),
-      '../../../' + file,
-    ] as const,
-);
+const localizedCommands = getFiles(
+  path.resolve(__dirname, '../../../locales/en-US/commands'),
+  ['.json'],
+).map((file) => [path.basename(file, '.json'), path.resolve(file)] as const);
 
 export enum Locales {
   EnglishUS = Locale.EnglishUS,
@@ -59,15 +57,20 @@ const commandsLocalization = (
       .map(([command, path]) => {
         let data;
 
+        const resolvedPath = path.replace(
+          /en-US/g,
+          locale === Locales.EnglishUS ? 'en-US' : locale,
+        );
+
         try {
-          data = require(path);
+          data = require(resolvedPath);
         } catch (err) {
           if (isRequired) {
             throw err;
           }
 
           Logger.warn(
-            `Missing command localization for ${command} in ${locale}.json at ${path}`,
+            `Missing command localization for ${command} in ${locale}.json at ${resolvedPath}`,
           );
         }
 
@@ -105,6 +108,9 @@ class I18n {
       supportedLngs: locales,
       defaultNS,
       resources,
+      interpolation: {
+        escapeValue: false,
+      },
     });
 
     return i18n;
@@ -139,7 +145,10 @@ class I18n {
 
   public static readonly timeKey = (ms: number) => {
     const [amount, unit] = I18n.msToTime(ms);
-    return `common:time.${amount === 1 ? 'singular' : 'plural'}.${unit}` as const;
+    return [
+      amount,
+      `common:time.${amount === 1 ? 'singular' : 'plural'}.${unit}`,
+    ] as const;
   };
 
   public static readonly genericErrorDecline = (interaction: Interaction) => {

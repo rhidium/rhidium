@@ -7,7 +7,7 @@ type CommandOrCategory = APICommand | string;
 const data = new SlashCommandStringOption()
   .setName('command-or-category')
   .setDescription('Select a command or category')
-  .setRequired(false)
+  .setRequired(true)
   .setAutocomplete(true);
 
 const CommandOrCategoryCommand = new Command({
@@ -20,9 +20,7 @@ const CommandOrCategoryCommand = new Command({
       .filter((cmd) => {
         return (
           cmd.data.name.toLowerCase().includes(focusedValue) ||
-          !!(
-            cmd.category && cmd.category.toLowerCase().includes(focusedValue)
-          ) ||
+          !!cmd.category.toLowerCase().includes(focusedValue) ||
           !!(
             'description' in cmd.data &&
             cmd.data.description.toLowerCase().includes(focusedValue)
@@ -31,7 +29,7 @@ const CommandOrCategoryCommand = new Command({
       })
       .map((cmd) => ({
         name: StringUtils.truncate(
-          `${cmd.data.name} (${cmd.category ?? 'Uncategorized'}) - ${
+          `${cmd.data.name} (${cmd.category}) - ${
             'description' in cmd.data
               ? cmd.data.description
               : 'No description available'

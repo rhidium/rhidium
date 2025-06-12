@@ -4,13 +4,18 @@ import {
   CommandType,
   PermLevel,
 } from '@core/commands';
-import { Embeds } from '@core/config';
+import { appConfig, Embeds } from '@core/config';
 import { UnitConstants } from '@core/constants';
 
 const ChangeNameCommand = new Command({
   type: CommandType.ChatInputPlain,
   permissions: {
     level: PermLevel['Bot Administrator'],
+  },
+  enabled: {
+    guilds: appConfig.client.development_server_id
+      ? [appConfig.client.development_server_id]
+      : false,
   },
   throttle: {
     // Global Rate Limit of 2 per hour
@@ -23,6 +28,7 @@ const ChangeNameCommand = new Command({
     builder
       .setName('change-name')
       .setDescription("Change the bot's username")
+      .setDefaultMemberPermissions(0)
       .addStringOption((option) =>
         option
           .setName('name')
