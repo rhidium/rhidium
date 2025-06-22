@@ -40,23 +40,17 @@
     "commit": "cz",
     "setup:linux": "pnpm install && cp .env.example .env && cp config/config.example.json config/config.json && cp config/extended-config.example.json config/extended-config.json",
     "setup:windows": "pnpm install && copy .env.example .env && copy config/config.example.json config/config.json && cp config/extended-config.example.json config/extended-config.json",
-    "db:format": "prisma format",
+    "db:deploy": "prisma migrate deploy",
     "db:generate": "prisma generate",
-    "db:deploy": "prisma migrate deploy && prisma generate",
-    "db:reset": "prisma migrate reset",
-    "db:push": "prisma db push",
-    "db:seed": "prisma db seed",
     "db:migrate": "prisma migrate dev",
+    "db:push": "prisma db push --skip-generate",
+    "db:reset": "prisma migrate reset",
+    "db:studio": "prisma studio",
     "prepare": "node .husky/install.mjs",
     "checks": "gts check && turbo run typecheck && turbo run test",
     "ci:cs": "pnpm changeset",
     "ci:publish": "pnpm publish -r",
     "ci:version": "pnpm changeset version"
-  },
-  "pnpm": {
-    "overrides": {
-      "undici": ">=6.21.1"
-    }
   },
   "dependencies": {
     "@prisma/client": "6.5.0",

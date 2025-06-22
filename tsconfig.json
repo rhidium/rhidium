@@ -1,5 +1,5 @@
 {
-  "extends": "./node_modules/gts/tsconfig-google.json",
+  "extends": ["./node_modules/gts/tsconfig-google.json"],
   "include": [
     "src/**/*.ts",
     "test/**/*.ts",
@@ -7,6 +7,7 @@
     "locales/**/*.json",
     "package.json"
   ],
+  "exclude": ["node_modules", "dist"],
   "compilerOptions": {
     /* Visit https://aka.ms/tsconfig to read more about this file */
     /* Projects */
@@ -113,5 +114,5 @@
     /* Completeness */
     // "skipDefaultLibCheck": true,                      /* Skip type checking .d.ts files that are included with TypeScript. */
     "skipLibCheck": true /* Skip type checking all .d.ts files. */
-  }
+  },
 }

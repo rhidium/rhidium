@@ -18,6 +18,7 @@ import {
   MessageContextMenuCommandInteraction,
   ModalBuilder,
   ModalSubmitInteraction,
+  PrimaryEntryPointCommandInteraction,
   RoleSelectMenuBuilder,
   RoleSelectMenuInteraction,
   SlashCommandOptionsOnlyBuilder,
@@ -111,27 +112,27 @@ type CommandInteraction<
   : Type extends typeof CommandType.MessageContextMenu
     ? MessageContextMenuCommandInteraction<Cached>
     : Type extends
-          | typeof CommandType.ChatInput
-          | typeof CommandType.ChatInputPlain
+        | typeof CommandType.ChatInput
+        | typeof CommandType.ChatInputPlain
       ? ChatInputCommandInteraction<Cached>
-      : Type extends typeof CommandType.PrimaryEntryPoint
-        ? ChatInputCommandInteraction<Cached>
-        : Type extends typeof CommandType.Button
-          ? ButtonInteraction<Cached>
-          : Type extends typeof CommandType.StringSelect
-            ? StringSelectMenuInteraction<Cached>
-            : Type extends typeof CommandType.UserSelect
-              ? UserSelectMenuInteraction<Cached>
-              : Type extends typeof CommandType.RoleSelect
-                ? RoleSelectMenuInteraction<Cached>
-                : Type extends typeof CommandType.MentionableSelect
-                  ? MentionableSelectMenuInteraction<Cached>
-                  : Type extends typeof CommandType.ChannelSelect
-                    ? ChannelSelectMenuInteraction<Cached>
-                    : Type extends typeof CommandType.ModalSubmit
-                      ? ModalSubmitInteraction<Cached>
-                      : Type extends typeof CommandType.AutoComplete
-                        ? AutocompleteInteraction<Cached>
+      : Type extends typeof CommandType.Button
+        ? ButtonInteraction<Cached>
+        : Type extends typeof CommandType.StringSelect
+          ? StringSelectMenuInteraction<Cached>
+          : Type extends typeof CommandType.UserSelect
+            ? UserSelectMenuInteraction<Cached>
+            : Type extends typeof CommandType.RoleSelect
+              ? RoleSelectMenuInteraction<Cached>
+              : Type extends typeof CommandType.MentionableSelect
+                ? MentionableSelectMenuInteraction<Cached>
+                : Type extends typeof CommandType.ChannelSelect
+                  ? ChannelSelectMenuInteraction<Cached>
+                  : Type extends typeof CommandType.ModalSubmit
+                    ? ModalSubmitInteraction<Cached>
+                    : Type extends typeof CommandType.AutoComplete
+                      ? AutocompleteInteraction<Cached>
+                      : Type extends typeof CommandType.PrimaryEntryPoint
+                        ? PrimaryEntryPointCommandInteraction<Cached>
                         : never;
 
 type CommandRunFunction<
