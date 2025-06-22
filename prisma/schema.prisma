@@ -97,6 +97,9 @@ model Guild {
   MemberJoinEmbedId   Int?
   MemberLeaveEmbed     Embed? @relation("MemberLeaveEmbed", fields: [MemberLeaveEmbedId], references: [id])
   MemberLeaveEmbedId   Int?
+
+  // Workshop Monitor features
+  GameServers GameServer[]                                       // The game servers that are associated with the guild
 }
 
 // 
@@ -306,4 +309,91 @@ model Settings {
   @@unique([id])
   id  String @id @default("singleton")
   commandUsageSummaryLastProcessedAt DateTime? // The date the command usage summary was last processed
+}
+
+// 
+// Start of Workshop Monitor feature models
+// 
+
+enum GameServerStatus {
+  ONLINE // The game server is online and accepting connections
+  OFFLINE // The game server is offline and not accepting connections
+  MAINTENANCE // The game server is under maintenance, configured by server administrators
+}
+
+model Webhook {
+  id          String   @id @unique @default(uuid(7)) // The unique (internal) id of the webhook
+  name        String   // The name of the webhook
+  url         String   // The URL of the webhook
+  secret     String?  // The secret for the webhook, if applicable
+
+  active      Boolean  @default(true) // Whether the webhook is active or not
+  deliveries Int      @default(0) // The number of times the webhook has successfully delivered a message
+  lastDeliveredAt DateTime? // The date the webhook last successfully delivered a message
+  fails Int      @default(0) // The number of times the webhook has failed to deliver a message
+  lastFailedAt DateTime? // The date the webhook last failed to deliver a message
+
+  createdAt   DateTime @default(now()) // The date the webhook was created
+  updatedAt   DateTime @updatedAt // The date the webhook was last updated
+
+  GameServerId String? @unique
+  GameServer GameServer?
+}
+
+model WorkshopMod {
+  id         Int      @id @default(autoincrement()) // The unique (internal) id of the mod
+  name        String   // The name of the mod
+  description String?  // The description of the mod, if applicable
+  workshopId  String   // The workshop ID of the mod, used to identify it in the Steam Workshop
+  appId       Int      // The Steam App ID of the game this mod is for
+  version     String?  // The version of the mod, if applicable
+
+  banned Boolean @default(false) // Whether the mod is banned or not, used to prevent installation on game servers
+  bannedReason String? // The reason the mod was banned, if applicable
+  bannedAt DateTime? // The date the mod was banned, if applicable
+
+  removed Boolean @default(false) // Whether the mod is removed or not, used to prevent installation on game servers
+  removedReason String? // The reason the mod was removed, if applicable
+  removedAt DateTime? // The date the mod was removed, if applicable
+
+  fetches Int @default(0) // The number of times the mod has been fetched from the Steam Workshop
+  updates Int @default(0) // The number of times the mod has been updated
+  relays Int @default(0) // The number of times the mod update has been relayed to game servers
+  lastFetchedAt DateTime? // The date the mod was last fetched from the Steam Workshop
+  lastUpdatedAt DateTime? // The date the mod was last updated, used to determine
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  GameServers GameServer[] // The game servers that have this mod installed
+  LastUpdatedModFor GameServer[] @relation("LastUpdatedMod") // The game server that last updated this mod, if applicable
+}
+
+model GameServer {
+  id          String   @id @unique
+  appId      Int      // The Steam App ID of the game server
+  themeColor String? // The (hex) theme color for the game server, used in embeds and UI
+  name        String   // The name of the game server
+  description String? // The description of the game server, if applicable
+  ipv4   String        // The IP address of the game server
+  gameport        Int  // The port of the game server
+  steamQueryPort Int?  // The Steam query port of the game server, if applicable
+  status      GameServerStatus   // The status of the game server (e.g., online, offline)
+  players     Int      // The number of players currently on the server
+  maxPlayers  Int      // The maximum number of players allowed on the server
+  lastUpdated DateTime @default(now()) // The last time the server information was updated
+
+  Mods        WorkshopMod[] // The mods installed on the game server, if applicable
+  modUpdates Int @default(0) // The number of mod updates received for the game server
+  modUpdateAt DateTime? // The date the last mod update was received
+  WebhookId String? @unique // The id of the webhook to send updates to
+  Webhook Webhook? @relation(fields: [WebhookId], references: [id]) // The webhook to send updates to
+  LastUpdatedModId Int? @unique // The id of the last mod update received, if applicable
+  LastUpdatedMod WorkshopMod? @relation("LastUpdatedMod", fields: [LastUpdatedModId], references: [id]) // The last mod update received, if applicable
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  GuildId     String  // Which guild this game server belongs to
+  Guild       Guild @relation(fields: [GuildId], references: [id])
 }

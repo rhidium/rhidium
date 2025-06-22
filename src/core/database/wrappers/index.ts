@@ -5,6 +5,7 @@ import { memberWrapper } from './member';
 import { reminderWrapper } from './reminder';
 import { userWrapper } from './user';
 import { settingsWrapper } from './settings';
+import { workshopModWrapper } from './workshop-mod';
 
 export {
   type CacheType,
@@ -36,4 +37,5 @@ export class Database {
   static readonly AuditLog = auditLogWrapper;
   static readonly Reminder = reminderWrapper;
   static readonly Settings = settingsWrapper;
+  static readonly WorkshopMod = workshopModWrapper;
 }
