@@ -412,6 +412,8 @@ class RESTClient implements AbstractRESTClient {
 
     const { guildId, clearOtherEnvironment, forceSync } = options ?? {};
 
+    if (guildId) await Database.Guild.resolve(guildId);
+
     const [synced, apiCommands] = await Promise.all([
       this.checkCommandsSynced(guildId ?? null),
       this.fetchApiCommands(guildId ?? null),
