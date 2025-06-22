@@ -190,6 +190,22 @@ const HelpCommand = new Command({
 
     // Handle general help command / overview / bot introduction / getting started :)
     if (!result) {
+      await HelpCommand.reply(interaction, {
+        embeds: [
+          Embeds.info({
+            title: 'Help & Commands Overview',
+            description:
+              "We haven't quite finished the help command yet, but here's a brief overview of what you can do with this bot.",
+            fields: [
+              {
+                name: 'Coming Soon',
+                value: 'Coming Soon:tm:',
+                inline: false,
+              },
+            ],
+          }),
+        ],
+      });
       return;
     }
 
