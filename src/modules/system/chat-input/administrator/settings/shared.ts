@@ -14,12 +14,7 @@ import {
   sendableChannelSettings,
   SettingsKey,
 } from './types';
-import {
-  byDisplayCategory,
-  categoryIndForSetting,
-  groupedSettingsPrompts,
-  settingsPrompts,
-} from './prompts';
+import { groupedSettingsPrompts, settingsPrompts } from './prompts';
 import { CacheManager } from '@core/data-structures';
 import Client from '@core/client';
 import { GuildInteraction, Permissions, PermLevel } from '@core/commands';
@@ -31,6 +26,7 @@ import {
   InteractionUtils,
   PaginationPage,
   Prompt,
+  PromptDisplay,
   PromptInteractionHandler,
   PromptResolver,
   PromptType,
@@ -38,9 +34,6 @@ import {
   StringUtils,
 } from '@core/utils';
 import { appConfig, Embeds } from '@core/config';
-import { Logger } from '@core/logger';
-
-const isProduction: boolean = process.env.NODE_ENV === 'production';
 
 type CommandChoices = {
   name: string;
@@ -112,12 +105,14 @@ export const settingsEmbed = async (
           ),
         ),
       ),
-      value: prompts.sort(byDisplayCategory).map((prompt) => ({
+      value: prompts.sort(PromptDisplay.sortByCategory).map((prompt) => ({
         name: prompt.name,
         value: StringUtils.truncate(
           (prompt.message
             ? `-# ${prompt.message}${
-                prompt.infoSuffix ? ` ${prompt.infoSuffix}` : ''
+                prompt.display?.infoSuffix
+                  ? ` ${prompt.display?.infoSuffix}`
+                  : ''
               }\n`
             : '') +
             '- ' +
@@ -143,7 +138,7 @@ export const settingsEmbed = async (
             ),
           EmbedConstants.FIELD_VALUE_MAX_LENGTH,
         ),
-        inline: prompt.displayInline ?? false,
+        inline: prompt.display?.inline ?? false,
       })),
     }));
 
@@ -276,115 +271,13 @@ export const handleSettingsUpdate = async (
         await settingsEmbed(
           i,
           await Database.Guild.resolve(i.guildId),
-          guildSettingPrompt ? categoryIndForSetting(guildSettingPrompt) : 0,
+          guildSettingPrompt
+            ? PromptDisplay.getCategoryIndex(
+                guildSettingPrompt,
+                groupedSettingsPrompts,
+              )
+            : 0,
         );
-      },
-      async onPromptError(error, i, prompt) {
-        Logger.error(error);
-        const ctx = {
-          embeds: [
-            Embeds.error({
-              title: 'Something went wrong',
-              description: error.message,
-              fields: isProduction
-                ? []
-                : [
-                    {
-                      name: 'Prompt',
-                      value:
-                        '```json\n' +
-                        StringUtils.truncate(
-                          JSON.stringify(prompt, null, 2),
-                          EmbedConstants.FIELD_VALUE_MAX_LENGTH - 25,
-                        ) +
-                        '\n```',
-                      inline: true,
-                    },
-                    {
-                      name: 'Stack Trace',
-                      value:
-                        '```js\n' +
-                        StringUtils.truncate(
-                          error.stack ?? 'No stack trace available',
-                          EmbedConstants.FIELD_VALUE_MAX_LENGTH - 25,
-                        ) +
-                        '\n```',
-                      inline: true,
-                    },
-                  ],
-            }),
-          ],
-        };
-
-        if (i.replied || i.deferred) await i.editReply(ctx);
-        else await i.reply(ctx);
-      },
-      contextTransformer(
-        prompt,
-        prompts,
-        index,
-        collected,
-        errorFeedbackFields,
-      ) {
-        const isLast = index === prompts.length - 1;
-        const remaining = prompts.length - index - 1;
-        const collectedSliced = (collected?.slice(-10) ?? []).reverse();
-
-        const displayValue = (value: string) => {
-          switch (prompt.type) {
-            case 'number':
-              return '- `' + Number(value).toLocaleString() + '`';
-            case 'boolean':
-              return '- ' + (value === 'true' ? 'Yes' : 'No');
-            case 'channel':
-              return `- <#${value}>`;
-            case 'role':
-              return `- <@&${value}>`;
-            case 'user':
-              return `- <@${value}>`;
-            case 'string':
-            default:
-              return value;
-          }
-        };
-
-        const collectedString = `${collectedSliced
-          .map((c) => StringUtils.truncate(c, 100))
-          .map(displayValue)
-          .join('\n')}${
-          (collected?.length ?? 0) > 10
-            ? `\n... and ${collected!.length - 10} more`
-            : ''
-        }`;
-
-        const embedFn = errorFeedbackFields.length ? Embeds.error : Embeds.info;
-
-        return {
-          content: !isLast
-            ? `Question **${index + 1}** of **${prompts.length}**, ${remaining} more question${
-                remaining === 1 ? '' : 's'
-              } after this`
-            : prompts.length === 1
-              ? ''
-              : 'Last question',
-          embeds: [
-            embedFn({
-              title: prompt.name,
-              description: prompt.message,
-              fields:
-                collected === null || !collected.length
-                  ? [...errorFeedbackFields]
-                  : [
-                      ...errorFeedbackFields,
-                      {
-                        name: 'You have provided the following values so far:',
-                        value: collectedString,
-                        inline: false,
-                      },
-                    ],
-            }),
-          ],
-        };
       },
     },
   );

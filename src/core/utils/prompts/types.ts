@@ -9,12 +9,24 @@ type PromptType = 'string' | 'number' | 'boolean' | 'channel' | 'role' | 'user';
 
 type PromptChoice<Value = string> = { name: string; value: Value };
 
+type PromptDisplay = {
+  category?: string;
+  inline?: boolean;
+  infoSuffix?: string;
+};
+
+type PromptRegexValidation = {
+  pattern: RegExp;
+  validationError: string;
+};
+
 type PromptBase = {
   id: string;
   type: PromptType;
   name: string;
   message?: string;
   required: boolean;
+  display?: PromptDisplay;
 };
 
 type PromptWithChoices = PromptBase & {
@@ -68,6 +80,12 @@ type PromptWithMinMax = PromptBase &
       }
   );
 
+type PromptWithRegexValidation = PromptBase & {
+  regex: PromptRegexValidation;
+  type: 'string' | 'number';
+  choices?: never;
+};
+
 type Prompt =
   | PromptBase
   | PromptWithMultiple
@@ -75,7 +93,8 @@ type Prompt =
   | PromptWithChannelTypes
   | PromptWithMinMax
   | PromptWithMultipleChoices
-  | PromptWithDefaultValue;
+  | PromptWithDefaultValue
+  | PromptWithRegexValidation;
 
 type AnyPromptValue = string | number | boolean | string[] | number[] | null;
 
@@ -133,6 +152,7 @@ export {
   type PromptWithMultipleChoices,
   type PromptWithDefaultValue,
   type PromptWithMinMax,
+  type PromptWithRegexValidation,
   type Prompt,
   type AnyPromptValue,
   type ResolvedPrompt,

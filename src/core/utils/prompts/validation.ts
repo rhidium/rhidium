@@ -7,6 +7,7 @@ import {
   PromptWithMinMax,
   PromptWithMultiple,
   PromptWithMultipleChoices,
+  PromptWithRegexValidation,
   PromptWithUnknownChoices,
   ResolvedPrompt,
   ValueForPrompt,
@@ -37,6 +38,19 @@ class PromptValidation {
     prompt: Prompt,
   ): prompt is PromptWithMinMax => {
     return (prompt.type === 'string' || prompt.type === 'number') as boolean;
+  };
+
+  public static readonly isPromptWithRegexValidation = (
+    prompt: Prompt,
+  ): prompt is PromptWithRegexValidation => {
+    return (
+      'regex' in prompt &&
+      typeof prompt.regex === 'object' &&
+      'pattern' in prompt.regex &&
+      prompt.regex.pattern instanceof RegExp &&
+      'validationError' in prompt.regex &&
+      typeof prompt.regex.validationError === 'string'
+    );
   };
 
   public static readonly isPromptWithMultipleChoices = (
@@ -433,6 +447,22 @@ class PromptValidation {
               } is required, ${value} has ${valueStr.length}.`,
             );
           }
+        }
+      }
+    }
+
+    // Handle regex validation
+    if (PromptValidation.isPromptWithRegexValidation(prompt)) {
+      const { pattern, validationError } = prompt.regex;
+      for (const value of safeArr.filter((e) => typeof e !== 'undefined')) {
+        const valueStr =
+          typeof value === 'object' && value !== null && 'id' in value
+            ? value.id
+            : value.toString();
+        if (!pattern.test(valueStr)) {
+          throw new Error(
+            `Value "${valueStr}" does not match the required pattern: ${validationError}`,
+          );
         }
       }
     }
