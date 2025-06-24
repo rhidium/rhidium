@@ -5,6 +5,8 @@ import { memberWrapper } from './member';
 import { reminderWrapper } from './reminder';
 import { userWrapper } from './user';
 import { settingsWrapper } from './settings';
+import { workshopModWrapper } from './workshop-mod';
+import { prismaClient } from '../client';
 
 export {
   type CacheType,
@@ -29,6 +31,7 @@ export class Database {
     return Database._instance;
   }
 
+  static readonly client = prismaClient;
   static readonly Command = commandWrapper;
   static readonly Guild = guildWrapper;
   static readonly Member = memberWrapper;
@@ -36,4 +39,5 @@ export class Database {
   static readonly AuditLog = auditLogWrapper;
   static readonly Reminder = reminderWrapper;
   static readonly Settings = settingsWrapper;
+  static readonly WorkshopMod = workshopModWrapper;
 }

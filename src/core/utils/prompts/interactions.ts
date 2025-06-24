@@ -33,8 +33,12 @@ import type {
 } from './types';
 import { PromptValidation } from './validation';
 import { StringUtils } from '../common';
-import { UnitConstants } from '@core/constants';
+import { EmbedConstants, UnitConstants } from '@core/constants';
 import { PromptResolver } from './resolver';
+import { Logger } from '@core/logger';
+import { Embeds } from '@core/config';
+
+const isProduction = process.env.NODE_ENV === 'production';
 
 type PromptInteraction = GuildInteraction<
   | UserSelectMenuInteraction<CacheType>
@@ -231,7 +235,7 @@ class PromptInteractionHandler {
     prompts: ResolvedPrompt<P>[],
     {
       allowCancel = prompts.length > 1,
-      contextTransformer,
+      contextTransformer = PromptInteractionHandler.defaultContextTransformer,
       deferUpdate,
       deferReply,
     }: PromptDeferOptions & PromptInteractionOptions<P> = {},
@@ -887,8 +891,8 @@ class PromptInteractionHandler {
   ): Promise<PromptsResponse<P>> => {
     const {
       allowCancel = prompts.length > 1,
-      onPromptError,
-      contextTransformer,
+      onPromptError = PromptInteractionHandler.defaultOnErrorHandler,
+      contextTransformer = PromptInteractionHandler.defaultContextTransformer,
       onFinish,
     } = options ?? {};
 
@@ -977,6 +981,119 @@ class PromptInteractionHandler {
     }
 
     return promptValues;
+  };
+
+  public static readonly defaultOnErrorHandler = async (
+    error: Error,
+    i: PromptInteraction,
+    prompt: ResolvedPrompt<Prompt>,
+  ): Promise<void> => {
+    Logger.error(error);
+    const ctx = {
+      embeds: [
+        Embeds.error({
+          title: 'Something went wrong',
+          description: error.message,
+          fields: isProduction
+            ? []
+            : [
+                {
+                  name: 'Prompt',
+                  value:
+                    '```json\n' +
+                    StringUtils.truncate(
+                      JSON.stringify(prompt, null, 2),
+                      EmbedConstants.FIELD_VALUE_MAX_LENGTH - 25,
+                    ) +
+                    '\n```',
+                  inline: true,
+                },
+                {
+                  name: 'Stack Trace',
+                  value:
+                    '```js\n' +
+                    StringUtils.truncate(
+                      error.stack ?? 'No stack trace available',
+                      EmbedConstants.FIELD_VALUE_MAX_LENGTH - 25,
+                    ) +
+                    '\n```',
+                  inline: true,
+                },
+              ],
+        }),
+      ],
+    };
+
+    if (i.replied || i.deferred) await i.editReply(ctx);
+    else await i.reply(ctx);
+  };
+
+  public static readonly defaultContextTransformer = (
+    prompt: ResolvedPrompt<Prompt>,
+    arr: ResolvedPrompt<Prompt>[],
+    ind: number,
+    collected: string[] | null,
+    errorFeedbackFields: APIEmbedField[],
+  ): GenericInteractionOptions => {
+    const isLast = ind === arr.length - 1;
+    const remaining = arr.length - ind - 1;
+    const collectedSliced = (collected?.slice(-10) ?? []).reverse();
+
+    const displayValue = (value: string) => {
+      switch (prompt.type) {
+        case 'number':
+          return '- `' + Number(value).toLocaleString() + '`';
+        case 'boolean':
+          return '- ' + (value === 'true' ? 'Yes' : 'No');
+        case 'channel':
+          return `- <#${value}>`;
+        case 'role':
+          return `- <@&${value}>`;
+        case 'user':
+          return `- <@${value}>`;
+        case 'string':
+        default:
+          return value;
+      }
+    };
+
+    const collectedString = `${collectedSliced
+      .map((c) => StringUtils.truncate(c, 100))
+      .map(displayValue)
+      .join('\n')}${
+      (collected?.length ?? 0) > 10
+        ? `\n... and ${collected!.length - 10} more`
+        : ''
+    }`;
+
+    const embedFn = errorFeedbackFields.length ? Embeds.error : Embeds.info;
+
+    return {
+      content: !isLast
+        ? `Question **${ind + 1}** of **${arr.length}**, ${remaining} more question${
+            remaining === 1 ? '' : 's'
+          } after this`
+        : arr.length === 1
+          ? ''
+          : 'Last question',
+      embeds: [
+        embedFn({
+          title: prompt.name,
+          description: prompt.message,
+          fields:
+            collected === null || !collected.length
+              ? [...errorFeedbackFields]
+              : [
+                  ...errorFeedbackFields,
+                  {
+                    name: 'You have provided the following values so far:',
+                    value: collectedString,
+                    inline: false,
+                  },
+                ],
+        }),
+      ],
+    };
   };
 }
 

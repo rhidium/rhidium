@@ -76,6 +76,7 @@ type SettingsKey = Exclude<
   | 'AutoModerationActions'
   | 'MemberJoinEmbed'
   | 'MemberLeaveEmbed'
+  | 'GameServers'
 >;
 
 type SettingsPrompt<
@@ -85,9 +86,6 @@ type SettingsPrompt<
   M extends boolean,
 > = MappedPrompt<T, R, M> & {
   accessor: K;
-  displayInline?: boolean;
-  displayCategory?: string;
-  infoSuffix?: string;
 };
 
 type SettingsPromptMap<K extends SettingsKey> = {

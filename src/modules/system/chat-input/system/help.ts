@@ -202,7 +202,6 @@ const HelpCommand = new Command({
           I18n.localize('commands:help.noCommandOrCategory', interaction),
         ),
       );
-
       return;
     }
 

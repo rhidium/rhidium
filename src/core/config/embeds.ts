@@ -60,9 +60,9 @@ class Embeds implements EmbedsOptions {
     return embed;
   };
 
-  public readonly status = (status: EmbedType, data: CreateEmbedData) => {
+  public readonly status = (status: EmbedType, data?: CreateEmbedData) => {
     const resolvedData =
-      typeof data === 'string' ? { description: data } : data;
+      (typeof data === 'string' ? { description: data } : data) ?? {};
     const options = this.embedBase;
     delete options.author;
     const embed = this.build({
@@ -98,18 +98,20 @@ class Embeds implements EmbedsOptions {
     return embed;
   };
 
-  public readonly primary = (data: CreateEmbedData) =>
+  public readonly primary = (data?: CreateEmbedData) =>
     this.status('primary', data);
-  public readonly secondary = (data: CreateEmbedData) =>
+  public readonly secondary = (data?: CreateEmbedData) =>
     this.status('secondary', data);
-  public readonly success = (data: CreateEmbedData) =>
+  public readonly success = (data?: CreateEmbedData) =>
     this.status('success', data);
-  public readonly error = (data: CreateEmbedData) => this.status('error', data);
-  public readonly warning = (data: CreateEmbedData) =>
+  public readonly error = (data?: CreateEmbedData) =>
+    this.status('error', data);
+  public readonly warning = (data?: CreateEmbedData) =>
     this.status('warning', data);
-  public readonly info = (data: CreateEmbedData) => this.status('info', data);
-  public readonly debug = (data: CreateEmbedData) => this.status('debug', data);
-  public readonly waiting = (data: CreateEmbedData) =>
+  public readonly info = (data?: CreateEmbedData) => this.status('info', data);
+  public readonly debug = (data?: CreateEmbedData) =>
+    this.status('debug', data);
+  public readonly waiting = (data?: CreateEmbedData) =>
     this.status('waiting', data);
 
   public readonly fromEmbedModel = (

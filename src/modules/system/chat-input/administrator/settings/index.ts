@@ -5,14 +5,14 @@ import {
 } from 'discord.js';
 import { handleSettingsUpdate, settingsEmbed } from './shared';
 import {
-  categoryIndForSetting,
   groupedSettingsChoices,
+  groupedSettingsPrompts,
   hasShortSetup,
   resettableSettingsChoices,
   settingsAllRequired,
   settingsPrompts,
 } from './prompts';
-import { InputUtils, PromptValidation } from '@core/utils';
+import { InputUtils, PromptDisplay, PromptValidation } from '@core/utils';
 import {
   AuditLogType,
   Database,
@@ -354,7 +354,12 @@ const SettingsCommand = new Command({
                 await settingsEmbed(
                   i,
                   updatedGuild,
-                  prompts.length === 1 ? categoryIndForSetting(prompts[0]!) : 0,
+                  prompts.length === 1
+                    ? PromptDisplay.getCategoryIndex(
+                        prompts[0]!,
+                        groupedSettingsPrompts,
+                      )
+                    : 0,
                 );
               });
             }

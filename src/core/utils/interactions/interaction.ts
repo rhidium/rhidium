@@ -6,6 +6,7 @@ import {
   InteractionReplyOptions,
   InteractionResponse,
   InteractionType,
+  InteractionUpdateOptions,
   Message,
   MessageFlags,
   MessageFlagsString,
@@ -106,9 +107,9 @@ class InteractionUtils {
       interaction.type === InteractionType.MessageComponent &&
       !InteractionUtils.isAcknowledged(interaction)
     ) {
-      return castResponse(interaction.update(resolvedContent));
+      return castResponse(interaction.update(resolvedContent as InteractionUpdateOptions));
     } else if (InteractionUtils.isAcknowledged(interaction)) {
-      return castResponse(interaction.editReply(resolvedContent));
+      return castResponse(interaction.editReply(resolvedContent as InteractionEditReplyOptions));
     }
 
     return castResponse(

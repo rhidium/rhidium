@@ -2,6 +2,93 @@
 
 import { Prisma } from '@prisma/client';
 
+// Prisma.Webhook
+const populateWebhook = Prisma.validator<Prisma.WebhookDefaultArgs>()({
+  select: {
+    id: true,
+    name: true,
+    url: true,
+    secret: true,
+
+    active: true,
+    deliveries: true,
+    lastDeliveredAt: true,
+    fails: true,
+    lastFailedAt: true,
+
+    createdAt: true,
+    updatedAt: true,
+
+    GameServerId: true,
+  },
+});
+type PopulatedWebhook = Prisma.WebhookGetPayload<typeof populateWebhook>;
+
+// Prisma.WorkshopMod
+const populateWorkshopMod = Prisma.validator<Prisma.WorkshopModDefaultArgs>()({
+  select: {
+    id: true,
+    name: true,
+    description: true,
+    workshopId: true,
+    appId: true,
+    version: true,
+
+    banned: true,
+    bannedReason: true,
+    bannedAt: true,
+
+    removed: true,
+    removedReason: true,
+    removedAt: true,
+
+    fetches: true,
+    updates: true,
+    relays: true,
+    lastFetchedAt: true,
+    lastUpdatedAt: true,
+
+    createdAt: true,
+    updatedAt: true,
+  },
+});
+type PopulatedWorkshopMod = Prisma.WorkshopModGetPayload<typeof populateWorkshopMod>;
+
+// Prisma.GameServer
+const populateGameServer = Prisma.validator<Prisma.GameServerDefaultArgs>()({
+  select: {
+    id: true,
+    appId: true,
+    themeColor: true,
+    name: true,
+    description: true,
+    ipv4: true,
+    gameport: true,
+    steamQueryPort: true,
+    status: true,
+    players: true,
+    maxPlayers: true,
+    lastUpdated: true,
+
+    Mods: {
+      select: {
+        id: true,
+      }
+    },
+    modUpdates: true,
+    modUpdateAt: true,
+    WebhookId: true,
+    Webhook: populateWebhook,
+    LastUpdatedModId: true,
+
+    createdAt: true,
+    updatedAt: true,
+
+    GuildId: true,
+  },
+});
+type PopulatedGameServer = Prisma.GameServerGetPayload<typeof populateGameServer>;
+
 // Prisma.Settings
 const populateSettings = Prisma.validator<Prisma.SettingsDefaultArgs>()({
   select: {
@@ -188,6 +275,9 @@ const populateGuild = Prisma.validator<Prisma.GuildDefaultArgs>()({
     MemberJoinEmbedId: true,
     MemberLeaveEmbed: populateEmbed,
     MemberLeaveEmbedId: true,
+
+    // Workshop Monitor featues
+    GameServers: populateGameServer,
   },
 });
 type PopulatedGuild = Prisma.GuildGetPayload<typeof populateGuild>;
@@ -293,4 +383,10 @@ export {
   type PopulatedCommandUsage,
   populateCommandUsageSummary,
   type PopulatedCommandUsageSummary,
+  populateGameServer,
+  type PopulatedGameServer,
+  populateWorkshopMod,
+  type PopulatedWorkshopMod,
+  populateWebhook,
+  type PopulatedWebhook,
 };

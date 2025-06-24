@@ -24,11 +24,16 @@ const discordTimestamp = (
 const discordTimestampNow = (style: TimestampStylesString): string =>
   discordTimestamp(Date.now(), style);
 
-const discordInfoTimestamp = (timestamp: number = Date.now()): string =>
-  `${discordTimestamp(
-    timestamp,
+const discordInfoTimestamp = (
+  timestamp: number | Date = Date.now(),
+): string => {
+  const resolvedTimestamp =
+    typeof timestamp === 'number' ? timestamp : timestamp.getTime();
+  return `${discordTimestamp(
+    resolvedTimestamp,
     TimestampStyles.ShortDateTime,
-  )} (${discordTimestamp(timestamp, TimestampStyles.RelativeTime)})`;
+  )} (${discordTimestamp(resolvedTimestamp, TimestampStyles.RelativeTime)})`;
+};
 
 const humanReadableMs = (
   ms: number,

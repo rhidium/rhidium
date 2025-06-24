@@ -1,9 +1,10 @@
+import { UnitConstants } from '@core/constants';
+import { Logger } from '@core/logger';
+import { Guild, Interaction, Locale } from 'discord.js';
 import fs from 'fs';
 import path from 'path';
 import i18n, { TOptions } from 'i18next';
-import { Guild, Interaction, Locale } from 'discord.js';
-import { UnitConstants } from '@core/constants';
-import { Logger } from '@core/logger';
+import path from 'path';
 import { LocalizedLabelKey } from './i18next';
 
 import enUSCommon from '../../../locales/en-US/common.json';
@@ -35,9 +36,14 @@ const getFiles = (
 };
 
 const localizedCommands = getFiles(
-  path.resolve(__dirname, '../../../locales/en-US/commands'),
-  ['.json'],
-).map((file) => [path.basename(file, '.json'), path.resolve(file)] as const);
+  path.resolve(process.cwd(), './locales/en-US/commands'),
+  ['.json']
+).map(
+  (file) => [
+    file.slice(file.lastIndexOf(path.sep) + 1, file.length - 5),
+    file,
+  ] as const,
+);
 
 export enum Locales {
   EnglishUS = Locale.EnglishUS,
@@ -63,7 +69,7 @@ const commandsLocalization = (
         );
 
         try {
-          data = require(resolvedPath);
+          data = require(path.replace('en-US', locale));
         } catch (err) {
           if (isRequired) {
             throw err;

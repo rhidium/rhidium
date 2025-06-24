@@ -8,6 +8,7 @@ import {
   populateReminder,
   populateCommand,
   populateSettings,
+  populateWorkshopMod,
 } from './select';
 
 export const populateModelArgs = {
@@ -18,6 +19,7 @@ export const populateModelArgs = {
   Reminder: populateReminder,
   Command: populateCommand,
   Settings: populateSettings,
+  WorkshopMod: populateWorkshopMod,
 };
 
 //
@@ -32,6 +34,7 @@ export type ModelCreateArgs = {
   Reminder: Prisma.ReminderCreateArgs;
   Command: Prisma.CommandCreateArgs;
   Settings: Prisma.SettingsCreateArgs;
+  WorkshopMod: Prisma.WorkshopModCreateArgs;
 };
 
 export type ModelCreateManyArgs = {
@@ -42,6 +45,7 @@ export type ModelCreateManyArgs = {
   Reminder: Prisma.ReminderCreateManyArgs;
   Command: Prisma.CommandCreateManyArgs;
   Settings: Prisma.SettingsCreateManyArgs;
+  WorkshopMod: Prisma.WorkshopModCreateManyArgs;
 };
 
 export type ModelCreateManyAndReturnArgs = {
@@ -52,6 +56,7 @@ export type ModelCreateManyAndReturnArgs = {
   Reminder: Prisma.ReminderCreateManyAndReturnArgs;
   Command: Prisma.CommandCreateManyAndReturnArgs;
   Settings: Prisma.SettingsCreateManyAndReturnArgs;
+  WorkshopMod: Prisma.WorkshopModCreateManyAndReturnArgs;
 };
 
 //
@@ -66,6 +71,7 @@ export type ModelDeleteArgs = {
   Reminder: Prisma.ReminderDeleteArgs;
   Command: Prisma.CommandDeleteArgs;
   Settings: Prisma.SettingsDeleteArgs;
+  WorkshopMod: Prisma.WorkshopModDeleteArgs;
 };
 
 export type ModelDeleteManyArgs = {
@@ -76,6 +82,7 @@ export type ModelDeleteManyArgs = {
   Reminder: Prisma.ReminderDeleteManyArgs;
   Command: Prisma.CommandDeleteManyArgs;
   Settings: Prisma.SettingsDeleteManyArgs;
+  WorkshopMod: Prisma.WorkshopModDeleteManyArgs;
 };
 
 //
@@ -90,6 +97,7 @@ export type ModelFindFirstArgs = {
   Reminder: Prisma.ReminderFindFirstArgs;
   Command: Prisma.CommandFindFirstArgs;
   Settings: Prisma.SettingsFindFirstArgs;
+  WorkshopMod: Prisma.WorkshopModFindFirstArgs;
 };
 
 export type ModelFindManyArgs = {
@@ -100,6 +108,7 @@ export type ModelFindManyArgs = {
   Reminder: Prisma.ReminderFindManyArgs;
   Command: Prisma.CommandFindManyArgs;
   Settings: Prisma.SettingsFindManyArgs;
+  WorkshopMod: Prisma.WorkshopModFindManyArgs;
 };
 
 export type ModelFindUniqueArgs = {
@@ -110,6 +119,7 @@ export type ModelFindUniqueArgs = {
   Reminder: Prisma.ReminderFindUniqueArgs;
   Command: Prisma.CommandFindUniqueArgs;
   Settings: Prisma.SettingsFindUniqueArgs;
+  WorkshopMod: Prisma.WorkshopModFindUniqueArgs;
 };
 
 //
@@ -124,6 +134,7 @@ export type ModelGroupByArgs = {
   Reminder: Prisma.ReminderGroupByArgs;
   Command: Prisma.CommandGroupByArgs;
   Settings: Prisma.SettingsGroupByArgs;
+  WorkshopMod: Prisma.WorkshopModGroupByArgs;
 };
 
 //
@@ -138,6 +149,7 @@ export type ModelAggregateArgs = {
   Reminder: Prisma.ReminderAggregateArgs;
   Command: Prisma.CommandAggregateArgs;
   Settings: Prisma.SettingsAggregateArgs;
+  WorkshopMod: Prisma.WorkshopModAggregateArgs;
 };
 
 export type ModelCountArgs = {
@@ -148,6 +160,7 @@ export type ModelCountArgs = {
   Reminder: Prisma.ReminderCountArgs;
   Command: Prisma.CommandCountArgs;
   Settings: Prisma.SettingsCountArgs;
+  WorkshopMod: Prisma.WorkshopModCountArgs;
 };
 
 //
@@ -162,6 +175,7 @@ export type ModelUpdateArgs = {
   Reminder: Prisma.ReminderUpdateArgs;
   Command: Prisma.CommandUpdateArgs;
   Settings: Prisma.SettingsUpdateArgs;
+  WorkshopMod: Prisma.WorkshopModUpdateArgs;
 };
 
 export type ModelUpdateManyArgs = {
@@ -172,6 +186,7 @@ export type ModelUpdateManyArgs = {
   Reminder: Prisma.ReminderUpdateManyArgs;
   Command: Prisma.CommandUpdateManyArgs;
   Settings: Prisma.SettingsUpdateManyArgs;
+  WorkshopMod: Prisma.WorkshopModUpdateManyArgs;
 };
 
 export type ModelUpsertArgs = {
@@ -182,6 +197,7 @@ export type ModelUpsertArgs = {
   Reminder: Prisma.ReminderUpsertArgs;
   Command: Prisma.CommandUpsertArgs;
   Settings: Prisma.SettingsUpsertArgs;
+  WorkshopMod: Prisma.WorkshopModUpsertArgs;
 };
 
 //
@@ -212,6 +228,7 @@ export type ModelGetPayload = {
   Reminder: Prisma.ReminderGetPayload<typeof populateReminder>;
   Command: Prisma.CommandGetPayload<typeof populateCommand>;
   Settings: Prisma.SettingsGetPayload<typeof populateSettings>;
+  WorkshopMod: Prisma.WorkshopModGetPayload<typeof populateWorkshopMod>;
 };
 
 export type ModelFieldRefs = {
@@ -222,6 +239,7 @@ export type ModelFieldRefs = {
   Reminder: Prisma.ReminderFieldRefs;
   Command: Prisma.CommandFieldRefs;
   Settings: Prisma.SettingsFieldRefs;
+  WorkshopMod: Prisma.WorkshopModFieldRefs;
 };
 
 export type ModelScalarFieldEnum = {
@@ -232,6 +250,7 @@ export type ModelScalarFieldEnum = {
   Reminder: Prisma.ReminderScalarFieldEnum | Prisma.ReminderScalarFieldEnum[];
   Command: Prisma.CommandScalarFieldEnum | Prisma.CommandScalarFieldEnum[];
   Settings: Prisma.SettingsScalarFieldEnum | Prisma.SettingsScalarFieldEnum[];
+  WorkshopMod: Prisma.WorkshopModScalarFieldEnum | Prisma.WorkshopModScalarFieldEnum[];
 };
 
 export type ModelGroupByPayload = {
@@ -252,6 +271,9 @@ export type ModelGroupByPayload = {
   Settings: Prisma.GetSettingsGroupByPayload<{
     by: ModelScalarFieldEnum['Settings'];
   }>;
+  WorkshopMod: Prisma.GetWorkshopModGroupByPayload<{
+    by: ModelScalarFieldEnum['WorkshopMod'];
+  }>;
 };
 
 export type ModelAggregateResult = {
@@ -262,4 +284,5 @@ export type ModelAggregateResult = {
   Reminder: Prisma.AggregateReminder;
   Command: Prisma.AggregateCommand;
   Settings: Prisma.AggregateSettings;
+  WorkshopMod: Prisma.AggregateWorkshopMod;
 };

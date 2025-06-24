@@ -490,6 +490,13 @@ class CommandBase<
         }
       }
 
+      if (!contexts.length) {
+        Logger.warn(
+          `No valid contexts found for command ${command.idWithoutPrefix}. Defaulting to Guild context.`,
+        );
+        contexts.push(InteractionContextType.Guild);
+      }
+
       return contexts;
     }
 
