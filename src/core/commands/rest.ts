@@ -26,7 +26,7 @@ type CommandCheckResponse = {
 
 type SyncCommandOptions = {
   /**
-   * The guild ID to sync commands for, or `null` for global
+   * The guild ID to sync commands for, or none for global
    */
   guildId?: string | null;
   /**
@@ -48,7 +48,7 @@ type AbstractRESTClient = {
   data: APICommandData[];
   /**
    * Checks if local commands are in sync with the database & Discord API
-   * @param guildId The guild ID to check commands for, or `null` for global
+   * @param guildId The guild ID to check commands for, or none for global
    * @returns A response object with the sync status, consisting of new, updated, and deleted commands
    */
   checkCommandsSynced: (
@@ -56,7 +56,7 @@ type AbstractRESTClient = {
   ) => Promise<CommandCheckResponse>;
   /**
    * Syncs the local commands to the database
-   * @param guildId The guild ID to sync commands for, or `null` for global
+   * @param guildId The guild ID to sync commands for, or none for global
    * @param commandData The command data to sync
    * @param diff The diff response from `checkCommandsSynced`
    * @returns A promise that resolves when the commands are synced
@@ -68,7 +68,7 @@ type AbstractRESTClient = {
   ) => Promise<void>;
   /**
    * Clears commands from the Discord API
-   * @param guildId The guild ID to clear commands for, or `null` for global
+   * @param guildId The guild ID to clear commands for, or none for global
    * @returns A promise that resolves when the commands are cleared
    */
   clearCommands: (guildId?: string | null) => Promise<void>;
@@ -84,7 +84,7 @@ type AbstractRESTClient = {
   ) => Promise<void>;
   /**
    * Fetches commands from the Discord API
-   * @param guildId The guild ID to fetch commands for, or `null` for global
+   * @param guildId The guild ID to fetch commands for, or none for global
    * @returns A promise that resolves with the command data
    */
   fetchApiCommands: (
@@ -150,9 +150,7 @@ class RESTClient implements AbstractRESTClient {
     return this._instance;
   }
 
-  public async checkCommandsSynced(
-    guildId: string | null,
-  ): Promise<CommandCheckResponse> {
+  public async checkCommandsSynced(): Promise<CommandCheckResponse> {
     const commandApiIds = this.data.map((command) =>
       CommandBase.resolveId(command),
     );
@@ -162,7 +160,6 @@ class RESTClient implements AbstractRESTClient {
         id: {
           in: commandApiIds,
         },
-        GuildId: guildId,
       },
     });
 
@@ -204,7 +201,7 @@ class RESTClient implements AbstractRESTClient {
       (id) => !commandApiIds.includes(id),
     );
 
-    return {
+    const synced = {
       isSynced:
         newCommands.length === 0 &&
         updatedCommands.length === 0 &&
@@ -213,6 +210,10 @@ class RESTClient implements AbstractRESTClient {
       updated: updatedCommands,
       deleted: deletedCommands,
     };
+
+    this.debug('Commands synced: %o', synced);
+
+    return synced;
   }
 
   public readonly syncCommandsToDatabase = async (
@@ -250,7 +251,6 @@ class RESTClient implements AbstractRESTClient {
         resolvedNew.map(async (command) => {
           await Database.Command.create({
             id: CommandBase.resolveId(command),
-            GuildId: guildId,
             data: JSON.stringify(command),
           });
         }),
@@ -267,7 +267,6 @@ class RESTClient implements AbstractRESTClient {
           const original = await Database.Command.findFirst({
             where: {
               id: CommandBase.resolveId(command),
-              GuildId: guildId,
             },
           });
 
@@ -278,7 +277,6 @@ class RESTClient implements AbstractRESTClient {
           await Database.Command.update({
             where: {
               id: CommandBase.resolveId(command),
-              GuildId: guildId,
             },
             data: {
               data: JSON.stringify(command),
@@ -308,7 +306,6 @@ class RESTClient implements AbstractRESTClient {
             in: this.data.map((command) => CommandBase.resolveId(command)),
           },
         },
-        GuildId: guildId,
       },
     });
 
@@ -360,23 +357,24 @@ class RESTClient implements AbstractRESTClient {
     );
 
     if (guildId) {
-      if (!(await this.client.guilds.fetch(guildId).catch(() => null))) {
+      const guild = this.client.guilds.cache.get(guildId);
+
+      if (!guild) {
         Logger.warn(`Guild ${guildId} not found, skipping command fetch`);
         return new Collection<
           string,
           ApplicationCommand<{ guild: GuildResolvable }>
         >();
       }
+
+      return guild.commands.fetch();
     }
 
-    return this.client.application.commands.fetch({
-      guildId: guildId ?? undefined,
-    });
+    return this.client.application.commands.fetch();
   }
 
   private async syncComponentsToDatabase(
     components: Collection<string, NonAPICommand>,
-    guildId?: string | null,
   ) {
     this.debug(
       'Syncing component commands to database: %o',
@@ -389,11 +387,9 @@ class RESTClient implements AbstractRESTClient {
         return await Database.Command.upsert({
           where: {
             id,
-            GuildId: guildId,
           },
           create: {
             id,
-            GuildId: guildId ?? null,
             data: false,
           },
           update: {
@@ -420,45 +416,24 @@ class RESTClient implements AbstractRESTClient {
       this.syncComponentsToDatabase(components, guildId),
     ]);
 
-    const environmentIsDesynced = Array.isArray(apiCommands)
-      ? apiCommands.length !== this.data.length
-      : true;
-
-    if (synced.isSynced && !forceSync && !environmentIsDesynced) {
+    if (synced.isSynced && !forceSync) {
       this.debug('Commands are already in sync, skipping');
       return;
     }
 
-    if (environmentIsDesynced) {
-      this.debug(
-        'Environment API data is desynced, syncing commands to Discord API',
-        {
-          guildId,
-          forceSync,
-          apiCommandsIsArray: Array.isArray(apiCommands),
-          apiCommandsLength: Array.isArray(apiCommands)
-            ? apiCommands.length
-            : null,
-          dataLength: this.data.length,
-        },
-      );
-    }
+    const putCommandData = forceSync
+      ? this.data
+      : this.data.filter(
+          (command) =>
+            synced.new.includes(CommandBase.resolveId(command)) ||
+            synced.updated.includes(CommandBase.resolveId(command)),
+        );
 
-    const putCommandData =
-      forceSync || environmentIsDesynced
-        ? this.data
-        : this.data.filter(
-            (command) =>
-              synced.new.includes(CommandBase.resolveId(command)) ||
-              synced.updated.includes(CommandBase.resolveId(command)),
-          );
-
-    const deleteCommandData =
-      forceSync || environmentIsDesynced
-        ? []
-        : synced.deleted
-            .map((id) => CommandBase.findInApiData(id, this.data) ?? null)
-            .filter((command) => command !== null);
+    const deleteCommandData = forceSync
+      ? []
+      : synced.deleted
+          .map((id) => CommandBase.findInApiData(id, this.data) ?? null)
+          .filter((command) => command !== null);
 
     this.debug(
       'Commands to put: %o',
@@ -481,7 +456,7 @@ class RESTClient implements AbstractRESTClient {
         this.REST.put(
           Routes.applicationGuildCommands(this.client.application.id, guildId),
           {
-            body: putCommandData,
+            body: this.data, // PUT requests "overwrite" the commands, so we need to send all of them
           },
         ),
         deleteCommandData.length > 0
@@ -502,7 +477,7 @@ class RESTClient implements AbstractRESTClient {
       await Promise.all([
         this.syncCommandsToDatabase(null, putCommandData, synced),
         this.REST.put(Routes.applicationCommands(this.client.application.id), {
-          body: putCommandData,
+          body: this.data,
         }),
         deleteCommandData.length > 0
           ? this.REST.delete(

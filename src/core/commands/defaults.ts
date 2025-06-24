@@ -7,6 +7,11 @@ import type {
 } from './options';
 import { appConfig } from '@core/config';
 
+const commandDeploymentEnvironment =
+  process.env.NODE_ENV === 'production'
+    ? null
+    : appConfig.client.development_server_id;
+
 const permissions: CommandPermissionOptions = {
   level: PermLevel.User,
   client: [],
@@ -30,7 +35,7 @@ const throttle: CommandThrottleOptions = {
 
 const interactions: CommandInteractionOptions<false> = {
   deferReply: false,
-  replyEphemeral: false,
+  replyEphemeral: true,
   refuseUncached: false,
 } as const;
 
@@ -41,7 +46,7 @@ const enabled: CommandEnabledOptions<false> = {
   guilds:
     process.env.NODE_ENV === 'production' ||
     !appConfig.client.development_server_id
-      ? []
+      ? true
       : [appConfig.client.development_server_id],
   dm: false,
   privateChannel: false,
@@ -54,4 +59,4 @@ const commandDefaults = {
   enabled,
 };
 
-export default commandDefaults;
+export { commandDefaults as default, commandDeploymentEnvironment };

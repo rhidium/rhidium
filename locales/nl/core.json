@@ -5,7 +5,8 @@
     "guildOnly": "Dit commando kan alleen in een server worden gebruikt.",
     "cachedGuildOnly": "Jouw servers zijn nog niet in de cache geladen. Probeer het later opnieuw.",
     "nsfwChannelOnly": "Dit commando is alleen beschikbaar in NSFW-kanalen.",
-    "notTargerUser": "Dit commando/deze component is bedoeld voor een specifieke gebruiker, het kan niet door jou worden gebruikt."
+    "notTargerUser": "Dit commando/deze component is bedoeld voor een specifieke gebruiker, het kan niet door jou worden gebruikt.",
+    "noOptionSelected": "Je moet een optie selecteren uit de lijst van opties die je kunt kiezen wanneer je dit commando gebruikt."
   },
   "permissions": {
     "levelTooLow": "Je machtigingsniveau is te laag om dit commando te gebruiken.",

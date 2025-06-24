@@ -60,17 +60,20 @@ The quickest, and easiest, way to host/use this bot template is by deploying it 
 1. Download the [latest release](https://github.com/rhidium/rhidium/releases`) or `git clone git@github.com:rhidium/rhidium.git` the repo
 2. Run `pnpm setup:linux` or `pnpm setup:windows` (depending on your OS) in the project root folder
 3. Edit the newly created `.env` and `/config/config.json` files and provide your configuration
-4. Start the application: `docker compose up`
+4. Sync the database: `docker compose run --rm client sh -c "npx prisma db push"`
+5. Start the application: `docker compose up -d client` (you can view logs with `docker compose logs -f client`)
 
 ### 🖥️ Run as a plain NodeJS app
 
 1. Install the additional pre-requisites:
+   - [pnpm](https://pnpm.io/installation) v9.15.4
    - [Node.js](https://nodejs.org/en/) v16.6.0 or newer
    - [PostgreSQL](https://www.postgresql.org/) v13 or newer
 2. Download the [latest release](https://github.com/rhidium/rhidium/releases`) or `git clone git@github.com:rhidium/rhidium.git` the repo
 3. Run `pnpm setup:linux` or `pnpm setup:windows` in the project root folder
 4. Edit the newly created `.env` and `/config/config.json` files and provide your configuration
-5. Start the application: `pnpm start` for production, and `pnpm dev` for local development
+5. Sync the database: `pnpm db:push`
+6. Start the application: `pnpm start` for production, and `pnpm dev` for local development
 
 ## ⚙️ Configuration
 
@@ -134,12 +137,13 @@ Join our [support server](https://discord.gg/mirasaki) if you have any questions
 ### High Priority
 
 - [ ] Localization for `prompts/interactions`
+- [ ] Resolve or otherwise review Typedoc warnings
 - [ ] Add documentation for `COMPONENT_HANDLER_IDENTIFIER`
-- [ ] Refactor (now-required) `(as unknown) as (Any)(Typed/API)Command`
 - [ ] Apply `data#setDefaultMemberPermissions` to relevant commands
+- [ ] Refactor (now-required) `(as unknown) as (Any)(Typed/API)Command`
 - [ ] Implement (+ refactor) `embeds` and `placeholders` from previous version
 - [ ] Implement (global) reusable command middleware, refactor from previous version
-- [ ] Resolve or otherwise review Typedoc warnings
+- [ ] Command **deployment** currently doesn't respect `enabled#guilds`, meaning they are registered as global commands
 
 ### Low Priority
 

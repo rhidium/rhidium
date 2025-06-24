@@ -4,13 +4,18 @@ import {
   CommandType,
   PermLevel,
 } from '@core/commands';
-import { Embeds } from '@core/config';
+import { appConfig, Embeds } from '@core/config';
 import { UnitConstants } from '@core/constants';
 
 const ChangeAvatarCommand = new Command({
   type: CommandType.ChatInputPlain,
   permissions: {
     level: PermLevel['Bot Administrator'],
+  },
+  enabled: {
+    guilds: appConfig.client.development_server_id
+      ? [appConfig.client.development_server_id]
+      : false,
   },
   throttle: {
     // Global Rate Limit of 5 per hour
@@ -23,6 +28,7 @@ const ChangeAvatarCommand = new Command({
     builder
       .setName('change-avatar')
       .setDescription("Change the bot's avatar")
+      .setDefaultMemberPermissions(0)
       .addAttachmentOption((option) =>
         option
           .setName('avatar')

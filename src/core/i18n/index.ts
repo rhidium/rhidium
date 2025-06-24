@@ -2,6 +2,7 @@ import { UnitConstants } from '@core/constants';
 import { Logger } from '@core/logger';
 import { Guild, Interaction, Locale } from 'discord.js';
 import fs from 'fs';
+import path from 'path';
 import i18n, { TOptions } from 'i18next';
 import path from 'path';
 import { LocalizedLabelKey } from './i18next';
@@ -13,25 +14,25 @@ import nlCommon from '../../../locales/nl/common.json';
 import nlCore from '../../../locales/nl/core.json';
 
 const getFiles = (
-  path: string,
+  dir: string,
   extensions: string[],
   recursive = false,
 ): string[] => {
   const files = fs
-    .readdirSync(path)
+    .readdirSync(dir)
     .filter((file: string) => extensions.some((ext) => file.endsWith(ext)));
 
   if (recursive) {
     const subdirs = fs
-      .readdirSync(path)
-      .filter((file: string) => fs.statSync(`${path}/${file}`).isDirectory());
+      .readdirSync(dir)
+      .filter((file: string) => fs.statSync(`${dir}/${file}`).isDirectory());
     for (const subdir of subdirs) {
-      const subdirFiles = getFiles(`${path}/${subdir}`, extensions, true);
+      const subdirFiles = getFiles(`${dir}/${subdir}`, extensions, true);
       files.push(...subdirFiles);
     }
   }
 
-  return files.map((file: string) => `${path}/${file}`);
+  return files.map((file: string) => `${dir}/${file}`);
 };
 
 const localizedCommands = getFiles(
@@ -62,6 +63,11 @@ const commandsLocalization = (
       .map(([command, path]) => {
         let data;
 
+        const resolvedPath = path.replace(
+          /en-US/g,
+          locale === Locales.EnglishUS ? 'en-US' : locale,
+        );
+
         try {
           data = require(path.replace('en-US', locale));
         } catch (err) {
@@ -70,7 +76,7 @@ const commandsLocalization = (
           }
 
           Logger.warn(
-            `Missing command localization for ${command} in ${locale}.json at ${path}`,
+            `Missing command localization for ${command} in ${locale}.json at ${resolvedPath}`,
           );
         }
 
@@ -108,6 +114,9 @@ class I18n {
       supportedLngs: locales,
       defaultNS,
       resources,
+      interpolation: {
+        escapeValue: false,
+      },
     });
 
     return i18n;
@@ -142,7 +151,10 @@ class I18n {
 
   public static readonly timeKey = (ms: number) => {
     const [amount, unit] = I18n.msToTime(ms);
-    return `common:time.${amount === 1 ? 'singular' : 'plural'}.${unit}` as const;
+    return [
+      amount,
+      `common:time.${amount === 1 ? 'singular' : 'plural'}.${unit}`,
+    ] as const;
   };
 
   public static readonly genericErrorDecline = (interaction: Interaction) => {

@@ -1,15 +1,17 @@
 import Client from '@core/client';
 import {
   Command,
+  commandDeploymentEnvironment,
   CommandThrottle,
   CommandType,
   Permissions,
 } from '@core/commands';
 import { appConfig, Embeds } from '@core/config';
-import { EmbedConstants } from '@core/constants';
+import { EmbedConstants, UnitConstants } from '@core/constants';
 import { StringUtils, TimeUtils } from '@core/utils';
 import { ApplicationCommandOptionType, Collection } from 'discord.js';
 import CommandOrCategoryCommand from '../../auto-completes/command-or-category';
+import { I18n } from '@core/i18n';
 
 class EmbedResolver {
   static readonly commandEmbed = (cmd: Command) => {
@@ -20,7 +22,12 @@ class EmbedResolver {
       throttle.limit === 1 ? '1 use' : `${throttle.limit} uses`;
     const cooldownOutput = throttle.enabled
       ? [
-          `**${cooldownUsagesOutput}** in **${TimeUtils.humanReadableMs(throttle.duration)}**`,
+          `**${cooldownUsagesOutput}** in **${TimeUtils.humanReadableMs(
+            throttle.duration,
+          ).replace(
+            'Just now',
+            `${Math.round(throttle.duration / UnitConstants.MS_IN_ONE_SECOND)} seconds`,
+          )}**`,
           `(type \`${CommandThrottle.resolveThrottleTypeName(throttle.type)}\`)`,
         ].join(' ')
       : 'n/a';
@@ -37,7 +44,7 @@ class EmbedResolver {
 
         {
           name: '#️⃣ Category',
-          value: cmd.category ? StringUtils.titleCase(cmd.category) : 'None',
+          value: StringUtils.titleCase(cmd.category),
           inline: true,
         },
         {
@@ -88,7 +95,7 @@ class EmbedResolver {
     commands: Collection<string, Command>,
   ) => {
     const apiCommandData = await client.manager.REST.fetchApiCommands(
-      appConfig.client.development_server_id,
+      commandDeploymentEnvironment,
     );
     const allFields = commands
       .toJSON()
@@ -188,24 +195,13 @@ const HelpCommand = new Command({
       interaction,
     });
 
-    // Handle general help command / overview / bot introduction / getting started :)
     if (!result) {
-      await HelpCommand.reply(interaction, {
-        embeds: [
-          Embeds.info({
-            title: 'Help & Commands Overview',
-            description:
-              "We haven't quite finished the help command yet, but here's a brief overview of what you can do with this bot.",
-            fields: [
-              {
-                name: 'Coming Soon',
-                value: 'Coming Soon:tm:',
-                inline: false,
-              },
-            ],
-          }),
-        ],
-      });
+      await HelpCommand.reply(
+        interaction,
+        Embeds.error(
+          I18n.localize('commands:help.noCommandOrCategory', interaction),
+        ),
+      );
       return;
     }
 

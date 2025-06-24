@@ -3,6 +3,7 @@ services:
     container_name: rhidium-client
     build:
       context: ./
+      target: client
       dockerfile: ./Dockerfile
       args:
         - CI=true
@@ -16,11 +17,26 @@ services:
     volumes:
       - ./logs:/app/logs:rw
       - ./docs:/app/docs:rw
-      - ./config:/app/config:r
       - ./prisma:/app/prisma:r # Prisma is included as a volume to allow for database migrations without having to rebuild the client container.
-      - ./locales:/app/locales:r # Locales are included as a volume because not all json files are directly imported in the project/source.
+    networks:
+      - app-network
+
+  docs:
+    container_name: rhidium-docs
+    build:
+      context: ./
+      target: docs
+      dockerfile: ./Dockerfile
+      args:
+        - CI=true
+    restart: unless-stopped
+    environment:
+      - CI=true
+      - NODE_ENV=production
     ports:
-      - 9000:9000
+      - 47000:80
+    volumes:
+      - .github/assets/favicon.ico:/usr/share/nginx/html/favicon.ico
     networks:
       - app-network
 
