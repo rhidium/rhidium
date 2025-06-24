@@ -1,4 +1,4 @@
-FROM node:23-slim AS base
+FROM node:24-alpine AS base
 ENV CI=true
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
@@ -9,8 +9,7 @@ COPY prisma/ prisma/
 COPY package.json pnpm-lock.yaml /app/
 RUN corepack prepare pnpm@9.15.4 --activate \
   && corepack enable \
-  && apt-get update -y \
-  && apt-get install -y openssl
+  && apk add --no-cache openssl
 
 FROM base AS prod-deps
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --prod --frozen-lockfile
@@ -30,7 +29,7 @@ RUN  pnpm run build
 FROM base AS client
 COPY --from=prod-deps /app/node_modules /app/node_modules
 COPY --from=build-client /app/dist /app/dist
-CMD  [ "node", "dist/src/core/index.js" ]
+CMD  [ "node", "dist/src/index.js" ]
 
 # 
 # START Docs

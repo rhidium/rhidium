@@ -136,14 +136,14 @@ Join our [support server](https://discord.gg/mirasaki) if you have any questions
 
 ### High Priority
 
-- [ ] Command **deployment** currently doesn't respect `enabled#guilds`, meaning they are registered as global commands
 - [ ] Localization for `prompts/interactions`
+- [ ] Resolve or otherwise review Typedoc warnings
 - [ ] Add documentation for `COMPONENT_HANDLER_IDENTIFIER`
-- [ ] Refactor (now-required) `(as unknown) as (Any)(Typed/API)Command`
 - [ ] Apply `data#setDefaultMemberPermissions` to relevant commands
+- [ ] Refactor (now-required) `(as unknown) as (Any)(Typed/API)Command`
 - [ ] Implement (+ refactor) `embeds` and `placeholders` from previous version
 - [ ] Implement (global) reusable command middleware, refactor from previous version
-- [ ] Resolve or otherwise review Typedoc warnings
+- [ ] Command **deployment** currently doesn't respect `enabled#guilds`, meaning they are registered as global commands
 
 ### Low Priority
 

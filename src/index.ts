@@ -5,13 +5,14 @@ moduleAlias.addAliases({
   '@core': `${__dirname}/`,
 });
 
-import { appConfig } from './config';
-import { ClientManager, commandDeploymentEnvironment } from './commands';
-import Client from './client';
-import { I18n } from './i18n';
-import utilityRegistry from '../modules/utility';
-import systemRegistry from '../modules/system';
-import moderationRegistry from '../modules/moderation';
+import { appConfig } from './core/config';
+import { ClientManager, commandDeploymentEnvironment } from './core/commands';
+import Client from './core/client';
+import { I18n } from './core/i18n';
+
+import utilityRegistry from './modules/utility';
+import systemRegistry from './modules/system';
+import moderationRegistry from './modules/moderation';
 
 const main = async () => {
   await I18n.init();
