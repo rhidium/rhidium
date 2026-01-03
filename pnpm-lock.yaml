@@ -103,7 +103,7 @@ importers:
         specifier: ^2.4.0
         version: 2.4.0
       tsdown:
-        specifier: ^0.19.0-beta.2
+        specifier: 0.19.0-beta.2
         version: 0.19.0-beta.2(synckit@0.11.11)(typescript@5.9.3)
       tslib:
         specifier: ^2.8.1
