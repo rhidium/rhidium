@@ -66,7 +66,7 @@ The quickest, and easiest, way to host/use this bot template is by deploying it 
 ### 🖥️ Run as a plain NodeJS app
 
 1. Install the additional pre-requisites:
-   - [pnpm](https://pnpm.io/installation) v9.15.4
+   - [pnpm](https://pnpm.io/installation) v10.4.1
    - [Node.js](https://nodejs.org/en/) v16.6.0 or newer
    - [PostgreSQL](https://www.postgresql.org/) v13 or newer
 2. Download the [latest release](https://github.com/rhidium/rhidium/releases`) or `git clone git@github.com:rhidium/rhidium.git` the repo

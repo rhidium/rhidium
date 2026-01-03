@@ -1,5 +1,7 @@
 {
-  "typescript.preferences.autoImportFileExcludePatterns": ["**/*.namespace.ts"],
+  "typescript.preferences.autoImportFileExcludePatterns": [
+    "**/*.namespace.ts"
+  ],
   "typescript.format.enable": true,
   "typescript.referencesCodeLens.enabled": true,
   "typescript.implementationsCodeLens.enabled": true,
@@ -28,7 +30,9 @@
   "json.schemas": [
     {
       "url": "https://cdn.jsdelivr.net/npm/tsup/schema.json",
-      "fileMatch": ["tsup.config.json"]
+      "fileMatch": [
+        "tsup.config.json"
+      ]
     }
   ],
   "cSpell.enabled": true,
@@ -38,6 +42,7 @@
     "adminer",
     "autoincrement",
     "Blurple",
+    "chrono",
     "cockroachdb",
     "codepaths",
     "commitlint",
@@ -55,6 +60,7 @@
     "Mirasaki",
     "repliable",
     "Rhidium",
+    "typedoc",
     "Upserting",
     "Vercel"
   ]
