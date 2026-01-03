@@ -1,12 +1,12 @@
-import { GetBatchResult } from '@prisma/client/runtime/library';
+import { type GetBatchResult } from '@prisma/client/runtime/library';
 import { prismaClient } from '../client';
 import { Model } from '../models';
 import {
-  ModelGetPayload,
-  ModelUpdateArgs,
-  ModelUpdateManyArgs,
-  ModelUpsertArgs,
-  ThenArg,
+  type ModelGetPayload,
+  type ModelUpdateArgs,
+  type ModelUpdateManyArgs,
+  type ModelUpsertArgs,
+  type ThenArg,
 } from '../types';
 import { resolvePopulatedModelArgs, toPrismaModelName } from './args';
 

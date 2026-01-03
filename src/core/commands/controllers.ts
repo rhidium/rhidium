@@ -1,5 +1,5 @@
 import { BaseInteraction } from 'discord.js';
-import { CommandRunFunction } from './types';
+import { type CommandRunFunction } from './types';
 
 type Controller<Params extends unknown[] = [], ReturnType = unknown> = (
   ...args: [...Params]

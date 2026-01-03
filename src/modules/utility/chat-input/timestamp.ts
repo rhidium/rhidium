@@ -1,6 +1,6 @@
 import { Command, CommandType } from '@core/commands';
 import { UnitConstants } from '@core/constants';
-import { TimestampStylesString } from 'discord.js';
+import { type TimestampStylesString } from 'discord.js';
 import TimezoneAutocomplete from '../autocompletes/timezone';
 import { Database } from '@core/database';
 import { Embeds } from '@core/config';

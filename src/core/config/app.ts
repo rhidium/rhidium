@@ -1,5 +1,5 @@
 /* eslint-disable n/no-unpublished-import */
-import { Colors, HexColorString, resolveColor } from 'discord.js';
+import { Colors, type HexColorString, resolveColor } from 'discord.js';
 
 import config from '../../../config/config.json';
 import extendedConfig from '../../../config/extended-config.json';

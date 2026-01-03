@@ -1,16 +1,16 @@
 import {
-  BitFieldResolvable,
+  type BitFieldResolvable,
   EmbedBuilder,
   InteractionCallbackResponse,
-  InteractionEditReplyOptions,
-  InteractionReplyOptions,
+  type InteractionEditReplyOptions,
+  type InteractionReplyOptions,
   InteractionResponse,
   InteractionType,
-  InteractionUpdateOptions,
+  type InteractionUpdateOptions,
   Message,
   MessageFlags,
-  MessageFlagsString,
-  RepliableInteraction,
+  type MessageFlagsString,
+  type RepliableInteraction,
 } from 'discord.js';
 
 type DynamicInteractionFlags =

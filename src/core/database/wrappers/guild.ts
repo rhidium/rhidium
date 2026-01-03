@@ -1,12 +1,12 @@
 import { ModerationAction } from '@prisma/client';
 import { Model } from '../models';
-import { PopulatedGuild, PopulatedMember, PopulatedUser } from '../select';
+import { type PopulatedGuild, type PopulatedMember, type PopulatedUser } from '../select';
 import { DatabaseWrapper } from './wrapper';
 import { UnitConstants } from '@core/constants';
 import { BaseInteraction } from 'discord.js';
 import { memberWrapper } from './member';
 import { userWrapper } from './user';
-import { GuildInteraction } from '@core/commands';
+import { type GuildInteraction } from '@core/commands';
 
 class GuildWrapper extends DatabaseWrapper<Model.Guild> {
   constructor() {

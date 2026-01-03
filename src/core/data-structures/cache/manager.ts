@@ -3,12 +3,12 @@ import { createHash } from 'crypto';
 import _debug from 'debug';
 import EventEmitter from 'events';
 import Keyv from 'keyv';
-import { LRUArgs, LRUCache } from './lru-cache';
+import { type LRUArgs, LRUCache } from './lru-cache';
 import {
-  AbstractCache,
-  CacheManagerMetadata,
-  ResolvedCreateCacheOptions,
-  SetCacheArguments,
+  type AbstractCache,
+  type CacheManagerMetadata,
+  type ResolvedCreateCacheOptions,
+  type SetCacheArguments,
 } from './types';
 import { NumberUtils } from '@core/utils';
 

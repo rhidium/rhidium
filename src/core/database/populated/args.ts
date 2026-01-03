@@ -1,5 +1,5 @@
 import { Model } from '../models';
-import { populateModelArgs, PrismaModelName } from '../types';
+import { populateModelArgs, type PrismaModelName } from '../types';
 
 export const toPrismaModelName = (str: string): PrismaModelName => {
   return str.replace(/([-_][a-z])/gi, ($1) =>

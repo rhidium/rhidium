@@ -1,5 +1,5 @@
 import { Model } from '../models';
-import { PopulatedGuild, PopulatedMember } from '../select';
+import { type PopulatedGuild, type PopulatedMember } from '../select';
 import { guildWrapper } from './guild';
 import { userWrapper } from './user';
 import { DatabaseWrapper } from './wrapper';

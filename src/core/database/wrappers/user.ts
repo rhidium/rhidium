@@ -1,6 +1,6 @@
 import { RiskLevel } from '@prisma/client';
 import { Model } from '../models';
-import { PopulatedUser } from '../select';
+import { type PopulatedUser } from '../select';
 import { DatabaseWrapper } from './wrapper';
 
 class UserWrapper extends DatabaseWrapper<Model.User> {

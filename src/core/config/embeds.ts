@@ -1,9 +1,9 @@
-import { APIEmbed, EmbedBuilder, type EmbedData } from 'discord.js';
+import { type APIEmbed, EmbedBuilder, type EmbedData } from 'discord.js';
 import { StringUtils, TimeUtils } from '../utils';
 import { EmbedConstants } from '../constants';
 import { appConfig } from './app';
 import { SafeEmbedBuilder } from '@core/utils/embeds';
-import { PopulatedEmbed } from '@core/database';
+import { type PopulatedEmbed } from '@core/database';
 
 type EmbedType = keyof typeof appConfig.colors;
 

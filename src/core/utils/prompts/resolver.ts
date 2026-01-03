@@ -1,4 +1,4 @@
-import { AnyPromptValue, Prompt, PromptType, ResolvedPrompt } from './types';
+import { type AnyPromptValue, type Prompt, type PromptType, type ResolvedPrompt } from './types';
 import { PromptValidation } from './validation';
 
 class PromptResolver {

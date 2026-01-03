@@ -5,12 +5,12 @@ import {
   PermLevel,
 } from '@core/commands';
 import { DiscordConstants, UnitConstants } from '@core/constants';
-import { DateSingleResult, InputUtils } from '@core/utils';
+import { type DateSingleResult, InputUtils } from '@core/utils';
 import { AttachmentBuilder, ChannelType } from 'discord.js';
 import ReminderAutoComplete from '../autocompletes/reminder';
 import { Embeds } from '@core/config';
 import {
-  ReminderModalSubmitData,
+  type ReminderModalSubmitData,
   ReminderServices,
 } from '../services/reminders';
 import { Database } from '@core/database';

@@ -3,7 +3,7 @@ import {
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,
-  Interaction,
+  type Interaction,
 } from 'discord.js';
 import { EvalConstants } from '../constants';
 import { appConfig, Embeds } from '@core/config';

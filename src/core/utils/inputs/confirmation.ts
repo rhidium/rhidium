@@ -3,12 +3,12 @@ import {
   ButtonBuilder,
   ButtonInteraction,
   ButtonStyle,
-  CacheType,
+  type CacheType,
   ComponentType,
-  Interaction,
-  InteractionEditReplyOptions,
-  InteractionReplyOptions,
-  RepliableInteraction,
+  type Interaction,
+  type InteractionEditReplyOptions,
+  type InteractionReplyOptions,
+  type RepliableInteraction,
 } from 'discord.js';
 import { appConfig } from '@core/config';
 import { I18n } from '@core/i18n';

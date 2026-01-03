@@ -2,10 +2,10 @@ import { Logger } from '@core/logger';
 import {
   Collection,
   Guild,
-  GuildBasedChannel,
+  type GuildBasedChannel,
   Message,
-  Snowflake,
-  TextBasedChannel,
+  type Snowflake,
+  type TextBasedChannel,
 } from 'discord.js';
 
 type ChannelWithMessages = GuildBasedChannel & TextBasedChannel;

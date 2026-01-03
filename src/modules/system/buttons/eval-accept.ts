@@ -4,7 +4,7 @@ import {
   AttachmentBuilder,
   ButtonBuilder,
   ButtonStyle,
-  Interaction,
+  type Interaction,
 } from 'discord.js';
 import { Command, CommandType, PermLevel } from '@core/commands';
 import { appConfig, Embeds } from '@core/config';

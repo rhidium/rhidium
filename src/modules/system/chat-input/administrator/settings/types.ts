@@ -1,10 +1,10 @@
 import { Permissions } from '@core/commands';
-import { PopulatedGuild } from '@core/database';
+import { type PopulatedGuild } from '@core/database';
 import {
-  AnyPromptValue,
-  MappedPrompt,
-  Prompt,
-  PromptType,
+  type AnyPromptValue,
+  type MappedPrompt,
+  type Prompt,
+  type PromptType,
   PromptValidation,
 } from '@core/utils';
 import { Guild, PermissionFlagsBits } from 'discord.js';

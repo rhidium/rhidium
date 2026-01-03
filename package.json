@@ -5,6 +5,7 @@
   "description": "Quickly and easily create powerful Discord bots using a powerful, opinionated, all-in-one framework.",
   "main": "dist/src/index.js",
   "packageManager": "pnpm@10.4.1",
+  "type": "module",
   "engines": {
     "node": ">=16.6.0",
     "npm": ">=7.0.0",

@@ -1,17 +1,17 @@
 import {
   Command,
-  CommandInteraction,
+  type CommandInteraction,
   CommandThrottleType,
   Permissions,
   PermLevel,
-  ThrottleConsumerResult,
+  type ThrottleConsumerResult,
 } from '@core/commands';
 import { Model } from '../models';
 import { DatabaseWrapper } from './wrapper';
 import { Prisma, prismaClient } from '../client';
 import { CacheManager } from '@core/data-structures';
 import { UnitConstants } from '@core/constants';
-import { populateCommandUsage, PopulatedCommandUsage } from '../select';
+import { populateCommandUsage, type PopulatedCommandUsage } from '../select';
 import { Logger } from '@core/logger';
 
 const commandUsageSelect = {

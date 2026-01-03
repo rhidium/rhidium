@@ -1,5 +1,5 @@
 import { ChannelType } from 'discord.js';
-import { SettingsPrompts } from './types';
+import { type SettingsPrompts } from './types';
 import { PromptDisplay } from '@core/utils';
 
 // Please note, the defaultValue in `settingsPrompts` is set when a guild resets it's respective setting.

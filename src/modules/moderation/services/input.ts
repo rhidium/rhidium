@@ -2,7 +2,7 @@ import { severityChoices, severityValues } from '@core/database';
 import { StringUtils } from '@core/utils';
 import {
   ActionRowBuilder,
-  ModalActionRowComponentBuilder,
+  type ModalActionRowComponentBuilder,
   SlashCommandStringOption,
   TextInputBuilder,
   TextInputStyle,

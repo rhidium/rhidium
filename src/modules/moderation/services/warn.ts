@@ -4,7 +4,7 @@ import {
   Guild,
   GuildMember,
   MessageFlags,
-  RepliableInteraction,
+  type RepliableInteraction,
   User,
 } from 'discord.js';
 import { ModerationPermissionServices } from './permission';
@@ -12,11 +12,11 @@ import { ModLogServices } from './mod-log';
 import {
   Database,
   ModerationAction,
-  PopulatedAutoModerationAction,
-  PopulatedGuild,
-  PopulatedMember,
+  type PopulatedAutoModerationAction,
+  type PopulatedGuild,
+  type PopulatedMember,
   PopulatedPrisma,
-  PopulatedWarning,
+  type PopulatedWarning,
   populateWarning,
   Prisma,
   Severity,

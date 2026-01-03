@@ -5,15 +5,15 @@ import {
   User,
   ThreadChannel,
   EmbedBuilder,
-  PartialGuildMember,
+  type PartialGuildMember,
 } from 'discord.js';
 import extractProperty from 'object-property-extractor';
 import { placeholderKeys } from './keys';
 import {
-  ContextPlaceholders,
-  DefaultIgnoreTypes,
-  ExtractKeys,
-  Placeholders,
+  type ContextPlaceholders,
+  type DefaultIgnoreTypes,
+  type ExtractKeys,
+  type Placeholders,
 } from './types';
 
 class Placeholder {

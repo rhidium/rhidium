@@ -1,16 +1,16 @@
 import { ArrayUtils } from '../common';
 import { PromptResolver } from './resolver';
 import {
-  AnyPromptValue,
-  Prompt,
-  PromptWithChannelTypes,
-  PromptWithMinMax,
-  PromptWithMultiple,
-  PromptWithMultipleChoices,
-  PromptWithRegexValidation,
-  PromptWithUnknownChoices,
-  ResolvedPrompt,
-  ValueForPrompt,
+  type AnyPromptValue,
+  type Prompt,
+  type PromptWithChannelTypes,
+  type PromptWithMinMax,
+  type PromptWithMultiple,
+  type PromptWithMultipleChoices,
+  type PromptWithRegexValidation,
+  type PromptWithUnknownChoices,
+  type ResolvedPrompt,
+  type ValueForPrompt,
 } from './types';
 
 class PromptValidation {

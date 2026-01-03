@@ -1,5 +1,5 @@
 import { Model } from '../models';
-import { PopulatedSettings } from '../select';
+import { type PopulatedSettings } from '../select';
 import { DatabaseWrapper } from './wrapper';
 
 class SettingsWrapper extends DatabaseWrapper<Model.Settings> {

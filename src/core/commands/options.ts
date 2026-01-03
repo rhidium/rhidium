@@ -3,20 +3,20 @@ import {
   ChatInputCommandInteraction,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   InteractionContextType,
-  PermissionResolvable,
-  Permissions,
+  type PermissionResolvable,
+  type Permissions,
 } from 'discord.js';
-import { RequiredResourceOptions } from './required-resources';
+import { type RequiredResourceOptions } from './required-resources';
 import {
-  CacheTypeResolver,
-  CommandData,
-  CommandInteraction,
-  CommandRunFunction,
+  type CacheTypeResolver,
+  type CommandData,
+  type CommandInteraction,
+  type CommandRunFunction,
   CommandType,
-  DeepPartial,
+  type DeepPartial,
 } from './types';
-import { CommandThrottleOptions } from './throttle';
-import { CommandController } from './controllers';
+import { type CommandThrottleOptions } from './throttle';
+import { type CommandController } from './controllers';
 import Client from '@core/client';
 
 type CommandInteractionOptions<RefuseUncached extends boolean> = {

@@ -1,36 +1,36 @@
 import {
   ActionRowBuilder,
-  APIEmbedField,
+  type APIEmbedField,
   ButtonBuilder,
   ButtonStyle,
   MessageFlags,
-  RepliableInteraction,
+  type RepliableInteraction,
 } from 'discord.js';
 import {
-  PermissionSetting,
+  type PermissionSetting,
   permissionSettings,
   sendableChannelFormatter,
-  SendableChannelSetting,
+  type SendableChannelSetting,
   sendableChannelSettings,
-  SettingsKey,
+  type SettingsKey,
 } from './types';
 import { groupedSettingsPrompts, settingsPrompts } from './prompts';
 import { CacheManager } from '@core/data-structures';
 import Client from '@core/client';
-import { GuildInteraction, Permissions, PermLevel } from '@core/commands';
+import { type GuildInteraction, Permissions, PermLevel } from '@core/commands';
 import { EmbedConstants, UnitConstants } from '@core/constants';
-import { AuditLogType, Database, PopulatedGuild } from '@core/database';
+import { AuditLogType, Database, type PopulatedGuild } from '@core/database';
 import {
   ArrayUtils,
   InteractionPagination,
   InteractionUtils,
-  PaginationPage,
-  Prompt,
+  type PaginationPage,
+  type Prompt,
   PromptDisplay,
   PromptInteractionHandler,
   PromptResolver,
-  PromptType,
-  PromptValue,
+  type PromptType,
+  type PromptValue,
   StringUtils,
 } from '@core/utils';
 import { appConfig, Embeds } from '@core/config';

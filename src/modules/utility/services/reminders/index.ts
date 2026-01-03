@@ -1,6 +1,6 @@
 import { appConfig, Embeds } from '@core/config';
 import { DiscordConstants, UnitConstants } from '@core/constants';
-import { ResolvedPopulatedReminder } from '@core/database';
+import { type ResolvedPopulatedReminder } from '@core/database';
 import { StringUtils, TimeUtils, InteractionUtils } from '@core/utils';
 import {
   ActionRowBuilder,

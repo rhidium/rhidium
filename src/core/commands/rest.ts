@@ -1,16 +1,16 @@
 import { Database } from '@core/database';
-import { debug, Debugger, Logger } from '@core/logger';
+import { debug, type Debugger, Logger } from '@core/logger';
 import { ObjectUtils } from '@core/utils';
 import {
   ApplicationCommand,
   Collection,
-  GuildResolvable,
+  type GuildResolvable,
   REST,
-  RESTPostAPIChatInputApplicationCommandsJSONBody,
-  RESTPostAPIContextMenuApplicationCommandsJSONBody,
+  type RESTPostAPIChatInputApplicationCommandsJSONBody,
+  type RESTPostAPIContextMenuApplicationCommandsJSONBody,
   Routes,
 } from 'discord.js';
-import { CommandBase, NonAPICommand } from './base';
+import { CommandBase, type NonAPICommand } from './base';
 import Client from '@core/client';
 
 type APICommandData =

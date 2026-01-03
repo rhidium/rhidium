@@ -4,15 +4,15 @@ import { CacheManager } from '@core/data-structures';
 import { Database } from '@core/database';
 import { EmojiUtils, StringUtils } from '@core/utils';
 import {
-  APIInteractionGuildMember,
+  type APIInteractionGuildMember,
   Guild,
   GuildChannel,
   GuildMember,
-  GuildTextBasedChannel,
+  type GuildTextBasedChannel,
   PermissionFlagsBits,
-  PermissionResolvable,
+  type PermissionResolvable,
   PermissionsBitField,
-  Snowflake,
+  type Snowflake,
 } from 'discord.js';
 
 enum PermLevel {

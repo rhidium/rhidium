@@ -1,4 +1,4 @@
-import { ComponentRegistry } from '@core/commands';
+import { type ComponentRegistry } from '@core/commands';
 import CommandOrCategoryCommand from './auto-completes/command-or-category';
 import EvalAcceptCommand from './buttons/eval-accept';
 import EvalDeclineCommand from './buttons/eval-decline';

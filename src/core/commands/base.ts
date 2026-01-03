@@ -1,6 +1,6 @@
 import {
   CommandType,
-  NonAPICommandTypeValue,
+  type NonAPICommandTypeValue,
   type APICommandTypeValue,
   type CacheTypeResolver,
   type CommandData,
@@ -13,25 +13,25 @@ import {
   ApplicationCommandType,
   ApplicationIntegrationType,
   ButtonBuilder,
-  CacheType,
+  type CacheType,
   ChannelSelectMenuBuilder,
   ContextMenuCommandBuilder,
-  Interaction,
+  type Interaction,
   InteractionContextType,
   InteractionType,
   MentionableSelectMenuBuilder,
   MessageFlags,
   ModalBuilder,
-  RepliableInteraction,
-  RESTPostAPIChatInputApplicationCommandsJSONBody,
-  RESTPostAPIContextMenuApplicationCommandsJSONBody,
+  type RepliableInteraction,
+  type RESTPostAPIChatInputApplicationCommandsJSONBody,
+  type RESTPostAPIContextMenuApplicationCommandsJSONBody,
   RoleSelectMenuBuilder,
   SlashCommandBuilder,
-  SlashCommandOptionsOnlyBuilder,
+  type SlashCommandOptionsOnlyBuilder,
   SlashCommandStringOption,
   SlashCommandSubcommandBuilder,
   SlashCommandSubcommandGroupBuilder,
-  SlashCommandSubcommandsOnlyBuilder,
+  type SlashCommandSubcommandsOnlyBuilder,
   StringSelectMenuBuilder,
   UserSelectMenuBuilder,
 } from 'discord.js';
@@ -44,15 +44,15 @@ import type {
   CommandPermissionOptions,
   PartialCommandOptions,
 } from './options';
-import { CommandThrottleOptions } from './throttle';
+import { type CommandThrottleOptions } from './throttle';
 import { Permissions, PermLevel } from '@core/commands/permissions';
 import {
   InteractionUtils,
   ResponseContent,
-  WithResponseContent,
+  type WithResponseContent,
 } from '@core/utils';
-import { CommandController } from './controllers';
-import { LocalizedLabelKey } from '@core/i18n/i18next';
+import { type CommandController } from './controllers';
+import { type LocalizedLabelKey } from '@core/i18n/i18next';
 import { I18n, locales } from '@core/i18n';
 import { InteractionConstants } from '@core/constants';
 import { Database } from '@core/database';

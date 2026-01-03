@@ -1,5 +1,5 @@
 import { Model } from '../models';
-import { PopulatedReminder } from '../select';
+import { type PopulatedReminder } from '../select';
 import { DatabaseWrapper } from './wrapper';
 
 type ResolvedPopulatedReminder = Omit<PopulatedReminder, 'repeatEvery'> & {

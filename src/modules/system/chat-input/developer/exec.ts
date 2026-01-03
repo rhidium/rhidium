@@ -3,7 +3,7 @@ import { appConfig, Embeds } from '@core/config';
 import { EmbedConstants, UnitConstants } from '@core/constants';
 import { TimeUtils } from '@core/utils';
 import { exec } from 'child_process';
-import { BaseMessageOptions } from 'discord.js';
+import { type BaseMessageOptions } from 'discord.js';
 
 const ExecCommand = new Command({
   type: CommandType.ChatInputPlain,
