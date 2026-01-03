@@ -1,12 +1,12 @@
-import { Permissions } from '@core/commands';
-import { type PopulatedGuild } from '@core/database';
+import { Permissions } from '@core/commands/permissions';
+import { type PopulatedGuild } from '@core/database/select';
+import type { MappedPrompt } from '@core/utils/prompts/mapped';
 import {
   type AnyPromptValue,
-  type MappedPrompt,
   type Prompt,
   type PromptType,
-  PromptValidation,
-} from '@core/utils';
+} from '@core/utils/prompts/types';
+import { PromptValidation } from '@core/utils/prompts/validation';
 import { Guild, PermissionFlagsBits } from 'discord.js';
 
 const permissionSettings: (keyof Pick<

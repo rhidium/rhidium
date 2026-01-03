@@ -1,4 +1,7 @@
-import { Command, CommandType, Permissions } from '@core/commands';
+import { Command } from '@core/commands/base';
+import { Permissions } from '@core/commands/permissions';
+import { CommandType } from '@core/commands/types';
+import { Database } from '@core/database/wrappers';
 import { I18n } from '@core/i18n';
 import { SlashCommandUserOption } from 'discord.js';
 
@@ -28,7 +31,7 @@ const PermLevelCommand = new Command({
       : interaction.member;
     const memberPermLevelName = I18n.localize(
       `core:permissions.levels.${Permissions.intToString(
-        await Permissions.resolveForMember(member, guild),
+        await Permissions.resolveForMember(member, guild, Database),
       )}`,
       interaction,
     );

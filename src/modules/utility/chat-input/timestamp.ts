@@ -1,11 +1,12 @@
-import { Command, CommandType } from '@core/commands';
-import { UnitConstants } from '@core/constants';
+import { UnitConstants } from '@core/constants/units';
 import { type TimestampStylesString } from 'discord.js';
 import TimezoneAutocomplete from '../autocompletes/timezone';
-import { Database } from '@core/database';
-import { Embeds } from '@core/config';
+import { Database } from '@core/database/wrappers';
+import { Embeds } from '@core/config/embeds';
 import { stripIndents } from 'common-tags';
-import { InputUtils } from '@core/utils';
+import { InputUtils } from '@core/utils/inputs';
+import { Command } from '@core/commands/base';
+import { CommandType } from '@core/commands/types';
 
 const timestampStyle = {
   relative: 'R',

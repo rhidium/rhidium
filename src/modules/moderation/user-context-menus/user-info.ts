@@ -1,11 +1,15 @@
 import { WarnServices } from '../services/warn';
 import { stripIndents } from 'common-tags';
-import { Command, CommandType, PermLevel } from '@core/commands';
-import { Embeds } from '@core/config';
-import { ArrayUtils, StringUtils, TimeUtils } from '@core/utils';
-import { Database } from '@core/database';
-import { EmbedConstants } from '@core/constants';
+import { Embeds } from '@core/config/embeds';
+import { Database } from '@core/database/wrappers';
+import { EmbedConstants } from '@core/constants/embeds';
 import { I18n } from '@core/i18n';
+import { Command } from '@core/commands/base';
+import { CommandType } from '@core/commands/types';
+import { PermLevel } from '@core/commands/permissions';
+import { TimeUtils } from '@core/utils/common/time';
+import { ArrayUtils } from '@core/utils/common/arrays';
+import { StringUtils } from '@core/utils/common/strings';
 
 const UserInfoContextMenu = new Command({
   type: CommandType.UserContextMenu,

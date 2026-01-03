@@ -1,6 +1,6 @@
-import { type ComponentRegistry } from '@core/commands';
-import TestChatInput, { TestJob } from './test';
+import { type ComponentRegistry } from '@core/commands/manager';
+import TestChatInput from './test';
 
-const testRegistry = [TestChatInput, TestJob] as ComponentRegistry;
+const testRegistry = [TestChatInput] as ComponentRegistry;
 
 export default testRegistry;

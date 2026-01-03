@@ -137,6 +137,7 @@ Join our [support server](https://discord.gg/mirasaki) if you have any questions
 ### High Priority
 
 - [ ] Localization for `prompts/interactions`
+- [ ] `logger/Logger` should be made available in all interaction contexts
 - [ ] Resolve or otherwise review Typedoc warnings
 - [ ] Add documentation for `COMPONENT_HANDLER_IDENTIFIER`
 - [ ] Apply `data#setDefaultMemberPermissions` to relevant commands

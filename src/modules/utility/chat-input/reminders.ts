@@ -1,21 +1,20 @@
-import {
-  Command,
-  CommandThrottleType,
-  CommandType,
-  PermLevel,
-} from '@core/commands';
-import { DiscordConstants, UnitConstants } from '@core/constants';
-import { type DateSingleResult, InputUtils } from '@core/utils';
 import { AttachmentBuilder, ChannelType } from 'discord.js';
 import ReminderAutoComplete from '../autocompletes/reminder';
-import { Embeds } from '@core/config';
+import { Embeds } from '@core/config/embeds';
 import {
   type ReminderModalSubmitData,
   ReminderServices,
 } from '../services/reminders';
-import { Database } from '@core/database';
+import { Database } from '@core/database/wrappers';
 import { stripIndents } from 'common-tags';
 import { ReminderScheduler } from '../services/reminders/scheduler';
+import { UnitConstants } from '@core/constants/units';
+import { Command } from '@core/commands/base';
+import { CommandType } from '@core/commands/types';
+import { PermLevel } from '@core/commands/permissions';
+import { CommandThrottleType } from '@core/commands/throttle';
+import { InputUtils } from '@core/utils/inputs';
+import { DiscordConstants } from '@core/constants/discord';
 
 const frequentIntervalThreshold = UnitConstants.MS_IN_ONE_MINUTE * 30;
 const frequentIntervalMaxRuntime = UnitConstants.MS_IN_ONE_DAY * 7;
@@ -167,7 +166,9 @@ const RemindersCommand = new Command({
         return false;
       }
 
-      if (when.length > 1) {
+      const [resolvedWhen] = when;
+
+      if (!resolvedWhen) {
         await RemindersCommand.reply(
           interaction,
           Embeds.error(
@@ -177,9 +178,7 @@ const RemindersCommand = new Command({
         return false;
       }
 
-      const [resolvedWhen] = when;
-
-      return (resolvedWhen as DateSingleResult)[1];
+      return resolvedWhen[0];
     };
 
     if (subcommand === 'when') {

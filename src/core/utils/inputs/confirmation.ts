@@ -10,10 +10,10 @@ import {
   type InteractionReplyOptions,
   type RepliableInteraction,
 } from 'discord.js';
-import { appConfig } from '@core/config';
+import { appConfig } from '@core/config/app';
 import { I18n } from '@core/i18n';
-import { UnitConstants } from '@core/constants';
-import { InteractionUtils } from '../interactions/interaction';
+import { UnitConstants } from '@core/constants/units';
+import { InteractionUtils } from '../interactions';
 
 type PromptConfirmationOptions<I extends RepliableInteraction<CacheType>> = {
   interaction: I;

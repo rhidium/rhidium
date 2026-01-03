@@ -7,7 +7,6 @@ import {
   type CommandInteraction,
   type CommandRunFunction,
 } from './types';
-import { debug, Logger, type Debugger } from '@core/logger';
 import {
   ApplicationCommandOptionBase,
   ApplicationCommandType,
@@ -35,7 +34,7 @@ import {
   StringSelectMenuBuilder,
   UserSelectMenuBuilder,
 } from 'discord.js';
-import commandDefaults from './defaults';
+import { commandDefaults } from './defaults';
 import type {
   AutoCompleteResolver,
   CommandEnabledOptions,
@@ -46,16 +45,16 @@ import type {
 } from './options';
 import { type CommandThrottleOptions } from './throttle';
 import { Permissions, PermLevel } from '@core/commands/permissions';
-import {
-  InteractionUtils,
-  ResponseContent,
-  type WithResponseContent,
-} from '@core/utils';
 import { type CommandController } from './controllers';
 import { I18n, locales } from '@core/i18n';
-import { InteractionConstants } from '@core/constants';
-import { Database } from '@core/database';
+import { Database } from '@core/database/wrappers';
 import type { LocalizedLabelKey } from '@core/i18n/types';
+import { logger } from '@core/logger';
+import { debug, type Debugger } from '@core/logger/debug';
+import { InteractionConstants } from '@core/constants/interactions';
+import { InteractionUtils, ResponseContent, type WithResponseContent } from '@core/utils/interactions';
+
+const Logger = logger();
 
 const isStringArray = (value: unknown): value is string[] =>
   Array.isArray(value) && value.every((item) => typeof item === 'string');
@@ -812,7 +811,7 @@ class CommandBase<
       | CommandData<Type>
       | ((builder: CommandData<Type>) => CommandData<Type>),
   ): CommandData<Type> => {
-    let resolved: CommandData<Type>;
+    let resolved: CommandData<Type> | undefined;
 
     const cast = (builder: unknown) => builder as CommandData<Type>;
     const data = (builder: unknown) => {
@@ -863,6 +862,9 @@ class CommandBase<
         break;
       case CommandType.AutoComplete:
         resolved = data(new SlashCommandStringOption().setAutocomplete(true));
+        break;
+      default:
+        throw new Error(`Unsupported command type for dataResolver: ${type}`);
     }
 
     return resolved;
@@ -882,6 +884,7 @@ class CommandBase<
     const memberPermLevel = await Permissions.resolveForMember(
       interaction.member,
       interaction.guild,
+      Database,
     );
 
     if (

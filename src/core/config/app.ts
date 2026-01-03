@@ -35,3 +35,5 @@ export const appConfig = {
   },
   pkg,
 };
+
+export type AppConfig = typeof appConfig;

@@ -31,7 +31,7 @@ export class PopulatedPrisma {
   // Standard Prisma Operations
   //
 
-  static $client = prismaClient;
+  static $client: typeof prismaClient = prismaClient;
   static $connect = prismaClient.$connect.bind(prismaClient);
   static $disconnect = prismaClient.$disconnect.bind(prismaClient);
   static $executeRaw = prismaClient.$executeRaw.bind(prismaClient);

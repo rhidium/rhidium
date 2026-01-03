@@ -1,6 +1,6 @@
 import _debug from 'debug';
 import type { GetBatchResult } from '@prisma/client/runtime/client';
-import { UnitConstants } from '@core/constants';
+import { UnitConstants } from '@core/constants/units';
 import { Model } from '../models';
 import { PopulatedPrisma } from '../populated';
 import type {
@@ -10,7 +10,8 @@ import type {
   ModelUpdateArgs,
   ThenArg,
 } from '../types';
-import { CacheManager, PerformanceTracker } from '@core/data-structures';
+import { CacheManager } from '@core/data-structures/cache/manager';
+import { PerformanceTracker } from '@core/data-structures/performance';
 
 // [DEV] `!this.useCache || !cacheResult` could use some improved logic/refactoring.
 

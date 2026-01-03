@@ -1,14 +1,9 @@
-import { type APICommand, Command, CommandType } from '@core/commands';
-import { StringUtils } from '@core/utils';
-import { SlashCommandStringOption } from 'discord.js';
+import { Command } from '@core/commands/base';
+import { CommandType } from '@core/commands/types';
+import { StringUtils } from '@core/utils/common/strings';
+import { CommandOrCategoryData } from './helpers';
 
-type CommandOrCategory = APICommand | string;
-
-const data = new SlashCommandStringOption()
-  .setName('command-or-category')
-  .setDescription('Select a command or category')
-  .setRequired(true)
-  .setAutocomplete(true);
+const data = CommandOrCategoryData;
 
 const CommandOrCategoryCommand = new Command({
   data,
@@ -76,8 +71,4 @@ const CommandOrCategoryCommand = new Command({
   },
 });
 
-export {
-  CommandOrCategoryCommand as default,
-  type CommandOrCategory,
-  data as CommandOrCategoryData,
-};
+export default CommandOrCategoryCommand;

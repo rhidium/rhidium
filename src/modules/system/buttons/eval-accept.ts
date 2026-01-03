@@ -6,13 +6,17 @@ import {
   ButtonStyle,
   type Interaction,
 } from 'discord.js';
-import { Command, CommandType, PermLevel } from '@core/commands';
-import { appConfig, Embeds } from '@core/config';
+
+import { Command } from '@core/commands/base';
+import { CommandType } from '@core/commands/types';
+import { PermLevel } from '@core/commands/permissions';
+import { appConfig } from '@core/config/app';
+import { Embeds } from '@core/config/embeds';
 import { EvalConstants } from '../constants';
 import { I18n } from '@core/i18n';
-import { TimeUtils } from '@core/utils';
-import { EmbedConstants } from '@core/constants';
-import Client from '@core/client';
+import { TimeUtils } from '@core/utils/common/time';
+import { EmbedConstants } from '@core/constants/embeds';
+import type Client from '@core/client';
 
 const evalAcceptedRow = (interaction: Interaction) =>
   new ActionRowBuilder<ButtonBuilder>().addComponents(

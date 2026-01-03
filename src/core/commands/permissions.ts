@@ -1,8 +1,9 @@
-import { appConfig } from '@core/config';
-import { UnitConstants } from '@core/constants';
-import { CacheManager } from '@core/data-structures';
-import { Database } from '@core/database';
-import { EmojiUtils, StringUtils } from '@core/utils';
+import { appConfig } from '@core/config/app';
+import { UnitConstants } from '@core/constants/units';
+import { CacheManager } from '@core/data-structures/cache/manager';
+import type { Database } from '@core/database/wrappers';
+import { StringUtils } from '@core/utils/common/strings';
+import { EmojiUtils } from '@core/utils/emojis';
 import {
   type APIInteractionGuildMember,
   Guild,
@@ -33,6 +34,7 @@ interface PermissionLevelConfiguration {
   hasLevel(
     config: ClientPermissionOptions,
     member: GuildMember,
+    db: typeof Database
   ): boolean | Promise<boolean>;
 }
 
@@ -56,7 +58,7 @@ const config: ClientPermissionOptions = {
     {
       name: 'Moderator',
       level: PermLevel.Moderator,
-      hasLevel: async (_config, member) => {
+      hasLevel: async (_config, member, Database) => {
         const guild = await Database.Guild.resolve(member.guild.id);
 
         if (!guild.modRoleIds.length) {
@@ -75,8 +77,8 @@ const config: ClientPermissionOptions = {
     {
       name: 'Administrator',
       level: PermLevel.Administrator,
-      hasLevel: async (_config, member) => {
-        const guild = await Database.Guild.resolve(member.guild.id);
+      hasLevel: async (_config, member, db) => {
+        const guild = await db.Guild.resolve(member.guild.id);
 
         if (!guild.adminRoleIds.length && !guild.adminUserIds.length) {
           return member.permissions.has(PermissionFlagsBits.Administrator);
@@ -157,6 +159,7 @@ class Permissions {
   public static readonly resolveForMember = async (
     member: GuildMember | APIInteractionGuildMember | null,
     guild: Guild | null,
+    db: typeof Database,
   ): Promise<PermLevel> => {
     if (member === null || guild === null) {
       return PermLevel.User;
@@ -179,7 +182,7 @@ class Permissions {
 
     let resolvedLevel = PermLevel.User;
     for await (const { level, hasLevel } of Permissions.sortedLevels) {
-      if (await hasLevel(Permissions.config, resolvedMember)) {
+      if (await hasLevel(Permissions.config, resolvedMember, db)) {
         resolvedLevel = level;
         break;
       }

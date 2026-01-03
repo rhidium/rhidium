@@ -39,7 +39,6 @@ class Placeholder {
     for (let i = 0; i < placeholderKeys.length; i++) {
       const key = placeholderKeys[i] as string;
       const value = extractProperty(obj, key, null);
-
       const placeholderKey = `{${prefix}${key}}`;
 
       if (value === null || typeof value === 'undefined') {

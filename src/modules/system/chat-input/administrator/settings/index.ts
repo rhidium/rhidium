@@ -12,15 +12,16 @@ import {
   settingsAllRequired,
   settingsPrompts,
 } from './prompts';
-import { InputUtils, PromptDisplay, PromptValidation } from '@core/utils';
-import {
-  AuditLogType,
-  Database,
-  type PopulatedGuild,
-  prismaClient,
-} from '@core/database';
-import { Command, CommandType, Permissions, PermLevel } from '@core/commands';
-import { Embeds } from '@core/config';
+import { Database, AuditLogType } from '@core/database/wrappers';
+import { PromptValidation } from '@core/utils/prompts/validation';
+import type { PopulatedGuild } from '@core/database/select';
+import { prismaClient } from '@core/database/client';
+import { Command } from '@core/commands/base';
+import { CommandType } from '@core/commands/types';
+import { Permissions, PermLevel } from '@core/commands/permissions';
+import { Embeds } from '@core/config/embeds';
+import { PromptDisplay } from '@core/utils/prompts/display';
+import { InputUtils } from '@core/utils/inputs';
 
 PromptValidation.validatePrompts(settingsPrompts);
 
@@ -214,6 +215,7 @@ const SettingsCommand = new Command({
           const memberPermLevel = await Permissions.resolveForMember(
             interaction.member,
             interaction.guild,
+            Database,
           );
 
           if (memberPermLevel < PermLevel['Server Owner']) {

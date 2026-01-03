@@ -8,7 +8,7 @@ export const generateKey = (
   return randomBytes(size).toString(format);
 };
 
-export const severityEntries = Object.entries(Severity);
+export const severityEntries = Object.entries<string>(Severity);
 export const severityValues = severityEntries.map(([, value]) => value);
 export const severityChoices = severityEntries.map(([key, value]) => ({
   name: key,

@@ -1,8 +1,10 @@
-import Client from '@core/client';
-import { debug } from '@core/logger';
-import { Logger } from '@core/logger';
-import { TimeUtils } from '@core/utils';
+import type Client from '@core/client';
+import { debug } from '@core/logger/debug';
+import { logger } from '@core/logger';
+import { TimeUtils } from '@core/utils/common/time';
 import { CronJob, type CronJobParams } from 'cron';
+
+const Logger = logger();
 
 type ClientJobParams = Omit<
   CronJobParams<() => void | Promise<void>, null>,

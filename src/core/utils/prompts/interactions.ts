@@ -23,7 +23,7 @@ import {
   UserSelectMenuBuilder,
   UserSelectMenuInteraction,
 } from 'discord.js';
-import type { GuildInteraction } from '@core/commands';
+import type { GuildInteraction } from '@core/commands/types';
 import type {
   AnyPromptValue,
   Prompt,
@@ -31,13 +31,14 @@ import type {
   ResolvedPrompt,
   ValueForPrompt,
 } from './types';
-import { PromptValidation } from './validation';
-import { StringUtils } from '../common';
-import { EmbedConstants, UnitConstants } from '@core/constants';
-import { PromptResolver } from './resolver';
-import { Logger } from '@core/logger';
-import { Embeds } from '@core/config';
+import { PromptResolver, PromptValidation } from './validation';
+import { StringUtils } from '../common/strings';
+import { UnitConstants } from '@core/constants/units';
+import { EmbedConstants } from '@core/constants/embeds';
+import { logger } from '@core/logger';
+import { Embeds } from '@core/config/embeds';
 
+const Logger = logger();
 const isProduction = process.env.NODE_ENV === 'production';
 
 type PromptInteraction = GuildInteraction<

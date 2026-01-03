@@ -1,7 +1,9 @@
 import { SlashCommandStringOption } from 'discord.js';
 import { WarnServices } from '../services/warn';
-import { Command, CommandType, PermLevel } from '@core/commands';
-import { Database } from '@core/database';
+import { Database } from '@core/database/wrappers';
+import { CommandType } from '@core/commands/types';
+import { Command } from '@core/commands/base';
+import { PermLevel } from '@core/commands/permissions';
 
 const data = new SlashCommandStringOption()
   .setName('warning')

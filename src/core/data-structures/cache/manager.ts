@@ -10,7 +10,7 @@ import {
   type ResolvedCreateCacheOptions,
   type SetCacheArguments,
 } from './types';
-import { NumberUtils } from '@core/utils';
+import { NumberUtils } from '@core/utils/common/numbers';
 
 export class CacheManager<T extends NonNullable<unknown>>
   implements AbstractCache<T>

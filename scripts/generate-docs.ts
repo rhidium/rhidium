@@ -1,4 +1,3 @@
-import { Logger } from '../src/core/logger/index';
 import { Application } from 'typedoc';
 
 /**
@@ -29,4 +28,4 @@ async function main() {
   }
 }
 
-main().catch(Logger.error);
+main().catch(console.error);

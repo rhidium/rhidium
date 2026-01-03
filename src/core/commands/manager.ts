@@ -1,14 +1,18 @@
 import { bold, Collection, Events, OAuth2Scopes } from 'discord.js';
 import { type AnyCommand, type APICommand, Command, CommandBase } from './base';
-import { debug, type Debugger, Logger } from '@core/logger';
-import { Embeds } from '@core/config';
+import { logger } from '@core/logger';
+import { debug, type Debugger } from '@core/logger/debug';
+import { Embeds } from '@core/config/embeds';
 import { type AbstractRESTClient, NoOpRESTClient, RESTClient } from './rest';
-import { InteractionUtils, StringUtils } from '@core/utils';
-import { Database } from '@core/database';
+import { Database } from '@core/database/wrappers';
 import { ClientJob } from './jobs';
 import { ClientEventListener } from './events';
-import Client from '@core/client';
+import type Client from '@core/client';
 import { I18n } from '@core/i18n';
+import { StringUtils } from '@core/utils/common/strings';
+import { InteractionUtils } from '@core/utils/interactions';
+
+const Logger = logger();
 
 class Manager<
   Key extends string,
@@ -376,7 +380,7 @@ class ClientManager {
 
       try {
         const [throttle, consumerResult] = await command.withThrottle(
-          () => Database.Command.throttleConsumer(command, safeInteraction),
+          () => Database.Command.throttleConsumer(command, safeInteraction, Database),
           () => {
             cmdRunStart = Date.now();
 

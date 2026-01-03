@@ -1,6 +1,8 @@
-import { Command, CommandType, PermLevel } from '@core/commands';
-import { Database } from '@core/database';
+import { Database } from '@core/database/wrappers';
 import { settingsEmbed } from '../chat-input/administrator/settings/shared';
+import { Command } from '@core/commands/base';
+import { CommandType } from '@core/commands/types';
+import { PermLevel } from '@core/commands/permissions';
 
 const SettingsCategoryCommand = new Command({
   type: CommandType.StringSelect,

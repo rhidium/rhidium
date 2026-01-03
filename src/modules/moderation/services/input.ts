@@ -1,5 +1,4 @@
-import { severityChoices, severityValues } from '@core/database';
-import { StringUtils } from '@core/utils';
+import { StringUtils } from '@core/utils/common/strings';
 import {
   ActionRowBuilder,
   type ModalActionRowComponentBuilder,
@@ -7,7 +6,8 @@ import {
   TextInputBuilder,
   TextInputStyle,
 } from 'discord.js';
-import { WarnInteractions } from '../modals/warn';
+import { WarnInteractions } from '../constants';
+import { severityChoices, severityValues } from '@core/database/util';
 
 const minSeverityLength = severityValues.reduce(
   (acc, curr) => Math.min(acc, curr.length),
@@ -44,7 +44,7 @@ class ModerationInputServices {
     label?: string;
     placeholder?: string;
     required?: boolean;
-  }) => {
+  }): ActionRowBuilder<ModalActionRowComponentBuilder> => {
     const {
       label = 'Severity',
       placeholder = `The severity of the warning: ${this.displaySeverity}`,

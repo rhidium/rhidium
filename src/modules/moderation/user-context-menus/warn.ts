@@ -1,6 +1,8 @@
 import { ContextMenuCommandBuilder } from 'discord.js';
-import { warnModal } from '../modals/warn';
-import { Command, CommandType, PermLevel } from '@core/commands';
+import { warnModal } from '../helpers';
+import { Command } from '@core/commands/base';
+import { CommandType } from '@core/commands/types';
+import { PermLevel } from '@core/commands/permissions';
 
 const WarnContextMenu = new Command({
   type: CommandType.UserContextMenu,

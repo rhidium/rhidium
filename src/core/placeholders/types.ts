@@ -1,5 +1,5 @@
-import Client from '@core/client';
-import {
+import type Client from '@core/client';
+import type {
   GuildChannel,
   Guild,
   GuildMember,

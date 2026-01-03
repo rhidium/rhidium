@@ -1,4 +1,4 @@
-import { UnitConstants } from '@core/constants';
+import { UnitConstants } from '@core/constants/units';
 import { Queue } from '.';
 
 export type QueueCallbackFunction<T> = (item: T) => Promise<void> | void;

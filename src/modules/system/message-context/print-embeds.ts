@@ -1,6 +1,7 @@
-import { Command, CommandType } from '@core/commands';
-import { Embeds } from '@core/config';
-import { EmbedConstants } from '@core/constants';
+import { Command } from '@core/commands/base';
+import { CommandType } from '@core/commands/types';
+import { Embeds } from '@core/config/embeds';
+import { EmbedConstants } from '@core/constants/embeds';
 import { I18n } from '@core/i18n';
 import { AttachmentBuilder, EmbedBuilder, escapeCodeBlock } from 'discord.js';
 

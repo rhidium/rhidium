@@ -1,4 +1,6 @@
-import { Command, CommandType, PermLevel } from '@core/commands';
+import { Command } from '@core/commands/base';
+import { CommandType } from '@core/commands/types';
+import { PermLevel } from '@core/commands/permissions';
 import {
   ActionRowBuilder,
   ButtonBuilder,
@@ -8,7 +10,7 @@ import {
   TextInputStyle,
 } from 'discord.js';
 import { EvalConstants } from '../constants';
-import { Embeds } from '@core/config';
+import { Embeds } from '@core/config/embeds';
 
 const codeModal = new ModalBuilder()
   .setCustomId(EvalConstants.CODE_MODAL_ID)

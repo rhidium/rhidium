@@ -1,5 +1,7 @@
-import { Logger } from '@core/logger';
+import { logger } from '@core/logger';
 import { PermissionFlagsBits } from 'discord.js';
+
+const Logger = logger();
 
 const emojiMap: Record<string, string> = {
   '0': '0️⃣',

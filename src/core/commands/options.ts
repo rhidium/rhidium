@@ -17,7 +17,7 @@ import {
 } from './types';
 import { type CommandThrottleOptions } from './throttle';
 import { type CommandController } from './controllers';
-import Client from '@core/client';
+import type Client from '@core/client';
 
 type CommandInteractionOptions<RefuseUncached extends boolean> = {
   /**
@@ -56,7 +56,7 @@ type CommandEnabledOptions<GuildOnly extends boolean> = {
   global: boolean;
   /**
    * Wether or not this command is considered "Not Safe For Work", and therefor not allowed/made available in
-   * channels thats are **not** explicitely marked as NSFW.
+   * channels thats are **not** explicitly marked as NSFW.
    * - If `true`, the command will only be available in NSFW channels.
    * - If `false`, the command will be available in all channels.
    * @default false

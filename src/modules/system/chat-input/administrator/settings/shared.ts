@@ -15,25 +15,24 @@ import {
   type SettingsKey,
 } from './types';
 import { groupedSettingsPrompts, settingsPrompts } from './prompts';
-import { CacheManager } from '@core/data-structures';
-import Client from '@core/client';
-import { type GuildInteraction, Permissions, PermLevel } from '@core/commands';
-import { EmbedConstants, UnitConstants } from '@core/constants';
-import { AuditLogType, Database, type PopulatedGuild } from '@core/database';
-import {
-  ArrayUtils,
-  InteractionPagination,
-  InteractionUtils,
-  type PaginationPage,
-  type Prompt,
-  PromptDisplay,
-  PromptInteractionHandler,
-  PromptResolver,
-  type PromptType,
-  type PromptValue,
-  StringUtils,
-} from '@core/utils';
-import { appConfig, Embeds } from '@core/config';
+import { CacheManager } from '@core/data-structures/cache/manager';
+import type Client from '@core/client';
+import { Permissions, PermLevel } from '@core/commands/permissions';
+import { AuditLogType, Database } from '@core/database/wrappers';
+import { type PopulatedGuild } from '@core/database/select';
+import { UnitConstants } from '@core/constants/units';
+import type { GuildInteraction } from '@core/commands/types';
+import { InteractionPagination, type PaginationPage } from '@core/utils/interactions/pagination';
+import { ArrayUtils } from '@core/utils/common/arrays';
+import { PromptDisplay } from '@core/utils/prompts/display';
+import { StringUtils } from '@core/utils/common/strings';
+import { PromptResolver } from '@core/utils/prompts/validation';
+import { appConfig } from '@core/config/app';
+import { EmbedConstants } from '@core/constants/embeds';
+import { Embeds } from '@core/config/embeds';
+import type { Prompt, PromptType, PromptValue } from '@core/utils/prompts/types';
+import { InteractionUtils } from '@core/utils/interactions';
+import { PromptInteractionHandler } from '@core/utils/prompts/interactions';
 
 type CommandChoices = {
   name: string;
@@ -61,9 +60,10 @@ const commandChoicesFromCache = async (
   const memberPermLevel = await Permissions.resolveForMember(
     interaction.member,
     interaction.guild,
+    Database,
   );
 
-  // Note: We only include commands with Adminstrator permission level or lower,
+  // Note: We only include commands with Administrator permission level or lower,
   // If we include Guild Owner commands, the admin submission values (select menu)
   // would not include any guild owner commands, unsetting them.
   const maxLevel = Math.min(memberPermLevel, PermLevel.Administrator);

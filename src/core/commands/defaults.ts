@@ -1,11 +1,10 @@
-import { PermLevel } from '@core/commands/permissions';
 import { type CommandThrottleOptions, CommandThrottleType } from './throttle';
 import type {
   CommandEnabledOptions,
   CommandInteractionOptions,
   CommandPermissionOptions,
 } from './options';
-import { appConfig } from '@core/config';
+import { appConfig } from '@core/config/app';
 
 const commandDeploymentEnvironment =
   process.env.NODE_ENV === 'production'
@@ -13,7 +12,7 @@ const commandDeploymentEnvironment =
     : appConfig.client.development_server_id;
 
 const permissions: CommandPermissionOptions = {
-  level: PermLevel.User,
+  level: 0,
   client: [],
   user: [],
   whitelist: {
@@ -59,4 +58,4 @@ const commandDefaults = {
   enabled,
 };
 
-export { commandDefaults as default, commandDeploymentEnvironment };
+export { commandDefaults, commandDeploymentEnvironment };

@@ -1,12 +1,8 @@
 import { ModerationAction } from '@prisma/client';
 import { Model } from '../models';
-import { type PopulatedGuild, type PopulatedMember, type PopulatedUser } from '../select';
+import { type PopulatedGuild } from '../select';
 import { DatabaseWrapper } from './wrapper';
-import { UnitConstants } from '@core/constants';
-import { BaseInteraction } from 'discord.js';
-import { memberWrapper } from './member';
-import { userWrapper } from './user';
-import { type GuildInteraction } from '@core/commands';
+import { UnitConstants } from '@core/constants/units';
 
 class GuildWrapper extends DatabaseWrapper<Model.Guild> {
   constructor() {
@@ -39,24 +35,6 @@ class GuildWrapper extends DatabaseWrapper<Model.Guild> {
       },
       update: {},
     });
-  }
-
-  async resolveFromInteraction<I extends BaseInteraction>(
-    interaction: GuildInteraction<I>,
-  ): Promise<readonly [PopulatedGuild, PopulatedMember, PopulatedUser]> {
-    const [user, guild] = await Promise.all([
-      userWrapper.resolve(interaction.user.id),
-      this.resolve(interaction.guildId),
-    ]);
-
-    const member = await memberWrapper.resolve({
-      userId: interaction.user.id,
-      guildId: interaction.guildId,
-      resolveGuild: false,
-      resolveUser: false,
-    });
-
-    return [guild, member, user];
   }
 }
 

@@ -1,7 +1,9 @@
-import { ClientEventListener } from '@core/commands';
-import { Logger } from '@core/logger';
+import { ClientEventListener } from '@core/commands/events';
+import { logger } from '@core/logger';
 import { Events } from 'discord.js';
-import { backlogCommandUsage } from '../jobs/process-command-usage';
+import { backlogCommandUsage } from '../jobs/helpers';
+
+const Logger = logger();
 
 const ClientReady = new ClientEventListener({
   once: true,

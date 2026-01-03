@@ -1,10 +1,16 @@
 import { AttachmentBuilder, ChannelType } from 'discord.js';
 import { ModLogServices } from '../services/mod-log';
-import { Command, CommandType, Permissions, PermLevel } from '@core/commands';
-import { ChannelUtils, InputUtils, StringUtils, TimeUtils } from '@core/utils';
-import { EmbedConstants, UnitConstants } from '@core/constants';
-import { Embeds } from '@core/config';
-import { Database } from '@core/database';
+import { Embeds } from '@core/config/embeds';
+import { Database } from '@core/database/wrappers';
+import { Command } from '@core/commands/base';
+import { CommandType } from '@core/commands/types';
+import { Permissions, PermLevel } from '@core/commands/permissions';
+import { InputUtils } from '@core/utils/inputs';
+import { UnitConstants } from '@core/constants/units';
+import { ChannelUtils } from '@core/utils/channels';
+import { TimeUtils } from '@core/utils/common/time';
+import { StringUtils } from '@core/utils/common/strings';
+import { EmbedConstants } from '@core/constants/embeds';
 
 const PurgeCommand = new Command({
   type: CommandType.ChatInputPlain,

@@ -5,7 +5,7 @@ import {
   TextInputBuilder,
   TextInputStyle,
 } from 'discord.js';
-import { UnitConstants } from '@core/constants';
+import { UnitConstants } from '@core/constants/units';
 
 class DurationInput {
   /**
@@ -91,7 +91,7 @@ class DurationInput {
     required?: boolean;
     omitSuffix?: boolean;
     shortSuffix?: boolean | 'short';
-  }) => {
+  }): ActionRowBuilder<ModalActionRowComponentBuilder> => {
     const {
       customId = 'duration',
       label = 'Duration',

@@ -1,6 +1,6 @@
-import { Permissions } from '@core/commands';
-import { type PopulatedGuild } from '@core/database';
-import { Logger } from '@core/logger';
+import { Permissions } from '@core/commands/permissions';
+import type { PopulatedGuild } from '@core/database/select';
+import { logger } from '@core/logger';
 import {
   Guild,
   type GuildBasedChannel,
@@ -9,6 +9,8 @@ import {
   PermissionFlagsBits,
   type TextBasedChannel,
 } from 'discord.js';
+
+const Logger = logger();
 
 type ModLogMessage = string | MessagePayload | MessageCreateOptions;
 type ModLogOptions = {
