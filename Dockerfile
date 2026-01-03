@@ -7,7 +7,7 @@ WORKDIR /app
 COPY .husky/ .husky/
 COPY prisma/ prisma/
 COPY package.json pnpm-lock.yaml /app/
-RUN corepack prepare pnpm@9.15.4 --activate \
+RUN corepack prepare pnpm@10.4.1 --activate \
   && corepack enable \
   && apk add --no-cache openssl
 
@@ -45,7 +45,7 @@ COPY config/config.example.json /app/config/config.json
 COPY config/extended-config.example.json /app/config/extended-config.json
 RUN pnpm run docs:build
 
-FROM nginx:1.27.4-alpine-slim AS docs
+FROM nginx:1.29.4-alpine-slim AS docs
 RUN rm -rf /usr/share/nginx/html/*
 COPY typedoc.conf /etc/nginx/nginx.conf
 COPY --from=build-docs /app/docs /usr/share/nginx/html
