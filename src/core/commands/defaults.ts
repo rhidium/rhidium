@@ -6,7 +6,7 @@ import type {
 } from './options';
 import { appConfig } from '@core/config/app';
 
-const commandDeploymentEnvironment =
+const commandDeploymentEnvironment: string | null =
   process.env.NODE_ENV === 'production'
     ? null
     : appConfig.client.development_server_id;
