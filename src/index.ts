@@ -11,6 +11,7 @@ import moderationRegistry from './modules/moderation';
 
 const main = async () => {
   await I18n.init();
+
   const manager = new ClientManager();
   const client = new Client({
     intents: [GatewayIntentBits.Guilds],
