@@ -137,7 +137,8 @@ export class CacheManager<T extends NonNullable<unknown>>
   }
 
   async ttl(key: string): Promise<number | null> {
-    return this.cache.ttl(key);
+    const ttl = await this.cache.ttl(key);
+    return ttl || null;
   }
 
   async set(key: string, value: T | null, ttl?: number): Promise<T | null> {

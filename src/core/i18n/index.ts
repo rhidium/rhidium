@@ -2,7 +2,6 @@ import { UnitConstants } from '@core/constants';
 import { Logger } from '@core/logger';
 import { Guild, type Interaction, Locale } from 'discord.js';
 import fs from 'fs';
-import path from 'path';
 import i18n, { type TOptions } from 'i18next';
 import path from 'path';
 import { type LocalizedLabelKey } from './i18next';

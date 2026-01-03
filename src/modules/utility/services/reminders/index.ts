@@ -142,7 +142,18 @@ class ReminderServices {
   static readonly reminderDataFromModalSubmit = async (
     interaction: ModalSubmitInteraction,
   ): Promise<ReminderModalSubmitData | null> => {
-    const message = interaction.fields.getField('message').value;
+    const messageInput = interaction.fields.getField('message');
+    if (!('value' in messageInput)) {
+      await InteractionUtils.replyDynamic(interaction, {
+        embeds: [
+          Embeds.error(
+            'Invalid modal submission data. Please note that Rhidium currently ONLY support text-based inputs (TextInputBuilder).',
+          ),
+        ],
+      });
+      return null;
+    }
+    const message = messageInput.value;
 
     if (message.length > DiscordConstants.MAX_MESSAGE_CONTENT_LENGTH) {
       await InteractionUtils.replyDynamic(interaction, {

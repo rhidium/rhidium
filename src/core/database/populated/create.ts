@@ -1,4 +1,4 @@
-import { type GetBatchResult } from '@prisma/client/runtime/library';
+import type { GetBatchResult } from '@prisma/client/runtime/client';
 import { prismaClient } from '../client';
 import { Model } from '../models';
 import {

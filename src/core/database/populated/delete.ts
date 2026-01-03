@@ -1,5 +1,5 @@
 import { prismaClient } from '../client';
-import { type GetBatchResult } from '@prisma/client/runtime/library';
+import type { GetBatchResult } from '@prisma/client/runtime/client';
 import {
   type ModelDeleteArgs,
   type ModelDeleteManyArgs,

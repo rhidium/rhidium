@@ -117,6 +117,14 @@ const WarnModalCommand = new Command({
     const severity =
       fields.getField(WarnInteractions.WARN_SEVERITY_INPUT_ID) ?? Severity.LOW;
     const validFor = fields.getField(WarnInteractions.WARN_VALID_FOR_INPUT_ID);
+
+    if (!('value' in validFor) || !('value' in severity) || !('value' in reason)) {
+      await WarnModalCommand.reply(interaction, {
+        embeds: [Embeds.error('Invalid modal submission data. Please note that Rhidium currently ONLY support text-based inputs (TextInputBuilder).')],
+      });
+      return;
+    }
+
     const validUntil =
       validFor === null
         ? null

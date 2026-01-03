@@ -410,10 +410,10 @@ class RESTClient implements AbstractRESTClient {
 
     if (guildId) await Database.Guild.resolve(guildId);
 
-    const [synced, apiCommands] = await Promise.all([
-      this.checkCommandsSynced(guildId ?? null),
+    const [synced] = await Promise.all([
+      this.checkCommandsSynced(),
       this.fetchApiCommands(guildId ?? null),
-      this.syncComponentsToDatabase(components, guildId),
+      this.syncComponentsToDatabase(components),
     ]);
 
     if (synced.isSynced && !forceSync) {

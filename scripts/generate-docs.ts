@@ -11,7 +11,7 @@ async function main() {
   // TypeDoc's tsconfig.json/package.json/typedoc.json option readers
   const app = await Application.bootstrapWithPlugins({
     entryPoints: ['src/core/index.namespace.ts'],
-    includeVersion: true,
+    includeVersion: true as unknown as string, // [DEV] BUG: All option types collapse to string or string[]
   });
 
   // Project may not have converted correctly
