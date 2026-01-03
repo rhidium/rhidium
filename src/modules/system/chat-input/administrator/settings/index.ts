@@ -16,7 +16,7 @@ import { InputUtils, PromptDisplay, PromptValidation } from '@core/utils';
 import {
   AuditLogType,
   Database,
-  PopulatedGuild,
+  type PopulatedGuild,
   prismaClient,
 } from '@core/database';
 import { Command, CommandType, Permissions, PermLevel } from '@core/commands';

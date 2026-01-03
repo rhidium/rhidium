@@ -1,6 +1,6 @@
 import _debug from 'debug';
 import { ReminderServices } from '.';
-import { Database, ResolvedPopulatedReminder } from '@core/database';
+import { Database, type ResolvedPopulatedReminder } from '@core/database';
 import Client from '@core/client';
 import { RuntimeUtils, TimeUtils } from '@core/utils';
 

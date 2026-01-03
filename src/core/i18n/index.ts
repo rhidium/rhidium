@@ -1,17 +1,16 @@
 import { UnitConstants } from '@core/constants';
 import { Logger } from '@core/logger';
-import { Guild, Interaction, Locale } from 'discord.js';
+import { Guild, type Interaction, Locale } from 'discord.js';
 import fs from 'fs';
+import i18n, { type TOptions } from 'i18next';
 import path from 'path';
-import i18n, { TOptions } from 'i18next';
-import path from 'path';
-import { LocalizedLabelKey } from './i18next';
 
 import enUSCommon from '../../../locales/en-US/common.json';
 import enUSCore from '../../../locales/en-US/core.json';
 
 import nlCommon from '../../../locales/nl/common.json';
 import nlCore from '../../../locales/nl/core.json';
+import type { LocalizedLabelKey } from './types';
 
 const getFiles = (
   dir: string,

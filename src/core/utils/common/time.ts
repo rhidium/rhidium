@@ -2,7 +2,7 @@ import { UnitConstants } from '@core/constants';
 import {
   Locale,
   TimestampStyles,
-  TimestampStylesString,
+  type TimestampStylesString,
   time,
 } from 'discord.js';
 

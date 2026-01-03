@@ -1,11 +1,11 @@
 import { prismaClient } from '../client';
 import { Model } from '../models';
 import {
-  ModelAggregateArgs,
-  ModelAggregateResult,
-  ModelCountArgs,
-  ModelFieldRefs,
-  ThenArg,
+  type ModelAggregateArgs,
+  type ModelAggregateResult,
+  type ModelCountArgs,
+  type ModelFieldRefs,
+  type ThenArg,
 } from '../types';
 import { toPrismaModelName } from './args';
 

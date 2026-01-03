@@ -1,6 +1,6 @@
 import Client from '@core/client';
 import { debug, type Debugger } from '@core/logger';
-import { ClientEvents, Events } from 'discord.js';
+import { type ClientEvents, Events } from 'discord.js';
 
 export interface ClientEventListenerOptions<K extends keyof ClientEvents> {
   /** Should we only listen for this event once? */

@@ -1,11 +1,11 @@
 import { prismaClient } from '../client';
 import { Model } from '../models';
 import {
-  ModelFindFirstArgs,
-  ModelFindManyArgs,
-  ModelFindUniqueArgs,
-  ModelGetPayload,
-  ThenArg,
+  type ModelFindFirstArgs,
+  type ModelFindManyArgs,
+  type ModelFindUniqueArgs,
+  type ModelGetPayload,
+  type ThenArg,
 } from '../types';
 import { resolvePopulatedModelArgs, toPrismaModelName } from './args';
 

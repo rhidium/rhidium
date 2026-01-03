@@ -1,9 +1,9 @@
 import type { Guild, Prisma } from '@prisma/client';
 import {
-  AnyPromptValue,
+  type AnyPromptValue,
   NumberUtils,
   ObjectUtils,
-  Prompt,
+  type Prompt,
   PromptResolver,
   StringUtils,
   TimeUtils,
@@ -11,7 +11,7 @@ import {
 import { Model } from '../models';
 import type { PopulatedAuditLog } from '../select';
 import { DatabaseWrapper } from './wrapper';
-import { EmbedBuilder, MessageCreateOptions, MessagePayload } from 'discord.js';
+import { EmbedBuilder, type MessageCreateOptions, MessagePayload } from 'discord.js';
 import { guildWrapper } from './guild';
 import { memberWrapper } from './member';
 import { userWrapper } from './user';

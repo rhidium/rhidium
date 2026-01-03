@@ -1,5 +1,5 @@
 import _debug from 'debug';
-import type { GetBatchResult } from '@prisma/client/runtime/library';
+import type { GetBatchResult } from '@prisma/client/runtime/client';
 import { UnitConstants } from '@core/constants';
 import { Model } from '../models';
 import { PopulatedPrisma } from '../populated';
@@ -14,7 +14,7 @@ import { CacheManager, PerformanceTracker } from '@core/data-structures';
 
 // [DEV] `!this.useCache || !cacheResult` could use some improved logic/refactoring.
 
-const debug = _debug('app:database:wrapper');
+const debugLib = _debug('app:database:wrapper');
 
 const defaultCache = CacheManager.fromStore<ThenArg<ModelGetPayload[Model]>>({
   max: 500,
@@ -86,8 +86,6 @@ type DatabaseWrapperOptions<T extends Model> = {
 };
 
 class DatabaseWrapper<T extends Model> implements DatabaseWrapperOptions<T> {
-  protected readonly debug = debug.extend(this.model);
-
   public readonly cache: CacheManagerType<T>;
   public readonly useCache: boolean;
   public readonly cachePrefix: string;
@@ -114,6 +112,13 @@ class DatabaseWrapper<T extends Model> implements DatabaseWrapperOptions<T> {
   constructor(
     public readonly model: T,
     options?: Partial<DatabaseWrapperOptions<T>>,
+    protected readonly debug = debugLib.extend(model),
+    /**
+     * A static reference to the fields of the model, because the fields
+     * are not expected to change during runtime.
+     * @returns The fields of the model.
+     */
+    readonly fields = PopulatedPrisma.fields(model),
   ) {
     this.cache =
       options?.cache ?? (defaultCache as unknown as CacheManagerType<T>);
@@ -324,13 +329,6 @@ class DatabaseWrapper<T extends Model> implements DatabaseWrapperOptions<T> {
       PopulatedPrisma.count(this.model, query),
     );
   };
-
-  /**
-   * A static reference to the fields of the model, because the fields
-   * are not expected to change during runtime.
-   * @returns The fields of the model.
-   */
-  readonly fields = PopulatedPrisma.fields(this.model);
 
   //
   // Create Operations

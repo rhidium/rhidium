@@ -1,11 +1,11 @@
 import {
-  APIEmbed,
-  APIEmbedField,
-  EmbedAuthorOptions,
+  type APIEmbed,
+  type APIEmbedField,
+  type EmbedAuthorOptions,
   EmbedBuilder,
-  EmbedData,
-  EmbedFooterOptions,
-  RestOrArray,
+  type EmbedData,
+  type EmbedFooterOptions,
+  type RestOrArray,
 } from 'discord.js';
 import { StringUtils } from './common';
 import { EmbedConstants } from '@core/constants';

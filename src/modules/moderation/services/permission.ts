@@ -1,11 +1,11 @@
 import { Embeds } from '@core/config';
 import { InteractionUtils } from '@core/utils';
-import { Guild } from '@prisma/client';
+import { type Guild } from '@prisma/client';
 import {
   Guild as _Guild,
   GuildMember,
   User as _User,
-  RepliableInteraction,
+  type RepliableInteraction,
 } from 'discord.js';
 
 const isProd = process.env.NODE_ENV === 'production';

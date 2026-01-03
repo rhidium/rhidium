@@ -1,8 +1,8 @@
 import { bold, Collection, Events, OAuth2Scopes } from 'discord.js';
-import { AnyCommand, APICommand, Command, CommandBase } from './base';
-import { debug, Debugger, Logger } from '@core/logger';
+import { type AnyCommand, type APICommand, Command, CommandBase } from './base';
+import { debug, type Debugger, Logger } from '@core/logger';
 import { Embeds } from '@core/config';
-import { AbstractRESTClient, NoOpRESTClient, RESTClient } from './rest';
+import { type AbstractRESTClient, NoOpRESTClient, RESTClient } from './rest';
 import { InteractionUtils, StringUtils } from '@core/utils';
 import { Database } from '@core/database';
 import { ClientJob } from './jobs';

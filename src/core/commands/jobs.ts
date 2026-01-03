@@ -2,7 +2,7 @@ import Client from '@core/client';
 import { debug } from '@core/logger';
 import { Logger } from '@core/logger';
 import { TimeUtils } from '@core/utils';
-import { CronJob, CronJobParams } from 'cron';
+import { CronJob, type CronJobParams } from 'cron';
 
 type ClientJobParams = Omit<
   CronJobParams<() => void | Promise<void>, null>,
@@ -31,9 +31,11 @@ class ClientJob {
     return this.params.id;
   }
 
-  private readonly debug = debug.commands.jobs.extend(this.id);
+  private readonly debug: debug.IDebugger;
 
-  constructor(public readonly params: ClientJobParams) {}
+  constructor(public readonly params: ClientJobParams) {
+    this.debug = debug.commands.jobs.extend(this.id);
+  }
 
   public readonly init = async (client: Client<true>): Promise<void> => {
     this.debug('Initializing job %s', this.id);

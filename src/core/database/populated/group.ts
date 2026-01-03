@@ -1,6 +1,6 @@
 import { prismaClient } from '../client';
 import { Model } from '../models';
-import { ModelGroupByArgs, ModelGroupByPayload, ThenArg } from '../types';
+import { type ModelGroupByArgs, type ModelGroupByPayload, type ThenArg } from '../types';
 import { toPrismaModelName } from './args';
 
 export const groupByPopulatedModel = async <T extends Model>(

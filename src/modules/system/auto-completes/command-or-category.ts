@@ -1,4 +1,4 @@
-import { APICommand, Command, CommandType } from '@core/commands';
+import { type APICommand, Command, CommandType } from '@core/commands';
 import { StringUtils } from '@core/utils';
 import { SlashCommandStringOption } from 'discord.js';
 

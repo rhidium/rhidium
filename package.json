@@ -1,26 +1,28 @@
 {
   "name": "rhidium",
   "license": "ISC",
-  "version": "4.0.0-alpha.0",
+  "version": "4.0.0-alpha.1",
   "description": "Quickly and easily create powerful Discord bots using a powerful, opinionated, all-in-one framework.",
-  "main": "dist/src/index.js",
-  "packageManager": "pnpm@9.15.4",
+  "main": "dist/index.js",
+  "type": "module",
+  "packageManager": "pnpm@10.4.1",
   "engines": {
     "node": ">=16.6.0",
     "npm": ">=7.0.0",
     "vscode": "^1.22.0"
   },
-  "config": {
-    "commitizen": {
-      "path": "./node_modules/cz-conventional-changelog"
-    }
-  },
   "prisma": {
     "schema": "prisma/schema.prisma",
-    "seed": "ts-node-dev ./prisma/seed.ts"
+    "seed": "tsx ./prisma/seed.ts"
   },
+  "files": [
+    "./config",
+    "./dist",
+    "./locales",
+    "./package.json"
+  ],
   "scripts": {
-    "build": "tsc",
+    "build": "tsdown",
     "prebuild": "rimraf dist",
     "clean": "gts clean; rimraf docs",
     "clean:full": "npm run clean; rimraf logs node_modules",
@@ -31,8 +33,8 @@
     "lint": "gts lint",
     "pretest": "npm run build",
     "posttest": "npm run lint",
-    "start": "node --enable-source-maps dist/src/index.js",
-    "start:dev": "DEBUG=app:* ts-node-dev -r tsconfig-paths/register --respawn --notify --transpile-only src/index.ts",
+    "start": "node --enable-source-maps dist/index.js",
+    "start:dev": "DEBUG=app:* tsx watch src/index.ts",
     "test": "mocha dist/test/**/*.js",
     "test:dev": "ts-mocha test/**/*.spec.ts -w --watch-files '**/*.ts'",
     "typecheck": "tsc --noEmit",
@@ -43,7 +45,7 @@
     "db:deploy": "prisma migrate deploy",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
-    "db:push": "prisma db push --skip-generate",
+    "db:push": "prisma db push",
     "db:reset": "prisma migrate reset",
     "db:studio": "prisma studio",
     "prepare": "node .husky/install.mjs",
@@ -53,44 +55,44 @@
     "ci:version": "pnpm changeset version"
   },
   "dependencies": {
-    "@prisma/client": "6.5.0",
-    "cache-manager": "^6.4.3",
-    "chrono-node": "^2.8.3",
+    "@prisma/adapter-pg": "^7.2.0",
+    "@prisma/client": "7.2.0",
+    "cache-manager": "^7.2.7",
+    "chrono-node": "^2.9.0",
     "colors": "^1.4.0",
     "common-tags": "^1.8.2",
-    "cron": "^4.3.1",
+    "cron": "^4.4.0",
     "date-fns-tz": "^3.2.0",
-    "debug": "^4.4.1",
+    "debug": "^4.4.3",
     "deep-object-diff": "^1.1.9",
-    "discord.js": "^14.20.0",
-    "i18next": "^24.2.3",
-    "keyv": "^5.3.4",
-    "lru-cache": "^11.1.0",
-    "module-alias": "^2.2.3",
+    "discord.js": "^14.25.1",
+    "i18next": "^25.7.3",
+    "keyv": "^5.5.5",
+    "lru-cache": "^11.2.4",
     "object-property-extractor": "^1.0.13",
-    "winston": "^3.17.0"
+    "pg": "^8.16.3",
+    "winston": "^3.19.0"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.29.5",
-    "@commitlint/cli": "^19.8.1",
-    "@commitlint/config-conventional": "^19.8.1",
+    "@changesets/cli": "^2.29.8",
+    "@commitlint/cli": "^20.3.0",
+    "@commitlint/config-conventional": "^20.3.0",
     "@types/common-tags": "^1.8.4",
     "@types/debug": "^4.1.12",
-    "@types/module-alias": "^2.0.4",
-    "@types/node": "^22.15.32",
+    "@types/node": "^25.0.3",
     "commitizen": "^4.3.1",
     "cz-conventional-changelog": "^3.3.0",
-    "gts": "^6.0.2",
+    "gts": "^7.0.0",
     "husky": "^9.1.7",
-    "lint-staged": "^15.5.2",
-    "prisma": "^6.10.1",
-    "rimraf": "^6.0.1",
+    "prisma": "^7.2.0",
+    "rimraf": "^6.1.2",
+    "terser": "^5.44.1",
     "ts-json-schema-generator": "^2.4.0",
-    "ts-node-dev": "^2.0.0",
-    "tsconfig-paths": "^4.2.0",
+    "tsdown": "^0.19.0-beta.2",
     "tslib": "^2.8.1",
-    "typedoc": "^0.27.9",
-    "typescript": "^5.8.3"
+    "tsx": "^4.21.0",
+    "typedoc": "^0.28.15",
+    "typescript": "^5.9.3"
   },
   "author": {
     "name": "Richard Hillebrand (Mirasaki)",
@@ -115,5 +117,12 @@
   "bugs": {
     "url": "https://github.com/rhidium/rhidium/issues"
   },
-  "homepage": "https://github.com/rhidium/rhidium#readme"
+  "homepage": "https://github.com/rhidium/rhidium#readme",
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@prisma/engines",
+      "esbuild",
+      "prisma"
+    ]
+  }
 }

@@ -1,11 +1,6 @@
-import moduleAlias from 'module-alias';
 import { GatewayIntentBits } from 'discord.js';
 
-moduleAlias.addAliases({
-  '@core': `${__dirname}/`,
-});
-
-import { appConfig } from './core/config';
+import { appConfig } from './core/config/index';
 import { ClientManager, commandDeploymentEnvironment } from './core/commands';
 import Client from './core/client';
 import { I18n } from './core/i18n';
@@ -16,6 +11,7 @@ import moderationRegistry from './modules/moderation';
 
 const main = async () => {
   await I18n.init();
+
   const manager = new ClientManager();
   const client = new Client({
     intents: [GatewayIntentBits.Guilds],

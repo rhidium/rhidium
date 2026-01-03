@@ -1,10 +1,10 @@
 import {
   Client as DiscordClient,
-  ClientOptions as DiscordClientOptions,
+  type ClientOptions as DiscordClientOptions,
   Events,
 } from 'discord.js';
 import { ClientManager, CommandBase } from './commands';
-import { SyncCommandOptions } from './commands/rest';
+import { type SyncCommandOptions } from './commands/rest';
 
 type ClientOptions = {
   manager: ClientManager;

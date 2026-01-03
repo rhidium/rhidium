@@ -17,7 +17,9 @@ services:
     volumes:
       - ./logs:/app/logs:rw
       - ./docs:/app/docs:rw
-      - ./prisma:/app/prisma:r # Prisma is included as a volume to allow for database migrations without having to rebuild the client container.
+      # Note: Prisma is included as a volume to allow for database migrations without having to rebuild the client container
+      - ./prisma:/app/prisma:r
+      - ./prisma.config.ts:/app/prisma.config.ts:r
     networks:
       - app-network
 

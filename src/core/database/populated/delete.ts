@@ -1,10 +1,10 @@
 import { prismaClient } from '../client';
-import { type GetBatchResult } from '@prisma/client/runtime/library';
+import type { GetBatchResult } from '@prisma/client/runtime/client';
 import {
-  ModelDeleteArgs,
-  ModelDeleteManyArgs,
-  ModelGetPayload,
-  ThenArg,
+  type ModelDeleteArgs,
+  type ModelDeleteManyArgs,
+  type ModelGetPayload,
+  type ThenArg,
 } from '../types';
 import { resolvePopulatedModelArgs, toPrismaModelName } from './args';
 import { Model } from '../models';

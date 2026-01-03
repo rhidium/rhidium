@@ -3,12 +3,12 @@ import { createHash } from 'crypto';
 import _debug from 'debug';
 import EventEmitter from 'events';
 import Keyv from 'keyv';
-import { LRUArgs, LRUCache } from './lru-cache';
+import { type LRUArgs, LRUCache } from './lru-cache';
 import {
-  AbstractCache,
-  CacheManagerMetadata,
-  ResolvedCreateCacheOptions,
-  SetCacheArguments,
+  type AbstractCache,
+  type CacheManagerMetadata,
+  type ResolvedCreateCacheOptions,
+  type SetCacheArguments,
 } from './types';
 import { NumberUtils } from '@core/utils';
 
@@ -137,7 +137,8 @@ export class CacheManager<T extends NonNullable<unknown>>
   }
 
   async ttl(key: string): Promise<number | null> {
-    return this.cache.ttl(key);
+    const ttl = await this.cache.ttl(key);
+    return ttl || null;
   }
 
   async set(key: string, value: T | null, ttl?: number): Promise<T | null> {

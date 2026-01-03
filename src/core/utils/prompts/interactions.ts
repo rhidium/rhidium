@@ -1,21 +1,21 @@
 import {
   ActionRowBuilder,
-  APIEmbedField,
+  type APIEmbedField,
   ButtonBuilder,
   ButtonInteraction,
   ButtonStyle,
-  CacheType,
+  type CacheType,
   ChannelSelectMenuBuilder,
   ChannelSelectMenuInteraction,
   Guild,
-  InteractionEditReplyOptions,
-  InteractionReplyOptions,
+  type InteractionEditReplyOptions,
+  type InteractionReplyOptions,
   ModalBuilder,
   ModalSubmitInteraction,
-  RepliableInteraction,
+  type RepliableInteraction,
   RoleSelectMenuBuilder,
   RoleSelectMenuInteraction,
-  SelectMenuComponentOptionData,
+  type SelectMenuComponentOptionData,
   StringSelectMenuBuilder,
   StringSelectMenuInteraction,
   TextInputBuilder,
@@ -770,15 +770,30 @@ class PromptInteractionHandler {
               customId === `@${prompt.id}-submit-value`) &&
             response.isModalSubmit()
           ) {
-            const input = response.fields.getField(`@${prompt.id}-input`).value;
+            const input = response.fields.getField(`@${prompt.id}-input`)
+
+            if (!('value' in input)) {
+              componentCollector.stop();
+              resolve(
+                await collect(currentChoicesPage, [
+                  {
+                    name: 'Invalid information provided, please try again.',
+                    value: 'No input value found. Please note that Rhidium currently ONLY support text-based inputs (TextInputBuilder).',
+                  },
+                ]),
+              );
+              return;
+            }
+
+            const inputValue = input.value;
 
             if (prompt.type === 'number') {
               try {
                 PromptValidation.validateConstraints(
                   prompt,
                   (PromptValidation.isPromptWithMultiple(prompt)
-                    ? [Number(input)]
-                    : Number(input)) as ValueForPrompt<ResolvedPrompt<P>>,
+                    ? [Number(inputValue)]
+                    : Number(inputValue)) as ValueForPrompt<ResolvedPrompt<P>>,
                 );
               } catch (error) {
                 componentCollector.stop();
@@ -798,7 +813,7 @@ class PromptInteractionHandler {
             }
 
             if (customId === `@${prompt.id}-add`) {
-              collected.push(input);
+              collected.push(inputValue);
 
               resolve(await collect(currentChoicesPage));
             }
@@ -830,7 +845,15 @@ class PromptInteractionHandler {
               e !== '@select-choices-previous' && e !== '@select-choices-next',
           ) // If we're working with a select menu, it's values are always final
       : response.isModalSubmit() // If we're working with a modal, we use the input field
-        ? [response.fields.getField(`@${prompt.id}-input`).value]
+        ? (() => {
+          const inputField = response.fields.getField(`@${prompt.id}-input`);
+          if (!('value' in inputField)) {
+            throw new Error(
+              'No input value found. Please note that Rhidium currently ONLY support text-based inputs (TextInputBuilder).',
+            );
+          }
+          return inputField.value;
+        })()
         : collected; // Otherwise, we use our collected values
 
     if (

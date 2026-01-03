@@ -1,4 +1,4 @@
-import { Logger } from '@core/logger';
+import { Logger } from '../src/core/logger/index';
 import { Application } from 'typedoc';
 
 /**

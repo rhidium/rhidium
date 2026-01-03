@@ -1,4 +1,4 @@
-import { ComponentRegistry } from '@core/commands';
+import { type ComponentRegistry } from '@core/commands';
 import ReminderAutoComplete from './autocompletes/reminder';
 import TimezoneAutocomplete from './autocompletes/timezone';
 import RemindersCommand from './chat-input/reminders';

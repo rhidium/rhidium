@@ -1,7 +1,7 @@
 import { Command, CommandThrottleType, CommandType } from '@core/commands';
 import { appConfig, Embeds } from '@core/config';
 import { UnitConstants } from '@core/constants';
-import { ActivitiesOptions, ActivityType, PresenceData } from 'discord.js';
+import { type ActivitiesOptions, ActivityType, type PresenceData } from 'discord.js';
 
 enum PresenceStatusData {
   Online = 'online',

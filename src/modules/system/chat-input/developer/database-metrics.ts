@@ -3,7 +3,7 @@ import { appConfig, Embeds } from '@core/config';
 import {
   Database,
   modelEntries,
-  ModelOperation,
+  type ModelOperation,
   modelOperations,
 } from '@core/database';
 import {

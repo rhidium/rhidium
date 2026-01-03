@@ -1,4 +1,4 @@
-import { ComponentRegistry } from '@core/commands';
+import { type ComponentRegistry } from '@core/commands';
 import AutoModerationAutoComplete from './auto-completes/auto-moderation-action';
 import WarningAutoComplete from './auto-completes/warning';
 import AutoModerationCommand from './chat-input/auto-moderation';

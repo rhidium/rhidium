@@ -1,4 +1,4 @@
-import { Prompts, PromptValidation } from '@core/utils';
+import { type Prompts, PromptValidation } from '@core/utils';
 
 export const stringTestPrompts: Prompts = [
   {

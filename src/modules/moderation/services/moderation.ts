@@ -1,10 +1,10 @@
 import { Permissions } from '@core/commands';
 import { UnitConstants } from '@core/constants';
 import {
-  PopulatedAutoModerationAction,
-  PopulatedWarning,
+  type PopulatedAutoModerationAction,
+  type PopulatedWarning,
 } from '@core/database';
-import { ChannelUtils, DeleteMessagesResult, TimeUtils } from '@core/utils';
+import { ChannelUtils, type DeleteMessagesResult, TimeUtils } from '@core/utils';
 import {
   ModerationAction,
   type Prisma,

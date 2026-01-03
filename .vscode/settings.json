@@ -1,5 +1,7 @@
 {
-  "typescript.preferences.autoImportFileExcludePatterns": ["**/*.namespace.ts"],
+  "typescript.preferences.autoImportFileExcludePatterns": [
+    "**/*.namespace.ts"
+  ],
   "typescript.format.enable": true,
   "typescript.referencesCodeLens.enabled": true,
   "typescript.implementationsCodeLens.enabled": true,
@@ -25,12 +27,6 @@
     "typescriptreact"
   ],
   "eslint.useESLintClass": true,
-  "json.schemas": [
-    {
-      "url": "https://cdn.jsdelivr.net/npm/tsup/schema.json",
-      "fileMatch": ["tsup.config.json"]
-    }
-  ],
   "cSpell.enabled": true,
   "cSpell.words": [
     "addgroup",
@@ -38,6 +34,7 @@
     "adminer",
     "autoincrement",
     "Blurple",
+    "chrono",
     "cockroachdb",
     "codepaths",
     "commitlint",
@@ -45,17 +42,24 @@
     "cuid",
     "discordapp",
     "emojify",
+    "esbuild",
     "Greyple",
     "healthcheck",
     "Hillebrand",
     "isready",
-    "lintstagedrc",
+    "Lngs",
     "mdel",
     "MDELETE",
+    "Millis",
     "Mirasaki",
     "repliable",
     "Rhidium",
+    "subcontroller",
+    "subdirs",
+    "typedoc",
+    "Uncategorized",
     "Upserting",
-    "Vercel"
+    "Vercel",
+    "wanasit"
   ]
 }
