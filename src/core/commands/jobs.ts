@@ -31,9 +31,11 @@ class ClientJob {
     return this.params.id;
   }
 
-  private readonly debug = debug.commands.jobs.extend(this.id);
+  private readonly debug: debug.IDebugger;
 
-  constructor(public readonly params: ClientJobParams) {}
+  constructor(public readonly params: ClientJobParams) {
+    this.debug = debug.commands.jobs.extend(this.id);
+  }
 
   public readonly init = async (client: Client<true>): Promise<void> => {
     this.debug('Initializing job %s', this.id);

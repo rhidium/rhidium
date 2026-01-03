@@ -112,13 +112,13 @@ class DatabaseWrapper<T extends Model> implements DatabaseWrapperOptions<T> {
   constructor(
     public readonly model: T,
     options?: Partial<DatabaseWrapperOptions<T>>,
-    protected readonly debug = debugLib.extend(this.model),
+    protected readonly debug = debugLib.extend(model),
     /**
      * A static reference to the fields of the model, because the fields
      * are not expected to change during runtime.
      * @returns The fields of the model.
      */
-    readonly fields = PopulatedPrisma.fields(this.model),
+    readonly fields = PopulatedPrisma.fields(model),
   ) {
     this.cache =
       options?.cache ?? (defaultCache as unknown as CacheManagerType<T>);

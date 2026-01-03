@@ -52,10 +52,10 @@ import {
   type WithResponseContent,
 } from '@core/utils';
 import { type CommandController } from './controllers';
-import { type LocalizedLabelKey } from '@core/i18n/i18next';
 import { I18n, locales } from '@core/i18n';
 import { InteractionConstants } from '@core/constants';
 import { Database } from '@core/database';
+import type { LocalizedLabelKey } from '@core/i18n/types';
 
 const isStringArray = (value: unknown): value is string[] =>
   Array.isArray(value) && value.every((item) => typeof item === 'string');
@@ -331,7 +331,7 @@ class CommandBase<
    * Reply to an interaction with a message, dynamically resolving
    * which reply function to use depending on wether or not the
    * interaction has been acknowledged. `ephemeral` is resolved from
-   * `this#isEphemeral` if not overriden.
+   * `this#isEphemeral` if not overridden.
    *
    * Please note that using {@link MessageFlags} in the `content` is not supported
    * with a dynamic function like this. If you need specific flags, use `reply`,

@@ -5,7 +5,7 @@ moduleAlias.addAliases({
   '@core': `${__dirname}/`,
 });
 
-import { appConfig } from './core/config';
+import { appConfig } from './core/config/index';
 import { ClientManager, commandDeploymentEnvironment } from './core/commands';
 import Client from './core/client';
 import { I18n } from './core/i18n';
