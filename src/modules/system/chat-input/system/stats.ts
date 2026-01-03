@@ -1,8 +1,9 @@
-import { Command, CommandType } from '@core/commands';
-import { Embeds } from '@core/config';
-import { UnitConstants } from '@core/constants';
+import { Command } from '@core/commands/base';
+import { CommandType } from '@core/commands/types';
+import { Embeds } from '@core/config/embeds';
+import { UnitConstants } from '@core/constants/units';
 import { I18n } from '@core/i18n';
-import { TimeUtils } from '@core/utils';
+import { TimeUtils } from '@core/utils/common/time';
 import { stripIndents } from 'common-tags';
 import { version } from 'discord.js';
 

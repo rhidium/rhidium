@@ -1,4 +1,4 @@
-import { UnitConstants } from '@core/constants';
+import { UnitConstants } from '@core/constants/units';
 import {
   ActionRowBuilder,
   type BaseMessageOptions,
@@ -9,9 +9,9 @@ import {
   type RepliableInteraction,
   StringSelectMenuBuilder,
 } from 'discord.js';
-import { StringUtils } from '../common';
+import { StringUtils } from '../common/strings';
 import { EmojiUtils } from '../emojis';
-import { InteractionUtils } from './interaction';
+import { InteractionUtils } from './';
 import { I18n } from '@core/i18n';
 
 type PaginationType = 'button' | 'select';

@@ -3,7 +3,6 @@
   "license": "ISC",
   "version": "4.0.0-alpha.1",
   "description": "Quickly and easily create powerful Discord bots using a powerful, opinionated, all-in-one framework.",
-  "main": "dist/index.js",
   "type": "module",
   "packageManager": "pnpm@10.4.1",
   "engines": {
@@ -19,6 +18,7 @@
     "./config",
     "./dist",
     "./locales",
+    "./src",
     "./package.json"
   ],
   "scripts": {
@@ -124,5 +124,700 @@
       "esbuild",
       "prisma"
     ]
-  }
+  },
+  "exports": {
+    ".": {
+      "require": "./dist/index.cjs",
+      "import": "./dist/index.mjs",
+      "types": "./src/index.ts"
+    },
+    "./core/client": {
+      "require": "./dist/core/client.cjs",
+      "import": "./dist/core/client.mjs",
+      "types": "./src/core/client.ts"
+    },
+    "./core/commands/base": {
+      "require": "./dist/core/commands/base.cjs",
+      "import": "./dist/core/commands/base.mjs",
+      "types": "./src/core/commands/base.ts"
+    },
+    "./core/commands/controllers": {
+      "require": "./dist/core/commands/controllers.cjs",
+      "import": "./dist/core/commands/controllers.mjs",
+      "types": "./src/core/commands/controllers.ts"
+    },
+    "./core/commands/defaults": {
+      "require": "./dist/core/commands/defaults.cjs",
+      "import": "./dist/core/commands/defaults.mjs",
+      "types": "./src/core/commands/defaults.ts"
+    },
+    "./core/commands/events": {
+      "require": "./dist/core/commands/events.cjs",
+      "import": "./dist/core/commands/events.mjs",
+      "types": "./src/core/commands/events.ts"
+    },
+    "./core/commands/jobs": {
+      "require": "./dist/core/commands/jobs.cjs",
+      "import": "./dist/core/commands/jobs.mjs",
+      "types": "./src/core/commands/jobs.ts"
+    },
+    "./core/commands/manager": {
+      "require": "./dist/core/commands/manager.cjs",
+      "import": "./dist/core/commands/manager.mjs",
+      "types": "./src/core/commands/manager.ts"
+    },
+    "./core/commands/options": {
+      "require": "./dist/core/commands/options.cjs",
+      "import": "./dist/core/commands/options.mjs",
+      "types": "./src/core/commands/options.ts"
+    },
+    "./core/commands/permissions": {
+      "require": "./dist/core/commands/permissions.cjs",
+      "import": "./dist/core/commands/permissions.mjs",
+      "types": "./src/core/commands/permissions.ts"
+    },
+    "./core/commands/required-resources": {
+      "require": "./dist/core/commands/required-resources.cjs",
+      "import": "./dist/core/commands/required-resources.mjs",
+      "types": "./src/core/commands/required-resources.ts"
+    },
+    "./core/commands/rest": {
+      "require": "./dist/core/commands/rest.cjs",
+      "import": "./dist/core/commands/rest.mjs",
+      "types": "./src/core/commands/rest.ts"
+    },
+    "./core/commands/throttle": {
+      "require": "./dist/core/commands/throttle.cjs",
+      "import": "./dist/core/commands/throttle.mjs",
+      "types": "./src/core/commands/throttle.ts"
+    },
+    "./core/commands/types": {
+      "require": "./dist/core/commands/types.cjs",
+      "import": "./dist/core/commands/types.mjs",
+      "types": "./src/core/commands/types.ts"
+    },
+    "./core/config/app": {
+      "require": "./dist/core/config/app.cjs",
+      "import": "./dist/core/config/app.mjs",
+      "types": "./src/core/config/app.ts"
+    },
+    "./core/config/embeds": {
+      "require": "./dist/core/config/embeds.cjs",
+      "import": "./dist/core/config/embeds.mjs",
+      "types": "./src/core/config/embeds.ts"
+    },
+    "./core/constants/discord": {
+      "require": "./dist/core/constants/discord.cjs",
+      "import": "./dist/core/constants/discord.mjs",
+      "types": "./src/core/constants/discord.ts"
+    },
+    "./core/constants/embeds": {
+      "require": "./dist/core/constants/embeds.cjs",
+      "import": "./dist/core/constants/embeds.mjs",
+      "types": "./src/core/constants/embeds.ts"
+    },
+    "./core/constants/interactions": {
+      "require": "./dist/core/constants/interactions.cjs",
+      "import": "./dist/core/constants/interactions.mjs",
+      "types": "./src/core/constants/interactions.ts"
+    },
+    "./core/constants/units": {
+      "require": "./dist/core/constants/units.cjs",
+      "import": "./dist/core/constants/units.mjs",
+      "types": "./src/core/constants/units.ts"
+    },
+    "./core/data-structures/cache/lru-cache": {
+      "require": "./dist/core/data-structures/cache/lru-cache.cjs",
+      "import": "./dist/core/data-structures/cache/lru-cache.mjs",
+      "types": "./src/core/data-structures/cache/lru-cache.ts"
+    },
+    "./core/data-structures/cache/manager": {
+      "require": "./dist/core/data-structures/cache/manager.cjs",
+      "import": "./dist/core/data-structures/cache/manager.mjs",
+      "types": "./src/core/data-structures/cache/manager.ts"
+    },
+    "./core/data-structures/cache/promise-cache": {
+      "require": "./dist/core/data-structures/cache/promise-cache.cjs",
+      "import": "./dist/core/data-structures/cache/promise-cache.mjs",
+      "types": "./src/core/data-structures/cache/promise-cache.ts"
+    },
+    "./core/data-structures/cache/types": {
+      "require": "./dist/core/data-structures/cache/types.cjs",
+      "import": "./dist/core/data-structures/cache/types.mjs",
+      "types": "./src/core/data-structures/cache/types.ts"
+    },
+    "./core/data-structures/performance": {
+      "require": "./dist/core/data-structures/performance/index.cjs",
+      "import": "./dist/core/data-structures/performance/index.mjs",
+      "types": "./src/core/data-structures/performance/index.ts"
+    },
+    "./core/data-structures/queue": {
+      "require": "./dist/core/data-structures/queue/index.cjs",
+      "import": "./dist/core/data-structures/queue/index.mjs",
+      "types": "./src/core/data-structures/queue/index.ts"
+    },
+    "./core/data-structures/queue/manager": {
+      "require": "./dist/core/data-structures/queue/manager.cjs",
+      "import": "./dist/core/data-structures/queue/manager.mjs",
+      "types": "./src/core/data-structures/queue/manager.ts"
+    },
+    "./core/database/client": {
+      "require": "./dist/core/database/client.cjs",
+      "import": "./dist/core/database/client.mjs",
+      "types": "./src/core/database/client.ts"
+    },
+    "./core/database/models": {
+      "require": "./dist/core/database/models.cjs",
+      "import": "./dist/core/database/models.mjs",
+      "types": "./src/core/database/models.ts"
+    },
+    "./core/database/populated": {
+      "require": "./dist/core/database/populated/index.cjs",
+      "import": "./dist/core/database/populated/index.mjs",
+      "types": "./src/core/database/populated/index.ts"
+    },
+    "./core/database/populated/args": {
+      "require": "./dist/core/database/populated/args.cjs",
+      "import": "./dist/core/database/populated/args.mjs",
+      "types": "./src/core/database/populated/args.ts"
+    },
+    "./core/database/populated/create": {
+      "require": "./dist/core/database/populated/create.cjs",
+      "import": "./dist/core/database/populated/create.mjs",
+      "types": "./src/core/database/populated/create.ts"
+    },
+    "./core/database/populated/delete": {
+      "require": "./dist/core/database/populated/delete.cjs",
+      "import": "./dist/core/database/populated/delete.mjs",
+      "types": "./src/core/database/populated/delete.ts"
+    },
+    "./core/database/populated/find": {
+      "require": "./dist/core/database/populated/find.cjs",
+      "import": "./dist/core/database/populated/find.mjs",
+      "types": "./src/core/database/populated/find.ts"
+    },
+    "./core/database/populated/group": {
+      "require": "./dist/core/database/populated/group.cjs",
+      "import": "./dist/core/database/populated/group.mjs",
+      "types": "./src/core/database/populated/group.ts"
+    },
+    "./core/database/populated/other": {
+      "require": "./dist/core/database/populated/other.cjs",
+      "import": "./dist/core/database/populated/other.mjs",
+      "types": "./src/core/database/populated/other.ts"
+    },
+    "./core/database/populated/update": {
+      "require": "./dist/core/database/populated/update.cjs",
+      "import": "./dist/core/database/populated/update.mjs",
+      "types": "./src/core/database/populated/update.ts"
+    },
+    "./core/database/select": {
+      "require": "./dist/core/database/select.cjs",
+      "import": "./dist/core/database/select.mjs",
+      "types": "./src/core/database/select.ts"
+    },
+    "./core/database/types": {
+      "require": "./dist/core/database/types.cjs",
+      "import": "./dist/core/database/types.mjs",
+      "types": "./src/core/database/types.ts"
+    },
+    "./core/database/util": {
+      "require": "./dist/core/database/util.cjs",
+      "import": "./dist/core/database/util.mjs",
+      "types": "./src/core/database/util.ts"
+    },
+    "./core/database/wrappers": {
+      "require": "./dist/core/database/wrappers/index.cjs",
+      "import": "./dist/core/database/wrappers/index.mjs",
+      "types": "./src/core/database/wrappers/index.ts"
+    },
+    "./core/database/wrappers/audit-log": {
+      "require": "./dist/core/database/wrappers/audit-log.cjs",
+      "import": "./dist/core/database/wrappers/audit-log.mjs",
+      "types": "./src/core/database/wrappers/audit-log.ts"
+    },
+    "./core/database/wrappers/command": {
+      "require": "./dist/core/database/wrappers/command.cjs",
+      "import": "./dist/core/database/wrappers/command.mjs",
+      "types": "./src/core/database/wrappers/command.ts"
+    },
+    "./core/database/wrappers/guild": {
+      "require": "./dist/core/database/wrappers/guild.cjs",
+      "import": "./dist/core/database/wrappers/guild.mjs",
+      "types": "./src/core/database/wrappers/guild.ts"
+    },
+    "./core/database/wrappers/member": {
+      "require": "./dist/core/database/wrappers/member.cjs",
+      "import": "./dist/core/database/wrappers/member.mjs",
+      "types": "./src/core/database/wrappers/member.ts"
+    },
+    "./core/database/wrappers/reminder": {
+      "require": "./dist/core/database/wrappers/reminder.cjs",
+      "import": "./dist/core/database/wrappers/reminder.mjs",
+      "types": "./src/core/database/wrappers/reminder.ts"
+    },
+    "./core/database/wrappers/settings": {
+      "require": "./dist/core/database/wrappers/settings.cjs",
+      "import": "./dist/core/database/wrappers/settings.mjs",
+      "types": "./src/core/database/wrappers/settings.ts"
+    },
+    "./core/database/wrappers/user": {
+      "require": "./dist/core/database/wrappers/user.cjs",
+      "import": "./dist/core/database/wrappers/user.mjs",
+      "types": "./src/core/database/wrappers/user.ts"
+    },
+    "./core/database/wrappers/workshop-mod": {
+      "require": "./dist/core/database/wrappers/workshop-mod.cjs",
+      "import": "./dist/core/database/wrappers/workshop-mod.mjs",
+      "types": "./src/core/database/wrappers/workshop-mod.ts"
+    },
+    "./core/database/wrappers/wrapper": {
+      "require": "./dist/core/database/wrappers/wrapper.cjs",
+      "import": "./dist/core/database/wrappers/wrapper.mjs",
+      "types": "./src/core/database/wrappers/wrapper.ts"
+    },
+    "./core/events": {
+      "require": "./dist/core/events/index.cjs",
+      "import": "./dist/core/events/index.mjs",
+      "types": "./src/core/events/index.ts"
+    },
+    "./core/i18n": {
+      "require": "./dist/core/i18n/index.cjs",
+      "import": "./dist/core/i18n/index.mjs",
+      "types": "./src/core/i18n/index.ts"
+    },
+    "./core/i18n/types": {
+      "require": "./dist/core/i18n/types.cjs",
+      "import": "./dist/core/i18n/types.mjs",
+      "types": "./src/core/i18n/types.ts"
+    },
+    "./core/logger": {
+      "require": "./dist/core/logger/index.cjs",
+      "import": "./dist/core/logger/index.mjs",
+      "types": "./src/core/logger/index.ts"
+    },
+    "./core/logger/debug": {
+      "require": "./dist/core/logger/debug.cjs",
+      "import": "./dist/core/logger/debug.mjs",
+      "types": "./src/core/logger/debug.ts"
+    },
+    "./core/placeholders": {
+      "require": "./dist/core/placeholders/index.cjs",
+      "import": "./dist/core/placeholders/index.mjs",
+      "types": "./src/core/placeholders/index.ts"
+    },
+    "./core/placeholders/keys": {
+      "require": "./dist/core/placeholders/keys.cjs",
+      "import": "./dist/core/placeholders/keys.mjs",
+      "types": "./src/core/placeholders/keys.ts"
+    },
+    "./core/placeholders/types": {
+      "require": "./dist/core/placeholders/types.cjs",
+      "import": "./dist/core/placeholders/types.mjs",
+      "types": "./src/core/placeholders/types.ts"
+    },
+    "./core/utils/channels": {
+      "require": "./dist/core/utils/channels.cjs",
+      "import": "./dist/core/utils/channels.mjs",
+      "types": "./src/core/utils/channels.ts"
+    },
+    "./core/utils/common/arrays": {
+      "require": "./dist/core/utils/common/arrays.cjs",
+      "import": "./dist/core/utils/common/arrays.mjs",
+      "types": "./src/core/utils/common/arrays.ts"
+    },
+    "./core/utils/common/numbers": {
+      "require": "./dist/core/utils/common/numbers.cjs",
+      "import": "./dist/core/utils/common/numbers.mjs",
+      "types": "./src/core/utils/common/numbers.ts"
+    },
+    "./core/utils/common/objects": {
+      "require": "./dist/core/utils/common/objects.cjs",
+      "import": "./dist/core/utils/common/objects.mjs",
+      "types": "./src/core/utils/common/objects.ts"
+    },
+    "./core/utils/common/random": {
+      "require": "./dist/core/utils/common/random.cjs",
+      "import": "./dist/core/utils/common/random.mjs",
+      "types": "./src/core/utils/common/random.ts"
+    },
+    "./core/utils/common/runtime": {
+      "require": "./dist/core/utils/common/runtime.cjs",
+      "import": "./dist/core/utils/common/runtime.mjs",
+      "types": "./src/core/utils/common/runtime.ts"
+    },
+    "./core/utils/common/strings": {
+      "require": "./dist/core/utils/common/strings.cjs",
+      "import": "./dist/core/utils/common/strings.mjs",
+      "types": "./src/core/utils/common/strings.ts"
+    },
+    "./core/utils/common/time": {
+      "require": "./dist/core/utils/common/time.cjs",
+      "import": "./dist/core/utils/common/time.mjs",
+      "types": "./src/core/utils/common/time.ts"
+    },
+    "./core/utils/embeds": {
+      "require": "./dist/core/utils/embeds.cjs",
+      "import": "./dist/core/utils/embeds.mjs",
+      "types": "./src/core/utils/embeds.ts"
+    },
+    "./core/utils/emojis": {
+      "require": "./dist/core/utils/emojis.cjs",
+      "import": "./dist/core/utils/emojis.mjs",
+      "types": "./src/core/utils/emojis.ts"
+    },
+    "./core/utils/files": {
+      "require": "./dist/core/utils/files.cjs",
+      "import": "./dist/core/utils/files.mjs",
+      "types": "./src/core/utils/files.ts"
+    },
+    "./core/utils/inputs": {
+      "require": "./dist/core/utils/inputs/index.cjs",
+      "import": "./dist/core/utils/inputs/index.mjs",
+      "types": "./src/core/utils/inputs/index.ts"
+    },
+    "./core/utils/inputs/confirmation": {
+      "require": "./dist/core/utils/inputs/confirmation.cjs",
+      "import": "./dist/core/utils/inputs/confirmation.mjs",
+      "types": "./src/core/utils/inputs/confirmation.ts"
+    },
+    "./core/utils/inputs/date-time-input": {
+      "require": "./dist/core/utils/inputs/date-time-input.cjs",
+      "import": "./dist/core/utils/inputs/date-time-input.mjs",
+      "types": "./src/core/utils/inputs/date-time-input.ts"
+    },
+    "./core/utils/inputs/duration-input": {
+      "require": "./dist/core/utils/inputs/duration-input.cjs",
+      "import": "./dist/core/utils/inputs/duration-input.mjs",
+      "types": "./src/core/utils/inputs/duration-input.ts"
+    },
+    "./core/utils/interactions": {
+      "require": "./dist/core/utils/interactions/index.cjs",
+      "import": "./dist/core/utils/interactions/index.mjs",
+      "types": "./src/core/utils/interactions/index.ts"
+    },
+    "./core/utils/interactions/pagination": {
+      "require": "./dist/core/utils/interactions/pagination.cjs",
+      "import": "./dist/core/utils/interactions/pagination.mjs",
+      "types": "./src/core/utils/interactions/pagination.ts"
+    },
+    "./core/utils/prompts/display": {
+      "require": "./dist/core/utils/prompts/display.cjs",
+      "import": "./dist/core/utils/prompts/display.mjs",
+      "types": "./src/core/utils/prompts/display.ts"
+    },
+    "./core/utils/prompts/interactions": {
+      "require": "./dist/core/utils/prompts/interactions.cjs",
+      "import": "./dist/core/utils/prompts/interactions.mjs",
+      "types": "./src/core/utils/prompts/interactions.ts"
+    },
+    "./core/utils/prompts/mapped": {
+      "require": "./dist/core/utils/prompts/mapped.cjs",
+      "import": "./dist/core/utils/prompts/mapped.mjs",
+      "types": "./src/core/utils/prompts/mapped.ts"
+    },
+    "./core/utils/prompts/types": {
+      "require": "./dist/core/utils/prompts/types.cjs",
+      "import": "./dist/core/utils/prompts/types.mjs",
+      "types": "./src/core/utils/prompts/types.ts"
+    },
+    "./core/utils/prompts/validation": {
+      "require": "./dist/core/utils/prompts/validation.cjs",
+      "import": "./dist/core/utils/prompts/validation.mjs",
+      "types": "./src/core/utils/prompts/validation.ts"
+    },
+    "./modules/moderation": {
+      "require": "./dist/modules/moderation/index.cjs",
+      "import": "./dist/modules/moderation/index.mjs",
+      "types": "./src/modules/moderation/index.ts"
+    },
+    "./modules/moderation/auto-completes/auto-moderation-action": {
+      "require": "./dist/modules/moderation/auto-completes/auto-moderation-action.cjs",
+      "import": "./dist/modules/moderation/auto-completes/auto-moderation-action.mjs",
+      "types": "./src/modules/moderation/auto-completes/auto-moderation-action.ts"
+    },
+    "./modules/moderation/auto-completes/warning": {
+      "require": "./dist/modules/moderation/auto-completes/warning.cjs",
+      "import": "./dist/modules/moderation/auto-completes/warning.mjs",
+      "types": "./src/modules/moderation/auto-completes/warning.ts"
+    },
+    "./modules/moderation/chat-input/auto-moderation": {
+      "require": "./dist/modules/moderation/chat-input/auto-moderation.cjs",
+      "import": "./dist/modules/moderation/chat-input/auto-moderation.mjs",
+      "types": "./src/modules/moderation/chat-input/auto-moderation.ts"
+    },
+    "./modules/moderation/chat-input/purge": {
+      "require": "./dist/modules/moderation/chat-input/purge.cjs",
+      "import": "./dist/modules/moderation/chat-input/purge.mjs",
+      "types": "./src/modules/moderation/chat-input/purge.ts"
+    },
+    "./modules/moderation/chat-input/severity": {
+      "require": "./dist/modules/moderation/chat-input/severity.cjs",
+      "import": "./dist/modules/moderation/chat-input/severity.mjs",
+      "types": "./src/modules/moderation/chat-input/severity.ts"
+    },
+    "./modules/moderation/chat-input/warn": {
+      "require": "./dist/modules/moderation/chat-input/warn.cjs",
+      "import": "./dist/modules/moderation/chat-input/warn.mjs",
+      "types": "./src/modules/moderation/chat-input/warn.ts"
+    },
+    "./modules/moderation/constants": {
+      "require": "./dist/modules/moderation/constants.cjs",
+      "import": "./dist/modules/moderation/constants.mjs",
+      "types": "./src/modules/moderation/constants.ts"
+    },
+    "./modules/moderation/helpers": {
+      "require": "./dist/modules/moderation/helpers.cjs",
+      "import": "./dist/modules/moderation/helpers.mjs",
+      "types": "./src/modules/moderation/helpers.ts"
+    },
+    "./modules/moderation/modals/warn": {
+      "require": "./dist/modules/moderation/modals/warn.cjs",
+      "import": "./dist/modules/moderation/modals/warn.mjs",
+      "types": "./src/modules/moderation/modals/warn.ts"
+    },
+    "./modules/moderation/services/input": {
+      "require": "./dist/modules/moderation/services/input.cjs",
+      "import": "./dist/modules/moderation/services/input.mjs",
+      "types": "./src/modules/moderation/services/input.ts"
+    },
+    "./modules/moderation/services/mod-log": {
+      "require": "./dist/modules/moderation/services/mod-log.cjs",
+      "import": "./dist/modules/moderation/services/mod-log.mjs",
+      "types": "./src/modules/moderation/services/mod-log.ts"
+    },
+    "./modules/moderation/services/moderation": {
+      "require": "./dist/modules/moderation/services/moderation.cjs",
+      "import": "./dist/modules/moderation/services/moderation.mjs",
+      "types": "./src/modules/moderation/services/moderation.ts"
+    },
+    "./modules/moderation/services/permission": {
+      "require": "./dist/modules/moderation/services/permission.cjs",
+      "import": "./dist/modules/moderation/services/permission.mjs",
+      "types": "./src/modules/moderation/services/permission.ts"
+    },
+    "./modules/moderation/services/warn": {
+      "require": "./dist/modules/moderation/services/warn.cjs",
+      "import": "./dist/modules/moderation/services/warn.mjs",
+      "types": "./src/modules/moderation/services/warn.ts"
+    },
+    "./modules/moderation/user-context-menus/user-info": {
+      "require": "./dist/modules/moderation/user-context-menus/user-info.cjs",
+      "import": "./dist/modules/moderation/user-context-menus/user-info.mjs",
+      "types": "./src/modules/moderation/user-context-menus/user-info.ts"
+    },
+    "./modules/moderation/user-context-menus/warn": {
+      "require": "./dist/modules/moderation/user-context-menus/warn.cjs",
+      "import": "./dist/modules/moderation/user-context-menus/warn.mjs",
+      "types": "./src/modules/moderation/user-context-menus/warn.ts"
+    },
+    "./modules/system": {
+      "require": "./dist/modules/system/index.cjs",
+      "import": "./dist/modules/system/index.mjs",
+      "types": "./src/modules/system/index.ts"
+    },
+    "./modules/system/auto-completes/command-or-category": {
+      "require": "./dist/modules/system/auto-completes/command-or-category.cjs",
+      "import": "./dist/modules/system/auto-completes/command-or-category.mjs",
+      "types": "./src/modules/system/auto-completes/command-or-category.ts"
+    },
+    "./modules/system/auto-completes/helpers": {
+      "require": "./dist/modules/system/auto-completes/helpers.cjs",
+      "import": "./dist/modules/system/auto-completes/helpers.mjs",
+      "types": "./src/modules/system/auto-completes/helpers.ts"
+    },
+    "./modules/system/buttons/eval-accept": {
+      "require": "./dist/modules/system/buttons/eval-accept.cjs",
+      "import": "./dist/modules/system/buttons/eval-accept.mjs",
+      "types": "./src/modules/system/buttons/eval-accept.ts"
+    },
+    "./modules/system/buttons/eval-decline": {
+      "require": "./dist/modules/system/buttons/eval-decline.cjs",
+      "import": "./dist/modules/system/buttons/eval-decline.mjs",
+      "types": "./src/modules/system/buttons/eval-decline.ts"
+    },
+    "./modules/system/buttons/settings-update": {
+      "require": "./dist/modules/system/buttons/settings-update.cjs",
+      "import": "./dist/modules/system/buttons/settings-update.mjs",
+      "types": "./src/modules/system/buttons/settings-update.ts"
+    },
+    "./modules/system/chat-input/administrator/settings": {
+      "require": "./dist/modules/system/chat-input/administrator/settings/index.cjs",
+      "import": "./dist/modules/system/chat-input/administrator/settings/index.mjs",
+      "types": "./src/modules/system/chat-input/administrator/settings/index.ts"
+    },
+    "./modules/system/chat-input/administrator/settings/prompts": {
+      "require": "./dist/modules/system/chat-input/administrator/settings/prompts.cjs",
+      "import": "./dist/modules/system/chat-input/administrator/settings/prompts.mjs",
+      "types": "./src/modules/system/chat-input/administrator/settings/prompts.ts"
+    },
+    "./modules/system/chat-input/administrator/settings/shared": {
+      "require": "./dist/modules/system/chat-input/administrator/settings/shared.cjs",
+      "import": "./dist/modules/system/chat-input/administrator/settings/shared.mjs",
+      "types": "./src/modules/system/chat-input/administrator/settings/shared.ts"
+    },
+    "./modules/system/chat-input/administrator/settings/test": {
+      "require": "./dist/modules/system/chat-input/administrator/settings/test.cjs",
+      "import": "./dist/modules/system/chat-input/administrator/settings/test.mjs",
+      "types": "./src/modules/system/chat-input/administrator/settings/test.ts"
+    },
+    "./modules/system/chat-input/administrator/settings/types": {
+      "require": "./dist/modules/system/chat-input/administrator/settings/types.cjs",
+      "import": "./dist/modules/system/chat-input/administrator/settings/types.mjs",
+      "types": "./src/modules/system/chat-input/administrator/settings/types.ts"
+    },
+    "./modules/system/chat-input/developer/change-avatar": {
+      "require": "./dist/modules/system/chat-input/developer/change-avatar.cjs",
+      "import": "./dist/modules/system/chat-input/developer/change-avatar.mjs",
+      "types": "./src/modules/system/chat-input/developer/change-avatar.ts"
+    },
+    "./modules/system/chat-input/developer/change-name": {
+      "require": "./dist/modules/system/chat-input/developer/change-name.cjs",
+      "import": "./dist/modules/system/chat-input/developer/change-name.mjs",
+      "types": "./src/modules/system/chat-input/developer/change-name.ts"
+    },
+    "./modules/system/chat-input/developer/change-presence": {
+      "require": "./dist/modules/system/chat-input/developer/change-presence.cjs",
+      "import": "./dist/modules/system/chat-input/developer/change-presence.mjs",
+      "types": "./src/modules/system/chat-input/developer/change-presence.ts"
+    },
+    "./modules/system/chat-input/developer/database-metrics": {
+      "require": "./dist/modules/system/chat-input/developer/database-metrics.cjs",
+      "import": "./dist/modules/system/chat-input/developer/database-metrics.mjs",
+      "types": "./src/modules/system/chat-input/developer/database-metrics.ts"
+    },
+    "./modules/system/chat-input/developer/eval": {
+      "require": "./dist/modules/system/chat-input/developer/eval.cjs",
+      "import": "./dist/modules/system/chat-input/developer/eval.mjs",
+      "types": "./src/modules/system/chat-input/developer/eval.ts"
+    },
+    "./modules/system/chat-input/developer/exec": {
+      "require": "./dist/modules/system/chat-input/developer/exec.cjs",
+      "import": "./dist/modules/system/chat-input/developer/exec.mjs",
+      "types": "./src/modules/system/chat-input/developer/exec.ts"
+    },
+    "./modules/system/chat-input/system/help": {
+      "require": "./dist/modules/system/chat-input/system/help.cjs",
+      "import": "./dist/modules/system/chat-input/system/help.mjs",
+      "types": "./src/modules/system/chat-input/system/help.ts"
+    },
+    "./modules/system/chat-input/system/invite": {
+      "require": "./dist/modules/system/chat-input/system/invite.cjs",
+      "import": "./dist/modules/system/chat-input/system/invite.mjs",
+      "types": "./src/modules/system/chat-input/system/invite.ts"
+    },
+    "./modules/system/chat-input/system/perm-level": {
+      "require": "./dist/modules/system/chat-input/system/perm-level.cjs",
+      "import": "./dist/modules/system/chat-input/system/perm-level.mjs",
+      "types": "./src/modules/system/chat-input/system/perm-level.ts"
+    },
+    "./modules/system/chat-input/system/stats": {
+      "require": "./dist/modules/system/chat-input/system/stats.cjs",
+      "import": "./dist/modules/system/chat-input/system/stats.mjs",
+      "types": "./src/modules/system/chat-input/system/stats.ts"
+    },
+    "./modules/system/chat-input/system/support": {
+      "require": "./dist/modules/system/chat-input/system/support.cjs",
+      "import": "./dist/modules/system/chat-input/system/support.mjs",
+      "types": "./src/modules/system/chat-input/system/support.ts"
+    },
+    "./modules/system/constants": {
+      "require": "./dist/modules/system/constants.cjs",
+      "import": "./dist/modules/system/constants.mjs",
+      "types": "./src/modules/system/constants.ts"
+    },
+    "./modules/system/jobs/helpers": {
+      "require": "./dist/modules/system/jobs/helpers.cjs",
+      "import": "./dist/modules/system/jobs/helpers.mjs",
+      "types": "./src/modules/system/jobs/helpers.ts"
+    },
+    "./modules/system/jobs/process-command-usage": {
+      "require": "./dist/modules/system/jobs/process-command-usage.cjs",
+      "import": "./dist/modules/system/jobs/process-command-usage.mjs",
+      "types": "./src/modules/system/jobs/process-command-usage.ts"
+    },
+    "./modules/system/listeners/guild/guild-member-add": {
+      "require": "./dist/modules/system/listeners/guild/guild-member-add.cjs",
+      "import": "./dist/modules/system/listeners/guild/guild-member-add.mjs",
+      "types": "./src/modules/system/listeners/guild/guild-member-add.ts"
+    },
+    "./modules/system/listeners/guild/guild-member-remove": {
+      "require": "./dist/modules/system/listeners/guild/guild-member-remove.cjs",
+      "import": "./dist/modules/system/listeners/guild/guild-member-remove.mjs",
+      "types": "./src/modules/system/listeners/guild/guild-member-remove.ts"
+    },
+    "./modules/system/listeners/ready": {
+      "require": "./dist/modules/system/listeners/ready.cjs",
+      "import": "./dist/modules/system/listeners/ready.mjs",
+      "types": "./src/modules/system/listeners/ready.ts"
+    },
+    "./modules/system/message-context/print-embeds": {
+      "require": "./dist/modules/system/message-context/print-embeds.cjs",
+      "import": "./dist/modules/system/message-context/print-embeds.mjs",
+      "types": "./src/modules/system/message-context/print-embeds.ts"
+    },
+    "./modules/system/modals/eval-modal": {
+      "require": "./dist/modules/system/modals/eval-modal.cjs",
+      "import": "./dist/modules/system/modals/eval-modal.mjs",
+      "types": "./src/modules/system/modals/eval-modal.ts"
+    },
+    "./modules/system/select-menus/settings-category": {
+      "require": "./dist/modules/system/select-menus/settings-category.cjs",
+      "import": "./dist/modules/system/select-menus/settings-category.mjs",
+      "types": "./src/modules/system/select-menus/settings-category.ts"
+    },
+    "./modules/test": {
+      "require": "./dist/modules/test/index.cjs",
+      "import": "./dist/modules/test/index.mjs",
+      "types": "./src/modules/test/index.ts"
+    },
+    "./modules/test/test": {
+      "require": "./dist/modules/test/test.cjs",
+      "import": "./dist/modules/test/test.mjs",
+      "types": "./src/modules/test/test.ts"
+    },
+    "./modules/utility": {
+      "require": "./dist/modules/utility/index.cjs",
+      "import": "./dist/modules/utility/index.mjs",
+      "types": "./src/modules/utility/index.ts"
+    },
+    "./modules/utility/autocompletes/reminder": {
+      "require": "./dist/modules/utility/autocompletes/reminder.cjs",
+      "import": "./dist/modules/utility/autocompletes/reminder.mjs",
+      "types": "./src/modules/utility/autocompletes/reminder.ts"
+    },
+    "./modules/utility/autocompletes/timezone": {
+      "require": "./dist/modules/utility/autocompletes/timezone.cjs",
+      "import": "./dist/modules/utility/autocompletes/timezone.mjs",
+      "types": "./src/modules/utility/autocompletes/timezone.ts"
+    },
+    "./modules/utility/chat-input/reminders": {
+      "require": "./dist/modules/utility/chat-input/reminders.cjs",
+      "import": "./dist/modules/utility/chat-input/reminders.mjs",
+      "types": "./src/modules/utility/chat-input/reminders.ts"
+    },
+    "./modules/utility/chat-input/timestamp": {
+      "require": "./dist/modules/utility/chat-input/timestamp.cjs",
+      "import": "./dist/modules/utility/chat-input/timestamp.mjs",
+      "types": "./src/modules/utility/chat-input/timestamp.ts"
+    },
+    "./modules/utility/listeners/ready": {
+      "require": "./dist/modules/utility/listeners/ready.cjs",
+      "import": "./dist/modules/utility/listeners/ready.mjs",
+      "types": "./src/modules/utility/listeners/ready.ts"
+    },
+    "./modules/utility/services/reminders": {
+      "require": "./dist/modules/utility/services/reminders/index.cjs",
+      "import": "./dist/modules/utility/services/reminders/index.mjs",
+      "types": "./src/modules/utility/services/reminders/index.ts"
+    },
+    "./modules/utility/services/reminders/scheduler": {
+      "require": "./dist/modules/utility/services/reminders/scheduler.cjs",
+      "import": "./dist/modules/utility/services/reminders/scheduler.mjs",
+      "types": "./src/modules/utility/services/reminders/scheduler.ts"
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs"
 }

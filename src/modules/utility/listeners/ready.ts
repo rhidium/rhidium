@@ -1,6 +1,6 @@
 import { Events } from 'discord.js';
 import { ReminderScheduler } from '../services/reminders/scheduler';
-import { ClientEventListener } from '@core/commands';
+import { ClientEventListener } from '@core/commands/events';
 
 const ClientReady = new ClientEventListener({
   once: true,

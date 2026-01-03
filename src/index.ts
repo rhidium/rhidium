@@ -1,7 +1,10 @@
+
 import { GatewayIntentBits } from 'discord.js';
 
-import { appConfig } from './core/config/index';
-import { ClientManager, commandDeploymentEnvironment } from './core/commands';
+import { initializeLogger } from '@core/logger';
+import { appConfig } from './core/config/app';
+import { ClientManager } from './core/commands/manager';
+import { commandDeploymentEnvironment } from '@core/commands/defaults';
 import Client from './core/client';
 import { I18n } from './core/i18n';
 
@@ -10,6 +13,8 @@ import systemRegistry from './modules/system';
 import moderationRegistry from './modules/moderation';
 
 const main = async () => {
+  initializeLogger(appConfig.logging);
+
   await I18n.init();
 
   const manager = new ClientManager();

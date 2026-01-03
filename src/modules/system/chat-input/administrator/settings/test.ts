@@ -1,4 +1,5 @@
-import { type Prompts, PromptValidation } from '@core/utils';
+import type { Prompts } from "@core/utils/prompts/mapped";
+import { PromptValidation } from "@core/utils/prompts/validation";
 
 export const stringTestPrompts: Prompts = [
   {

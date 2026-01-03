@@ -1,5 +1,5 @@
-import { UnitConstants } from '@core/constants';
-import { Logger } from '@core/logger';
+import { UnitConstants } from '@core/constants/units';
+import { logger } from '@core/logger';
 import { Guild, type Interaction, Locale } from 'discord.js';
 import fs from 'fs';
 import i18n, { type TOptions } from 'i18next';
@@ -11,6 +11,8 @@ import enUSCore from '../../../locales/en-US/core.json';
 import nlCommon from '../../../locales/nl/common.json';
 import nlCore from '../../../locales/nl/core.json';
 import type { LocalizedLabelKey } from './types';
+
+const Logger = logger();
 
 const getFiles = (
   dir: string,
@@ -53,13 +55,14 @@ export const defaultLocale = Locales.EnglishUS;
 
 export const locales = [defaultLocale, Locales.Dutch] as const;
 
-const commandsLocalization = (
+const commandsLocalization = async (
   locale: Locales,
   isRequired = locale === defaultLocale,
 ) => {
   return Object.fromEntries(
-    localizedCommands
-      .map(([command, path]) => {
+    (await Promise.all(
+      localizedCommands
+      .map(async ([command, path]) => {
         let data;
 
         const resolvedPath = path.replace(
@@ -68,7 +71,7 @@ const commandsLocalization = (
         );
 
         try {
-          data = require(path.replace('en-US', locale));
+          data = await import(path.replace('en-US', locale));
         } catch (err) {
           if (isRequired) {
             throw err;
@@ -81,7 +84,7 @@ const commandsLocalization = (
 
         return [command, data ?? null];
       })
-      .filter(([, data]) => data !== null),
+    )).filter(([, data]) => data !== null),
   );
 };
 

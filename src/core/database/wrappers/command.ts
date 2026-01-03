@@ -1,18 +1,20 @@
-import {
+import type {
   Command,
-  type CommandInteraction,
-  CommandThrottleType,
-  Permissions,
-  PermLevel,
-  type ThrottleConsumerResult,
-} from '@core/commands';
+  ThrottleConsumerResult,
+} from '@core/commands/base';
+import { CommandThrottleType } from '@core/commands/throttle';
+import { Permissions, PermLevel } from '@core/commands/permissions';
 import { Model } from '../models';
 import { DatabaseWrapper } from './wrapper';
 import { Prisma, prismaClient } from '../client';
-import { CacheManager } from '@core/data-structures';
-import { UnitConstants } from '@core/constants';
+import { CacheManager } from '@core/data-structures/cache/manager';
+import { UnitConstants } from '@core/constants/units';
 import { populateCommandUsage, type PopulatedCommandUsage } from '../select';
-import { Logger } from '@core/logger';
+import { logger } from '@core/logger';
+import type { CommandInteraction } from '@core/commands/types';
+import type { Database } from '.';
+
+const Logger = logger();
 
 const commandUsageSelect = {
   usages: true,
@@ -30,7 +32,8 @@ const throttleCache = CacheManager.fromStore<
 });
 
 class CommandWrapper extends DatabaseWrapper<Model.Command> {
-  constructor() {
+  constructor(
+  ) {
     super(Model.Command);
   }
 
@@ -73,6 +76,7 @@ class CommandWrapper extends DatabaseWrapper<Model.Command> {
   public readonly throttleConsumer = async (
     command: Command,
     interaction: CommandInteraction,
+    db: typeof Database,
   ): Promise<ThrottleConsumerResult> => {
     const options = command.throttle;
 
@@ -86,6 +90,7 @@ class CommandWrapper extends DatabaseWrapper<Model.Command> {
     const memberPermLevel = await Permissions.resolveForMember(
       interaction.member,
       interaction.guild,
+      db,
     );
 
     if (memberPermLevel > PermLevel['Server Owner']) {

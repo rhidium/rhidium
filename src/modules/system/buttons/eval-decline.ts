@@ -1,4 +1,6 @@
-import { Command, CommandType, PermLevel } from '@core/commands';
+import { Command } from '@core/commands/base';
+import { CommandType } from '@core/commands/types';
+import { PermLevel } from '@core/commands/permissions';
 import {
   ActionRowBuilder,
   ButtonBuilder,
@@ -6,7 +8,8 @@ import {
   type Interaction,
 } from 'discord.js';
 import { EvalConstants } from '../constants';
-import { appConfig, Embeds } from '@core/config';
+import { appConfig } from '@core/config/app';
+import { Embeds } from '@core/config/embeds';
 import { I18n } from '@core/i18n';
 
 const evalDeclinedRow = (interaction: Interaction) =>

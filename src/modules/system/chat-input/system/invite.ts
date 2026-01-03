@@ -1,11 +1,9 @@
-import {
-  Command,
-  commandDeploymentEnvironment,
-  CommandThrottleType,
-  CommandType,
-} from '@core/commands';
-import { Embeds } from '@core/config';
-import { UnitConstants } from '@core/constants';
+import { Command } from '@core/commands/base';
+import { commandDeploymentEnvironment } from '@core/commands/defaults';
+import { CommandThrottleType } from '@core/commands/throttle';
+import { CommandType } from '@core/commands/types';
+import { Embeds } from '@core/config/embeds';
+import { UnitConstants } from '@core/constants/units';
 import { I18n } from '@core/i18n';
 
 const InviteCommand = new Command({

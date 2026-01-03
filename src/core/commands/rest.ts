@@ -1,6 +1,7 @@
-import { Database } from '@core/database';
-import { debug, type Debugger, Logger } from '@core/logger';
-import { ObjectUtils } from '@core/utils';
+import { Database } from '@core/database/wrappers';
+import { logger } from '@core/logger';
+import { debug, type Debugger } from '@core/logger/debug';
+import { ObjectUtils } from '@core/utils/common/objects';
 import {
   ApplicationCommand,
   Collection,
@@ -11,7 +12,9 @@ import {
   Routes,
 } from 'discord.js';
 import { CommandBase, type NonAPICommand } from './base';
-import Client from '@core/client';
+import type Client from '@core/client';
+
+const Logger = logger();
 
 type APICommandData =
   | RESTPostAPIChatInputApplicationCommandsJSONBody

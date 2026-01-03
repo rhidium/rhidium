@@ -1,4 +1,4 @@
-import { UnitConstants } from '@core/constants';
+import { UnitConstants } from '@core/constants/units';
 import {
   Locale,
   TimestampStyles,

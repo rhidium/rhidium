@@ -1,4 +1,4 @@
-import { Logger } from '@core/logger';
+import { logger } from '@core/logger';
 import {
   Collection,
   Guild,
@@ -7,6 +7,8 @@ import {
   type Snowflake,
   type TextBasedChannel,
 } from 'discord.js';
+
+const Logger = logger();
 
 type ChannelWithMessages = GuildBasedChannel & TextBasedChannel;
 type MessageList = Collection<Snowflake, Message<true>>;

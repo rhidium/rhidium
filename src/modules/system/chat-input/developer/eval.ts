@@ -1,6 +1,8 @@
-import { Command, CommandType, PermLevel } from '@core/commands';
+import { Command } from '@core/commands/base';
+import { CommandType } from '@core/commands/types';
+import { PermLevel } from '@core/commands/permissions';
 import CodeModalCommand from '../../modals/eval-modal';
-import { appConfig } from '@core/config';
+import { appConfig } from '@core/config/app';
 
 const EvalCommand = new Command({
   type: CommandType.ChatInputPlain,

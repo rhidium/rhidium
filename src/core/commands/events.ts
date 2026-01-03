@@ -1,5 +1,5 @@
-import Client from '@core/client';
-import { debug, type Debugger } from '@core/logger';
+import type Client from '@core/client';
+import { debug, type Debugger } from '@core/logger/debug';
 import { type ClientEvents, Events } from 'discord.js';
 
 export interface ClientEventListenerOptions<K extends keyof ClientEvents> {

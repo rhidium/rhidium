@@ -1,7 +1,8 @@
-import { appConfig, Embeds } from '@core/config';
-import { DiscordConstants, UnitConstants } from '@core/constants';
-import { type ResolvedPopulatedReminder } from '@core/database';
-import { StringUtils, TimeUtils, InteractionUtils } from '@core/utils';
+import { appConfig } from '@core/config/app';
+import { Embeds } from '@core/config/embeds';
+import { UnitConstants } from '@core/constants/units';
+import { DiscordConstants } from '@core/constants/discord';
+import { type ResolvedPopulatedReminder } from '@core/database/wrappers';
 import {
   ActionRowBuilder,
   ModalBuilder,
@@ -9,6 +10,9 @@ import {
   TextInputBuilder,
   TextInputStyle,
 } from 'discord.js';
+import { StringUtils } from '@core/utils/common/strings';
+import { TimeUtils } from '@core/utils/common/time';
+import { InteractionUtils } from '@core/utils/interactions';
 
 type ReminderModalSubmitData = {
   message: string;

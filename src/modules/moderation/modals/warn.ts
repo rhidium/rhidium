@@ -1,81 +1,13 @@
-import {
-  ActionRowBuilder,
-  type ModalActionRowComponentBuilder,
-  ModalBuilder,
-  TextInputBuilder,
-  TextInputStyle,
-  User,
-} from 'discord.js';
 import { ModerationInputServices } from '../services/input';
 import { WarnServices } from '../services/warn';
-import { InputUtils, StringUtils } from '@core/utils';
-import { Command, CommandType } from '@core/commands';
-import { Embeds } from '@core/config';
 import { Severity } from '@prisma/client';
-import { severityValues } from '@core/database';
-
-export enum WarnInteractions {
-  WARN_MODAL_ID = 'warn-modal',
-  WARN_REASON_INPUT_ID = 'warn-reason',
-  WARN_SEVERITY_INPUT_ID = 'warn-severity',
-  WARN_VALID_FOR_INPUT_ID = 'warn-valid-for',
-}
-
-export const warnModal = (user: User | null) => {
-  if (user === null) {
-    return new ModalBuilder()
-      .setTitle('Warn')
-      .setCustomId(WarnInteractions.WARN_MODAL_ID)
-      .setComponents([
-        new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents([
-          new TextInputBuilder()
-            .setCustomId(WarnInteractions.WARN_REASON_INPUT_ID)
-            .setStyle(TextInputStyle.Paragraph)
-            .setLabel('Reason')
-            .setPlaceholder('The reason why you are warning this user.')
-            .setMinLength(5)
-            .setMaxLength(200)
-            .setRequired(true),
-        ]),
-        ModerationInputServices.severityTextInput(),
-        InputUtils.Duration.durationTextInput({
-          customId: WarnInteractions.WARN_VALID_FOR_INPUT_ID,
-          label: 'Valid For',
-          placeholder:
-            'How long this warning counts towards the auto-moderation thresholds.',
-          required: false,
-        }),
-      ]);
-  }
-
-  const safeDisplayName = StringUtils.truncate(user.displayName, 20);
-
-  return new ModalBuilder()
-    .setTitle(`Warn ${safeDisplayName}`)
-    .setCustomId(`${WarnInteractions.WARN_MODAL_ID}@${user.id}`)
-    .setComponents([
-      new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents([
-        new TextInputBuilder()
-          .setCustomId(WarnInteractions.WARN_REASON_INPUT_ID)
-          .setStyle(TextInputStyle.Paragraph)
-          .setLabel('Reason')
-          .setPlaceholder(
-            `The reason why you're warning ${safeDisplayName}. They will be notified of this reason.`,
-          )
-          .setMinLength(5)
-          .setMaxLength(200)
-          .setRequired(true),
-      ]),
-      ModerationInputServices.severityTextInput(),
-      InputUtils.Duration.durationTextInput({
-        customId: WarnInteractions.WARN_VALID_FOR_INPUT_ID,
-        label: 'Valid For',
-        placeholder:
-          'How long this warning counts towards the auto-moderation thresholds.',
-        required: false,
-      }),
-    ]);
-};
+import { warnModal } from '../helpers';
+import { WarnInteractions } from '../constants';
+import { Command } from '@core/commands/base';
+import { CommandType } from '@core/commands/types';
+import { Embeds } from '@core/config/embeds';
+import { InputUtils } from '@core/utils/inputs';
+import { severityValues } from '@core/database/util';
 
 const WarnModalCommand = new Command({
   type: CommandType.ModalSubmit,

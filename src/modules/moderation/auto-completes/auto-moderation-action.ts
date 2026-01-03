@@ -1,7 +1,8 @@
-import { Command, CommandType } from '@core/commands';
+import { Command } from '@core/commands/base';
 import { ModerationServices } from '../services/moderation';
 import { SlashCommandStringOption } from 'discord.js';
-import { Database } from '@core/database';
+import { Database } from '@core/database/wrappers';
+import { CommandType } from '@core/commands/types';
 
 const data = new SlashCommandStringOption()
   .setName('auto-moderation-action')

@@ -1,12 +1,16 @@
 import { ModerationAction } from '@prisma/client';
 import AutoModerationActionOption from '../auto-completes/auto-moderation-action';
 import { ModerationServices } from '../services/moderation';
-import { Command, CommandType, PermLevel } from '@core/commands';
-import { InputUtils } from '@core/utils';
-import { Database } from '@core/database';
-import { Embeds } from '@core/config';
-import { UnitConstants } from '@core/constants';
-import { Logger } from '@core/logger';
+import { InputUtils } from '@core/utils/inputs';
+import { Database } from '@core/database/wrappers';
+import { Embeds } from '@core/config/embeds';
+import { UnitConstants } from '@core/constants/units';
+import { logger } from '@core/logger';
+import { Command } from '@core/commands/base';
+import { CommandType } from '@core/commands/types';
+import { PermLevel } from '@core/commands/permissions';
+
+const Logger = logger();
 
 const AutoModerationCommand = new Command({
   type: CommandType.ChatInput,

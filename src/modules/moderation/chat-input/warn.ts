@@ -2,9 +2,11 @@ import { Severity } from '@prisma/client';
 import { WarnServices } from '../services/warn';
 import { ModerationInputServices } from '../services/input';
 import WarningAutoComplete from '../auto-completes/warning';
-import { Command, CommandType, PermLevel } from '@core/commands';
-import { InputUtils } from '@core/utils';
-import { Embeds } from '@core/config';
+import { InputUtils } from '@core/utils/inputs';
+import { Embeds } from '@core/config/embeds';
+import { Command } from '@core/commands/base';
+import { CommandType } from '@core/commands/types';
+import { PermLevel } from '@core/commands/permissions';
 
 const WarnCommand = new Command({
   type: CommandType.ChatInput,

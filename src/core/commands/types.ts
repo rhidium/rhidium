@@ -1,4 +1,4 @@
-import Client from '@core/client';
+import type Client from '@core/client';
 import {
   AutocompleteInteraction,
   BaseInteraction,

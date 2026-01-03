@@ -1,17 +1,19 @@
-import Client from '@core/client';
-import {
-  Command,
-  commandDeploymentEnvironment,
-  CommandThrottle,
-  CommandType,
-  Permissions,
-} from '@core/commands';
-import { appConfig, Embeds } from '@core/config';
-import { EmbedConstants, UnitConstants } from '@core/constants';
-import { StringUtils, TimeUtils } from '@core/utils';
+import type Client from '@core/client';
 import { ApplicationCommandOptionType, Collection } from 'discord.js';
 import CommandOrCategoryCommand from '../../auto-completes/command-or-category';
 import { I18n } from '@core/i18n';
+import { Command } from '@core/commands/base';
+import { TimeUtils } from '@core/utils/common/time';
+import { UnitConstants } from '@core/constants/units';
+import { CommandThrottle } from '@core/commands/throttle';
+import { Embeds } from '@core/config/embeds';
+import { StringUtils } from '@core/utils/common/strings';
+import { Permissions } from '@core/commands/permissions';
+import { appConfig } from '@core/config/app';
+import { commandDeploymentEnvironment } from '@core/commands/defaults';
+import { CommandType } from '@core/commands/types';
+import { EmbedConstants } from '@core/constants/embeds';
+import { Database } from '@core/database/wrappers';
 
 class EmbedResolver {
   static readonly commandEmbed = (cmd: Command) => {
@@ -206,7 +208,7 @@ const HelpCommand = new Command({
     }
 
     // Filter by active/enabled and perm level
-    const memberPermLevel = await Permissions.resolveForMember(member, guild);
+    const memberPermLevel = await Permissions.resolveForMember(member, guild, Database);
     const commands = client.manager.apiCommands.filter((cmd) => {
       const { enabled } = cmd;
       return (

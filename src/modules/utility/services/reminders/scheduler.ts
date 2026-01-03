@@ -1,8 +1,9 @@
 import _debug from 'debug';
 import { ReminderServices } from '.';
-import { Database, type ResolvedPopulatedReminder } from '@core/database';
-import Client from '@core/client';
-import { RuntimeUtils, TimeUtils } from '@core/utils';
+import { Database, type ResolvedPopulatedReminder } from '@core/database/wrappers';
+import type Client from '@core/client';
+import { TimeUtils } from '@core/utils/common/time';
+import { RuntimeUtils } from '@core/utils/common/runtime';
 
 const defaultLogger = _debug('@repo/reminders:scheduler');
 

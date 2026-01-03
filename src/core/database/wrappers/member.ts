@@ -1,8 +1,10 @@
+import type { BaseInteraction } from 'discord.js';
 import { Model } from '../models';
-import { type PopulatedGuild, type PopulatedMember } from '../select';
+import { type PopulatedGuild, type PopulatedMember, type PopulatedUser } from '../select';
 import { guildWrapper } from './guild';
 import { userWrapper } from './user';
 import { DatabaseWrapper } from './wrapper';
+import type { GuildInteraction } from '@core/commands/types';
 
 interface FindMemberOptions {
   userId: string;
@@ -82,6 +84,24 @@ class MemberWrapper extends DatabaseWrapper<Model.Member> {
       guild ?? (await guildWrapper.resolve(guildId)),
     ] as const;
   };
+
+  async resolveFromInteraction<I extends BaseInteraction>(
+    interaction: GuildInteraction<I>,
+  ): Promise<readonly [PopulatedGuild, PopulatedMember, PopulatedUser]> {
+    const [user, guild] = await Promise.all([
+      userWrapper.resolve(interaction.user.id),
+      guildWrapper.resolve(interaction.guildId),
+    ]);
+
+    const member = await memberWrapper.resolve({
+      userId: interaction.user.id,
+      guildId: interaction.guildId,
+      resolveGuild: false,
+      resolveUser: false,
+    });
+
+    return [guild, member, user];
+  }
 }
 
 const memberWrapper = new MemberWrapper();

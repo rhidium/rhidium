@@ -1,5 +1,5 @@
-import { Embeds } from '@core/config';
-import { InteractionUtils } from '@core/utils';
+import { Embeds } from '@core/config/embeds';
+import { InteractionUtils } from '@core/utils/interactions';
 import { type Guild } from '@prisma/client';
 import {
   Guild as _Guild,

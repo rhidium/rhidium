@@ -1,6 +1,7 @@
-import { Command, CommandType } from '@core/commands';
-import { DiscordConstants } from '@core/constants';
-import { Database } from '@core/database';
+import { Command } from '@core/commands/base';
+import { CommandType } from '@core/commands/types';
+import { DiscordConstants } from '@core/constants/discord';
+import { Database } from '@core/database/wrappers';
 import { SlashCommandStringOption } from 'discord.js';
 
 const data = new SlashCommandStringOption()

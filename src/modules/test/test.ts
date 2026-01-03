@@ -1,9 +1,9 @@
-import { ClientJob, CommandThrottleType } from '@core/commands';
+import { CommandThrottleType } from '@core/commands/throttle';
 import { Command } from '@core/commands/base';
 import { CommandType } from '@core/commands/types';
-import { Embeds } from '@core/config';
-import { UnitConstants } from '@core/constants';
-import { Logger } from '@core/logger';
+import { Embeds } from '@core/config/embeds';
+import { UnitConstants } from '@core/constants/units';
+import { logger } from '@core/logger';
 import { PermLevel } from '@core/commands/permissions';
 import {
   ActionRowBuilder,
@@ -17,6 +17,8 @@ import {
   TextInputStyle,
 } from 'discord.js';
 import { Placeholder } from '@core/placeholders';
+
+const Logger = logger();
 
 const testMap: Map<string, number> = new Map();
 
@@ -312,16 +314,6 @@ TestChatInput.extend({
   run: async () => {
     return ['TEST'] as const;
   },
-});
-
-const everyFiveSeconds = '*/5 * * * * *';
-
-export const TestJob = new ClientJob({
-  id: 'test-job',
-  cronTime: everyFiveSeconds,
-  runOnInit: true,
-  start: true,
-  async onTick() {},
 });
 
 export default TestChatInput;

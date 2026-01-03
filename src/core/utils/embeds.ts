@@ -7,8 +7,8 @@ import {
   type EmbedFooterOptions,
   type RestOrArray,
 } from 'discord.js';
-import { StringUtils } from './common';
-import { EmbedConstants } from '@core/constants';
+import { StringUtils } from './common/strings';
+import { EmbedConstants } from '@core/constants/embeds';
 
 class SafeEmbedBuilder extends EmbedBuilder {
   constructor(data?: EmbedData | APIEmbed) {

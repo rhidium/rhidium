@@ -9,26 +9,16 @@ import {
 } from 'discord.js';
 import { ModerationPermissionServices } from './permission';
 import { ModLogServices } from './mod-log';
-import {
-  Database,
-  ModerationAction,
-  type PopulatedAutoModerationAction,
-  type PopulatedGuild,
-  type PopulatedMember,
-  PopulatedPrisma,
-  type PopulatedWarning,
-  populateWarning,
-  Prisma,
-  Severity,
-} from '@core/database';
-import {
-  ChannelUtils,
-  StringUtils,
-  TimeUtils,
-  InteractionUtils,
-} from '@core/utils';
-import { EmbedConstants } from '@core/constants';
-import { Embeds } from '@core/config';
+import { EmbedConstants } from '@core/constants/embeds';
+import { Embeds } from '@core/config/embeds';
+import { Database } from '@core/database/wrappers';
+import { populateWarning, type PopulatedAutoModerationAction, type PopulatedGuild, type PopulatedMember, type PopulatedWarning } from '@core/database/select';
+import { InteractionUtils } from '@core/utils/interactions';
+import { ChannelUtils } from '@core/utils/channels';
+import { StringUtils } from '@core/utils/common/strings';
+import { ModerationAction, Prisma, type Severity } from '@prisma/client';
+import { PopulatedPrisma } from '@core/database/populated';
+import { TimeUtils } from '@core/utils/common/time';
 
 class WarnServices {
   static readonly stringifyWarn = (

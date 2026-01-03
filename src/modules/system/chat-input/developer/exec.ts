@@ -1,7 +1,11 @@
-import { Command, CommandType, PermLevel } from '@core/commands';
-import { appConfig, Embeds } from '@core/config';
-import { EmbedConstants, UnitConstants } from '@core/constants';
-import { TimeUtils } from '@core/utils';
+import { Command } from '@core/commands/base';
+import { PermLevel } from '@core/commands/permissions';
+import { CommandType } from '@core/commands/types';
+import { appConfig } from '@core/config/app';
+import { Embeds } from '@core/config/embeds';
+import { EmbedConstants } from '@core/constants/embeds';
+import { UnitConstants } from '@core/constants/units';
+import { TimeUtils } from '@core/utils/common/time';
 import { exec } from 'child_process';
 import { type BaseMessageOptions } from 'discord.js';
 

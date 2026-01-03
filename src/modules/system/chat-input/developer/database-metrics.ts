@@ -1,15 +1,18 @@
-import { Command, CommandType, PermLevel } from '@core/commands';
-import { appConfig, Embeds } from '@core/config';
+import { Command } from '@core/commands/base';
+import { CommandType } from '@core/commands/types';
+import { PermLevel } from '@core/commands/permissions';
 import {
   Database,
-  modelEntries,
   type ModelOperation,
   modelOperations,
-} from '@core/database';
+} from '@core/database/wrappers';
 import {
   SlashCommandSubcommandBuilder,
   SlashCommandSubcommandGroupBuilder,
 } from 'discord.js';
+import { modelEntries } from '@core/database/models';
+import { appConfig } from '@core/config/app';
+import { Embeds } from '@core/config/embeds';
 
 const displayMetrics: ModelOperation[] = [
   ...modelOperations.filter(

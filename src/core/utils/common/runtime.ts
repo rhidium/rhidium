@@ -1,4 +1,4 @@
-import { UnitConstants } from '@core/constants';
+import { UnitConstants } from '@core/constants/units';
 import { NumberUtils } from './numbers';
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));

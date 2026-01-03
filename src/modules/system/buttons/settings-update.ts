@@ -1,5 +1,7 @@
-import { Command, CommandType, PermLevel } from '@core/commands';
-import { Embeds } from '@core/config';
+import { Command } from '@core/commands/base';
+import { CommandType } from '@core/commands/types';
+import { PermLevel } from '@core/commands/permissions';
+import { Embeds } from '@core/config/embeds';
 import { settingsPrompts } from '../chat-input/administrator/settings/prompts';
 import { handleSettingsUpdate } from '../chat-input/administrator/settings/shared';
 

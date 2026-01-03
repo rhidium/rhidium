@@ -1,13 +1,13 @@
 import _debug, { type Debugger as _Debugger } from 'debug';
 
-const debuggr = _debug('app');
+const debugLib = _debug('app');
 
-const commands = debuggr.extend('commands');
-const permissions = debuggr.extend('permissions');
-const events = debuggr.extend('events');
-const cache = debuggr.extend('cache');
-const database = debuggr.extend('database');
-const utils = debuggr.extend('utils');
+const commands = debugLib.extend('commands');
+const permissions = debugLib.extend('permissions');
+const events = debugLib.extend('events');
+const cache = debugLib.extend('cache');
+const database = debugLib.extend('database');
+const utils = debugLib.extend('utils');
 
 export const debug = {
   commands: {

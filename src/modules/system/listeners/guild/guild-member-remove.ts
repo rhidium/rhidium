@@ -1,11 +1,14 @@
-import { ClientEventListener } from '@core/commands';
-import { appConfig, Embeds } from '@core/config';
-import { Database } from '@core/database';
+import { ClientEventListener } from '@core/commands/events';
+import { appConfig } from '@core/config/app';
+import { Embeds } from '@core/config/embeds';
+import { Database } from '@core/database/wrappers';
 import { I18n } from '@core/i18n';
-import { Logger } from '@core/logger';
+import { logger } from '@core/logger';
 import { Placeholder } from '@core/placeholders';
-import { TimeUtils } from '@core/utils';
+import { TimeUtils } from '@core/utils/common/time';
 import { EmbedBuilder, Events, PermissionFlagsBits } from 'discord.js';
+
+const Logger = logger();
 
 const requiredPermissions = [
   PermissionFlagsBits.SendMessages,

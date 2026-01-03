@@ -1,7 +1,10 @@
-import { Command, CommandThrottleType, CommandType } from '@core/commands';
-import { appConfig, Embeds } from '@core/config';
-import { UnitConstants } from '@core/constants';
+import { Command } from '@core/commands/base';
+import { CommandType } from '@core/commands/types';
+import { appConfig } from '@core/config/app';
+import { Embeds } from '@core/config/embeds';
+import { UnitConstants } from '@core/constants/units';
 import { I18n } from '@core/i18n';
+import { CommandThrottleType } from '@core/commands/throttle';
 
 const SupportCommand = new Command({
   type: CommandType.ChatInputPlain,

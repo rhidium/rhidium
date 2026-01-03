@@ -1,8 +1,11 @@
 import { Severity } from '@prisma/client';
 import { ModerationServices } from '../services/moderation';
-import { Command, CommandType, PermLevel } from '@core/commands';
-import { Database, severityChoices } from '@core/database';
-import { Embeds } from '@core/config';
+import { Database } from '@core/database/wrappers';
+import { Command } from '@core/commands/base';
+import { CommandType } from '@core/commands/types';
+import { PermLevel } from '@core/commands/permissions';
+import { severityChoices } from '@core/database/util';
+import { Embeds } from '@core/config/embeds';
 
 const SeverityCommand = new Command({
   type: CommandType.ChatInputPlain,
