@@ -82,7 +82,6 @@
     "cz-conventional-changelog": "^3.3.0",
     "gts": "^6.0.2",
     "husky": "^9.1.7",
-    "lint-staged": "^15.5.2",
     "prisma": "^6.10.1",
     "rimraf": "^6.0.1",
     "ts-json-schema-generator": "^2.4.0",

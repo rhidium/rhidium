@@ -12,7 +12,6 @@
 /.eslintrc.json
 /.gitattributes
 /.gitignore
-/.lintstagedrc.js
 /.prettierrc.js
 /commitlint.config.js
 /compose.yaml
