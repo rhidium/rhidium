@@ -1,9 +1,4 @@
-import moduleAlias from 'module-alias';
 import { GatewayIntentBits } from 'discord.js';
-
-moduleAlias.addAliases({
-  '@core': `${__dirname}/`,
-});
 
 import { appConfig } from './core/config/index';
 import { ClientManager, commandDeploymentEnvironment } from './core/commands';
