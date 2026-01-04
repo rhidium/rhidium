@@ -367,11 +367,6 @@
       "import": "./dist/core/database/wrappers/user.mjs",
       "types": "./src/core/database/wrappers/user.ts"
     },
-    "./core/database/wrappers/workshop-mod": {
-      "require": "./dist/core/database/wrappers/workshop-mod.cjs",
-      "import": "./dist/core/database/wrappers/workshop-mod.mjs",
-      "types": "./src/core/database/wrappers/workshop-mod.ts"
-    },
     "./core/database/wrappers/wrapper": {
       "require": "./dist/core/database/wrappers/wrapper.cjs",
       "import": "./dist/core/database/wrappers/wrapper.mjs",

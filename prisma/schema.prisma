@@ -96,9 +96,6 @@ model Guild {
   MemberJoinEmbedId   Int?
   MemberLeaveEmbed     Embed? @relation("MemberLeaveEmbed", fields: [MemberLeaveEmbedId], references: [id])
   MemberLeaveEmbedId   Int?
-
-  // Workshop Monitor features
-  GameServers GameServer[]                                       // The game servers that are associated with the guild
 }
 
 // 
@@ -308,33 +305,4 @@ model Settings {
   @@unique([id])
   id  String @id @default("singleton")
   commandUsageSummaryLastProcessedAt DateTime? // The date the command usage summary was last processed
-}
-
-// 
-// Start of Workshop Monitor feature models
-// 
-
-enum GameServerStatus {
-  ONLINE // The game server is online and accepting connections
-  OFFLINE // The game server is offline and not accepting connections
-  MAINTENANCE // The game server is under maintenance, configured by server administrators
-}
-
-model Webhook {
-  id          String   @id @unique @default(uuid(7)) // The unique (internal) id of the webhook
-  name        String   // The name of the webhook
-  url         String   // The URL of the webhook
-  secret     String?  // The secret for the webhook, if applicable
-
-  active      Boolean  @default(true) // Whether the webhook is active or not
-  deliveries Int      @default(0) // The number of times the webhook has successfully delivered a message
-  lastDeliveredAt DateTime? // The date the webhook last successfully delivered a message
-  fails Int      @default(0) // The number of times the webhook has failed to deliver a message
-  lastFailedAt DateTime? // The date the webhook last failed to deliver a message
-
-  createdAt   DateTime @default(now()) // The date the webhook was created
-  updatedAt   DateTime @updatedAt // The date the webhook was last updated
-
-  GameServerId String? @unique
-  GameServer GameServer?
 }
