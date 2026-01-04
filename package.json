@@ -207,6 +207,11 @@
       "import": "./dist/core/config/embeds.mjs",
       "types": "./src/core/config/embeds.ts"
     },
+    "./core/config/types": {
+      "require": "./dist/core/config/types.cjs",
+      "import": "./dist/core/config/types.mjs",
+      "types": "./src/core/config/types.ts"
+    },
     "./core/constants/discord": {
       "require": "./dist/core/constants/discord.cjs",
       "import": "./dist/core/constants/discord.mjs",
