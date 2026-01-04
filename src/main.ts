@@ -43,7 +43,7 @@ const main = async (
   }: Options = {},
 ) => {
   setConfigDirectory(process.env['RHIDIUM_CONFIG_DIR'] || './config');
-  setLocalesDirectory(process.env['RHIDIUM_LOCALES_DIR'] || './locales');
+  setLocalesDirectory(process.env['RHIDIUM_LOCALES_DIR'] || null);
   initializeLogger(appConfig.logging);
 
   await I18n.init();

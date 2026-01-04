@@ -42,7 +42,7 @@ let customLocalesDirectory: string | null = null;
  */
 export const setLocalesDirectory = (directory: string | null): void => {
   if (directory && !fs.existsSync(directory)) {
-    throw new Error(`Locales directory does not exist: ${directory}`);
+    throw new Error(`Locales directory does not exist: ${directory}\n\nDid you forget to create it, or mean to set it to null to use the default Rhidium locales?`);
   }
   customLocalesDirectory = directory;
 };
