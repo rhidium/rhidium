@@ -5,13 +5,13 @@ import fs from 'fs';
 import i18n, { type TOptions } from 'i18next';
 import path from 'path';
 import { fileURLToPath } from 'node:url';
-
-import enUSCommon from '../../../locales/en-US/common.json';
-import enUSCore from '../../../locales/en-US/core.json';
-
-import nlCommon from '../../../locales/nl/common.json';
-import nlCore from '../../../locales/nl/core.json';
 import type { LocalizedLabelKey } from './types';
+
+import enUSCommon from '../../../locales/en-US/common.json' with { type: 'json' };
+import enUSCore from '../../../locales/en-US/core.json' with { type: 'json' };
+
+import nlCommon from '../../../locales/nl/common.json' with { type: 'json' };
+import nlCore from '../../../locales/nl/core.json' with { type: 'json' };
 
 const Logger = logger();
 
@@ -88,11 +88,6 @@ const getFiles = (
  */
 const getLocalizedCommands = () => {
   const customDir = getConfiguredLocalesDirectory();
-
-  if (customDir && !fs.existsSync(customDir)) {
-    throw new Error(`Configured locales directory does not exist: ${customDir}\n\nDid you forget to create it?`);
-  }
-
   const locations = [
     // Consumer's custom locales directory
     ...(customDir ? [path.resolve(customDir, 'en-US/commands')] : []),
