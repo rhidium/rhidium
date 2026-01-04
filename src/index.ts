@@ -2,7 +2,7 @@
 import { GatewayIntentBits } from 'discord.js';
 
 import { initializeLogger } from '@core/logger';
-import { appConfig } from './core/config/app';
+import { appConfig, setConfigDirectory } from './core/config/app';
 import { ClientManager } from './core/commands/manager';
 import { commandDeploymentEnvironment } from '@core/commands/defaults';
 import Client from './core/client';
@@ -13,6 +13,7 @@ import systemRegistry from './modules/system';
 import moderationRegistry from './modules/moderation';
 
 const main = async () => {
+  setConfigDirectory(process.env['RHIDIUM_CONFIG_DIR'] || './config');
   initializeLogger(appConfig.logging);
 
   await I18n.init();

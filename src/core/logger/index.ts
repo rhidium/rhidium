@@ -22,8 +22,11 @@ const logFormat = printf(({ level, message, timestamp }) => {
 
 let _privateLogger: ReturnType<typeof createLogger> | null = null;
 
-const initializeLogger = (config: AppConfig['logging']) => {
-  const logger = createLogger({
+/**
+ * Creates a logger instance with the given configuration
+ */
+const createLoggerInstance = (config: AppConfig['logging']): ReturnType<typeof createLogger> => {
+  const loggerInstance = createLogger({
     level: config.log_level,
     levels,
     format: combine(timestamp({ format: config.timestamp_format }), logFormat),
@@ -31,7 +34,7 @@ const initializeLogger = (config: AppConfig['logging']) => {
   });
   
   if (config.use_console) {
-    logger.add(
+    loggerInstance.add(
       new transports.Console({ format: combine(colorize(), logFormat) }),
     );
   }
@@ -43,7 +46,7 @@ const initializeLogger = (config: AppConfig['logging']) => {
       fs.mkdirSync(options.directory, { recursive: true });
     }
   
-    logger.add(
+    loggerInstance.add(
       new transports.File({
         dirname: options.directory,
         filename: options.filename,
@@ -57,12 +60,39 @@ const initializeLogger = (config: AppConfig['logging']) => {
     );
   }
 
-  return logger;
-}
+  return loggerInstance;
+};
 
+/**
+ * Creates a default logger instance with minimal configuration.
+ * Used for early module imports before full initialization.
+ */
+const createDefaultLogger = (): ReturnType<typeof createLogger> => {
+  return createLogger({
+    level: 'info',
+    levels,
+    format: combine(timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }), logFormat),
+    transports: [
+      new transports.Console({ format: combine(colorize(), logFormat) }),
+    ],
+  });
+};
+
+/**
+ * Initialize the logger with application configuration.
+ * This replaces the default logger with a fully configured one.
+ */
+const initializeLogger = (config: AppConfig['logging']) => {
+  _privateLogger = createLoggerInstance(config);
+};
+
+/**
+ * Get the logger instance.
+ * Returns a lazy-initialized default logger if not yet configured.
+ */
 const logger = (): ReturnType<typeof createLogger> => {
   if (!_privateLogger) {
-    throw new Error('Logger has not been initialized. Please call initializeLogger first.');
+    _privateLogger = createDefaultLogger();
   }
   return _privateLogger;
 };

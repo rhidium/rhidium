@@ -112,7 +112,7 @@ model GuildCaseCounter {
   GuildId String @unique                                          // The guild this case counter belongs to
   Guild   Guild?
 
-  @@index([GuildId], name: "GuildInd")                            // Create an index for quering case counters by guild
+  @@index([GuildId], name: "GuildInd")                            // Create an index for querying case counters by guild
 }
 
 model SeverityConfiguration {
@@ -149,8 +149,8 @@ model Warning {
 
   TriggeredActions AutoModerationAction[]                         // The (auto-moderation) actions that were triggered by this warning
 
-  @@index([MemberUserId, MemberGuildId], name: "MemberInd")       // Create an index for quering warnings by member
-  @@index([IssuedByUserId, IssuedByGuildId], name: "IssuedByInd") // Create an index for quering warnings by issuer
+  @@index([MemberUserId, MemberGuildId], name: "MemberInd")       // Create an index for querying warnings by member
+  @@index([IssuedByUserId, IssuedByGuildId], name: "IssuedByInd") // Create an index for querying warnings by issuer
 }
 
 model AutoModerationAction {
@@ -250,9 +250,9 @@ model CommandUsage {
 
   // When the usage is safe to be transferred to the summary table, aka. no longer used
   // for processing, like command cooldowns/throttling, etc. The record is merged
-  // into CommandUsageSummary when this date is reached, or the next mightnight UTC after
+  // into CommandUsageSummary when this date is reached, or the next midnight UTC after
   // `timestamp` if not set. The value should be set to  the cooldown's expiry if it applies,
-  // or ommitted if not. CommandUsage records are processed every night at 00:00 UTC.
+  // or omitted if not. CommandUsage records are processed every night at 00:00 UTC.
   expireThreshold       DateTime?
 
   usages DateTime[] @default([])
@@ -337,62 +337,4 @@ model Webhook {
 
   GameServerId String? @unique
   GameServer GameServer?
-}
-
-model WorkshopMod {
-  id         Int      @id @default(autoincrement()) // The unique (internal) id of the mod
-  name        String   // The name of the mod
-  description String?  // The description of the mod, if applicable
-  workshopId  String   // The workshop ID of the mod, used to identify it in the Steam Workshop
-  appId       Int      // The Steam App ID of the game this mod is for
-  version     String?  // The version of the mod, if applicable
-
-  banned Boolean @default(false) // Whether the mod is banned or not, used to prevent installation on game servers
-  bannedReason String? // The reason the mod was banned, if applicable
-  bannedAt DateTime? // The date the mod was banned, if applicable
-
-  removed Boolean @default(false) // Whether the mod is removed or not, used to prevent installation on game servers
-  removedReason String? // The reason the mod was removed, if applicable
-  removedAt DateTime? // The date the mod was removed, if applicable
-
-  fetches Int @default(0) // The number of times the mod has been fetched from the Steam Workshop
-  updates Int @default(0) // The number of times the mod has been updated
-  relays Int @default(0) // The number of times the mod update has been relayed to game servers
-  lastFetchedAt DateTime? // The date the mod was last fetched from the Steam Workshop
-  lastUpdatedAt DateTime? // The date the mod was last updated, used to determine
-
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  GameServers GameServer[] // The game servers that have this mod installed
-  LastUpdatedModFor GameServer[] @relation("LastUpdatedMod") // The game server that last updated this mod, if applicable
-}
-
-model GameServer {
-  id          String   @id @unique
-  appId      Int      // The Steam App ID of the game server
-  themeColor String? // The (hex) theme color for the game server, used in embeds and UI
-  name        String   // The name of the game server
-  description String? // The description of the game server, if applicable
-  ipv4   String        // The IP address of the game server
-  gameport        Int  // The port of the game server
-  steamQueryPort Int?  // The Steam query port of the game server, if applicable
-  status      GameServerStatus   // The status of the game server (e.g., online, offline)
-  players     Int      // The number of players currently on the server
-  maxPlayers  Int      // The maximum number of players allowed on the server
-  lastUpdated DateTime @default(now()) // The last time the server information was updated
-
-  Mods        WorkshopMod[] // The mods installed on the game server, if applicable
-  modUpdates Int @default(0) // The number of mod updates received for the game server
-  modUpdateAt DateTime? // The date the last mod update was received
-  WebhookId String? @unique // The id of the webhook to send updates to
-  Webhook Webhook? @relation(fields: [WebhookId], references: [id]) // The webhook to send updates to
-  LastUpdatedModId Int? @unique // The id of the last mod update received, if applicable
-  LastUpdatedMod WorkshopMod? @relation("LastUpdatedMod", fields: [LastUpdatedModId], references: [id]) // The last mod update received, if applicable
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  GuildId     String  // Which guild this game server belongs to
-  Guild       Guild @relation(fields: [GuildId], references: [id])
 }
