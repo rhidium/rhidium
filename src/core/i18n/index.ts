@@ -88,6 +88,11 @@ const getFiles = (
  */
 const getLocalizedCommands = () => {
   const customDir = getConfiguredLocalesDirectory();
+
+  if (customDir && !fs.existsSync(customDir)) {
+    throw new Error(`Configured locales directory does not exist: ${customDir}\n\nDid you forget to create it?`);
+  }
+
   const locations = [
     // Consumer's custom locales directory
     ...(customDir ? [path.resolve(customDir, 'en-US/commands')] : []),
