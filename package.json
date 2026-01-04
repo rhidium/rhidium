@@ -33,7 +33,7 @@
     "lint": "gts lint",
     "pretest": "npm run build",
     "posttest": "npm run lint",
-    "start": "node --enable-source-maps dist/index.js",
+    "start": "node --enable-source-maps dist/index.mjs",
     "start:dev": "DEBUG=app:* tsx watch src/index.ts",
     "test": "mocha dist/test/**/*.js",
     "test:dev": "ts-mocha test/**/*.spec.ts -w --watch-files '**/*.ts'",

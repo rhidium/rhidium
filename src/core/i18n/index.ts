@@ -7,6 +7,9 @@ import path from 'path';
 import { fileURLToPath } from 'node:url';
 import type { LocalizedLabelKey } from './types';
 
+import { createRequire } from 'node:module';
+const require = createRequire(import.meta.url);
+
 import enUSCommon from '../../../locales/en-US/common.json' with { type: 'json' };
 import enUSCore from '../../../locales/en-US/core.json' with { type: 'json' };
 
@@ -135,8 +138,17 @@ const commandsLocalization = async (
         let data;
 
         try {
-          // Try to import the file directly (supports both ESM and JSON)
-          data = await import(filePath);
+          // Use require to load JSON files to avoid ERR_IMPORT_ATTRIBUTE_MISSING
+          const localeFilePath = filePath.replace(
+            /en-US/g,
+            locale === Locales.EnglishUS ? 'en-US' : locale,
+          );
+          
+          if (fs.existsSync(localeFilePath)) {
+            data = require(localeFilePath);
+          } else if (isRequired) {
+            throw new Error(`Required locale file not found: ${localeFilePath}`);
+          }
         } catch (err) {
           if (isRequired) {
             throw err;
