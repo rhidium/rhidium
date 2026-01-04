@@ -23,6 +23,7 @@
   ],
   "scripts": {
     "build": "tsdown",
+    "build:watch": "tsdown --watch",
     "prebuild": "rimraf dist",
     "clean": "gts clean; rimraf docs",
     "clean:full": "npm run clean; rimraf logs node_modules",
