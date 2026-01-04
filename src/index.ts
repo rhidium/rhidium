@@ -6,7 +6,7 @@ import { appConfig, setConfigDirectory } from './core/config/app';
 import { ClientManager } from './core/commands/manager';
 import { commandDeploymentEnvironment } from '@core/commands/defaults';
 import Client from './core/client';
-import { I18n } from './core/i18n';
+import { I18n, setLocalesDirectory } from './core/i18n';
 
 import utilityRegistry from './modules/utility';
 import systemRegistry from './modules/system';
@@ -14,6 +14,7 @@ import moderationRegistry from './modules/moderation';
 
 const main = async () => {
   setConfigDirectory(process.env['RHIDIUM_CONFIG_DIR'] || './config');
+  setLocalesDirectory(process.env['RHIDIUM_LOCALES_DIR'] || './locales');
   initializeLogger(appConfig.logging);
 
   await I18n.init();
