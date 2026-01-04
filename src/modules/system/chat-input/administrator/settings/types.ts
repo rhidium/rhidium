@@ -76,7 +76,6 @@ type SettingsKey = Exclude<
   | 'AutoModerationActions'
   | 'MemberJoinEmbed'
   | 'MemberLeaveEmbed'
-  | 'GameServers'
 >;
 
 type SettingsPrompt<

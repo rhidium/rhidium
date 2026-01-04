@@ -6,7 +6,6 @@ import type {
   Reminder,
   User,
   Settings,
-  WorkshopMod,
 } from './client';
 
 import type {
@@ -17,7 +16,6 @@ import type {
   PopulatedReminder,
   PopulatedCommand,
   PopulatedSettings,
-  PopulatedWorkshopMod,
 } from './select';
 
 enum Model {
@@ -28,7 +26,6 @@ enum Model {
   Reminder = 'Reminder',
   Command = 'Command',
   Settings = 'Settings',
-  WorkshopMod = 'WorkshopMod',
 }
 
 const seenModels = new Set<string>();
@@ -56,8 +53,7 @@ type ModelUnion =
   | AuditLog
   | Reminder
   | Command
-  | Settings
-  | WorkshopMod;
+  | Settings;
 
 type PopulatedModelUnion =
   | PopulatedUser
@@ -66,8 +62,7 @@ type PopulatedModelUnion =
   | PopulatedAuditLog
   | PopulatedReminder
   | PopulatedCommand
-  | PopulatedSettings
-  | PopulatedWorkshopMod;
+  | PopulatedSettings;
 
 type Models = {
   User: User;
@@ -77,7 +72,6 @@ type Models = {
   Reminder: Reminder;
   Command: Command;
   Settings: Settings;
-  WorkshopMod: WorkshopMod;
 };
 
 export {
