@@ -527,6 +527,11 @@
       "import": "./dist/core/utils/prompts/validation.mjs",
       "types": "./src/core/utils/prompts/validation.ts"
     },
+    "./main": {
+      "require": "./dist/main.cjs",
+      "import": "./dist/main.mjs",
+      "types": "./src/main.ts"
+    },
     "./modules/moderation": {
       "require": "./dist/modules/moderation/index.cjs",
       "import": "./dist/modules/moderation/index.mjs",

@@ -58,6 +58,7 @@
     "moderatable",
     "repliable",
     "Rhidium",
+    "subcmds",
     "subcontroller",
     "subdirs",
     "tailable",

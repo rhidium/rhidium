@@ -4,6 +4,7 @@ export default defineConfig((options) => {
   return {
     entry: [
       'src/index.ts',
+      'src/main.ts',
       'src/core/**/*.ts',
       'src/modules/**/*.ts',
       '!src/core/index.namespace.ts',
