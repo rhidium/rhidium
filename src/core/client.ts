@@ -11,6 +11,8 @@ type ClientOptions = {
   manager: ClientManager;
 };
 
+type FullClientOptions = DiscordClientOptions & ClientOptions;
+
 class Client<Ready extends boolean = boolean>
   extends DiscordClient<Ready>
   implements ClientOptions
@@ -43,3 +45,5 @@ class Client<Ready extends boolean = boolean>
 }
 
 export default Client;
+
+export type { FullClientOptions as ClientOptions };
