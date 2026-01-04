@@ -117,7 +117,7 @@ class ReminderServices {
             (reminder.repeatUntil
               ? ` until ${TimeUtils.discordInfoTimestamp(reminder.repeatUntil.valueOf())}`
               : '') +
-            (process.env.NODE_ENV !== 'production'
+            (process.env['NODE_ENV'] !== 'production'
               ? ' (Might be in the past due to being offline, this is a non-production environment)'
               : ''),
         });

@@ -77,7 +77,7 @@ const TestChatInput = new Command({
     limit: 1,
   },
   enabled: {
-    global: process.env.NODE_ENV !== 'production',
+    global: process.env['NODE_ENV'] !== 'production',
     guildOnly: true,
     guilds: ['1148585850007994388'],
   },

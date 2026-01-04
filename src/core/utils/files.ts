@@ -1,7 +1,7 @@
 import { lstatSync, readdirSync } from 'fs';
 import path from 'path';
 
-const projectRoot = process.env.PWD ?? '~/';
+const projectRoot = process.env['PWD'] ?? '~/';
 
 const javascriptExtensions = ['.js', '.mjs', '.cjs'];
 
@@ -39,7 +39,7 @@ const getFiles = (
   // and ts-node-dev is being used
   if (
     omitTsExtensionForJs === false &&
-    process.env.TS_NODE_DEV &&
+    process.env['TS_NODE_DEV'] &&
     resolvedExtensions.includes('.js')
   )
     resolvedExtensions.push('.ts');

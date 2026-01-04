@@ -263,7 +263,7 @@ class CommandWrapper extends DatabaseWrapper<Model.Command> {
     });
 
     if (anyExists) {
-      if (process.env.NODE_ENV === 'production') {
+      if (process.env['NODE_ENV'] === 'production') {
         throw new Error(
           `Command usage summary for date ${startOfDay} already exists`,
         );

@@ -7,7 +7,7 @@ import type {
 import { appConfig } from '@core/config/app';
 
 const commandDeploymentEnvironment: string | null =
-  process.env.NODE_ENV === 'production'
+  process.env['NODE_ENV'] === 'production'
     ? null
     : appConfig.client.development_server_id;
 
@@ -43,7 +43,7 @@ const enabled: CommandEnabledOptions<false> = {
   nsfw: false,
   guildOnly: false,
   guilds:
-    process.env.NODE_ENV === 'production' ||
+    process.env['NODE_ENV'] === 'production' ||
     !appConfig.client.development_server_id
       ? true
       : [appConfig.client.development_server_id],
