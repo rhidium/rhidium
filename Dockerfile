@@ -29,7 +29,7 @@ RUN  pnpm run build
 FROM base AS client
 COPY --from=prod-deps /app/node_modules /app/node_modules
 COPY --from=build-client /app/dist /app/dist
-CMD  [ "node", "dist/src/index.js" ]
+CMD  [ "node", "dist/index.mjs" ]
 
 # 
 # START Docs
