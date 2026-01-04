@@ -88,7 +88,7 @@ const commandsLocalization = async (
   );
 };
 
-export const ns = ['core', 'common', 'glossary', 'validation'] as const;
+export const ns = ['core', 'common', 'commands'] as const;
 
 export const defaultNS = 'void';
 export const resources = {
@@ -177,18 +177,20 @@ class I18n {
     ctx: Interaction | Guild | Locales | null,
     options?: Omit<TOptions, 'lng'>,
   ) => {
-    // @ts-expect-error - Incompatible type signatures
-    return i18n.t(key, {
-      ...options,
-      lng: !ctx
-        ? defaultLocale
-        : typeof ctx === 'string'
-          ? ctx
-          : 'locale' in ctx
-            ? ctx.locale
-            : ctx.preferredLocale,
-      fallbackLng: defaultLocale,
-    }) as string;
+    return i18n.t(
+      key as string,
+      {
+        ...options,
+        lng: !ctx
+          ? defaultLocale
+          : typeof ctx === 'string'
+            ? ctx
+            : 'locale' in ctx
+              ? ctx.locale
+              : ctx.preferredLocale,
+        fallbackLng: defaultLocale,
+      } as unknown as string,
+    ) as string;
   };
 
   public static readonly isLocalizedCommand = (command: string): boolean => {
