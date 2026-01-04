@@ -20,9 +20,7 @@ export default defineConfig((options) => {
       enabled: true,
       packageJson: true,
       devExports: false,
-      customExports(exports, context) {
-        // Add `types` field to package.json export objects
-        console.log('Adding types field to package.json exports for', exports)
+      customExports(exports) {
         for (const exportKey in exports) {
           const exportEntry = exports[exportKey]
           if (typeof exportEntry === 'object' && !Array.isArray(exportEntry)) {
