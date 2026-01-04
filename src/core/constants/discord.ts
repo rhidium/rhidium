@@ -9,4 +9,6 @@ export class DiscordConstants {
   static readonly MAX_PINS_PER_CHANNEL = 50;
   static readonly MAX_ACTIVE_THREADS_PER_GUILD = 1000;
   static readonly MAX_ROLES_PER_GUILD = 250;
+  static readonly MAX_USERS_PER_VOICE_CHANNEL = 99;
+  static readonly MAX_USERS_PER_VOICE_CHANNEL_VERIFIED_COMMUNITY_OR_PARTNER = 1000;
 }
