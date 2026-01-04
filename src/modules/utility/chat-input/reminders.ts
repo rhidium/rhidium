@@ -21,7 +21,7 @@ const frequentIntervalMaxRuntime = UnitConstants.MS_IN_ONE_DAY * 7;
 
 const maxRemindersPerUser = 100;
 const minRepeatEveryMs =
-  process.env.NODE_ENV === 'production'
+  process.env['NODE_ENV'] === 'production'
     ? UnitConstants.MS_IN_ONE_MINUTE * 5
     : UnitConstants.MS_IN_ONE_SECOND;
 

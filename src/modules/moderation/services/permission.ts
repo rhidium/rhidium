@@ -8,7 +8,7 @@ import {
   type RepliableInteraction,
 } from 'discord.js';
 
-const isProd = process.env.NODE_ENV === 'production';
+const isProd = process.env['NODE_ENV'] === 'production';
 
 type DiscordUser = _User;
 type DiscordGuild = _Guild;

@@ -39,7 +39,7 @@ import { logger } from '@core/logger';
 import { Embeds } from '@core/config/embeds';
 
 const Logger = logger();
-const isProduction = process.env.NODE_ENV === 'production';
+const isProduction = process.env['NODE_ENV'] === 'production';
 
 type PromptInteraction = GuildInteraction<
   | UserSelectMenuInteraction<CacheType>

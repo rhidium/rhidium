@@ -18,8 +18,8 @@ export const appConfig = {
     development_server_id:
       'development_server_id' in config.client
         ? (config.client.development_server_id ?? null)
-        : process.env.NODE_ENV === 'development'
-          ? (process.env.DEVELOPMENT_SERVER_ID ?? null)
+        : process.env['NODE_ENV'] === 'development'
+          ? (process.env['DEVELOPMENT_SERVER_ID'] ?? null)
           : null,
   },
   ...extendedConfig,
