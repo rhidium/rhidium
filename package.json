@@ -26,6 +26,7 @@
     "prebuild": "rimraf dist",
     "clean": "gts clean; rimraf docs",
     "clean:full": "npm run clean; rimraf logs node_modules",
+    "cp:locales": "node scripts/copy-locales.js",
     "dev": "npm run start:dev",
     "docs:build": "npx typedoc",
     "docs:watch": "npx typedoc --watch",
