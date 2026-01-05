@@ -1,7 +1,7 @@
 /* eslint-disable n/no-unpublished-import */
 import { Colors, type HexColorString, resolveColor } from 'discord.js';
 import { existsSync, readFileSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
+import { dirname, resolve, isAbsolute } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { z } from 'zod';
 import { ConfigSchema, ExtendedConfigSchema, type Config, type ExtendedConfig } from './types';
@@ -14,6 +14,7 @@ const __dirname = dirname(__filename);
  * Can be set via setConfigDirectory() before the config is loaded.
  */
 let userConfigDirectory: string | null = null;
+let userPackageJsonPath: string | null = null;
 
 /**
  * Set the directory where config files should be loaded from.
@@ -31,6 +32,27 @@ export const setConfigDirectory = (directory: string): void => {
     throw new Error(`Config directory does not exist: ${directory}`);
   }
   userConfigDirectory = directory;
+};
+
+/**
+ * Set a custom package.json path for the consumer project.
+ * Useful when bundlers relocate files or when package.json lives elsewhere.
+ */
+export const setPackageJsonPath = (pkgPath: string | null): void => {
+  if (pkgPath === null) {
+    userPackageJsonPath = null;
+    return;
+  }
+
+  const resolved = isAbsolute(pkgPath)
+    ? pkgPath
+    : resolve(process.cwd(), pkgPath);
+
+  if (!existsSync(resolved)) {
+    throw new Error(`package.json not found at provided path: ${resolved}`);
+  }
+
+  userPackageJsonPath = resolved;
 };
 
 /**
@@ -124,20 +146,37 @@ const loadConfigFile = <T>(filename: string, schema: z.ZodSchema<T>): T => {
  * Loads package.json from the rhidium installation directory.
  */
 const loadPackageJson = () => {
-  const location = resolve(__dirname, '../../../package.json');
-  
-  if (!existsSync(location)) {
-    throw new Error(`package.json not found at ${location}`);
+  const envPath = process.env['RHIDIUM_PACKAGE_JSON'];
+
+  const candidates = [
+    // 1) Explicitly set via code
+    userPackageJsonPath,
+    // 2) Environment variable (relative to cwd if not absolute)
+    envPath ? (isAbsolute(envPath) ? envPath : resolve(process.cwd(), envPath)) : null,
+    // 3) Default: rhidium package.json next to built files
+    resolve(__dirname, '../../../package.json'),
+    // 4) Fallback: parent of rhidium (e.g., consumer root)
+    resolve(__dirname, '../../../../package.json'),
+  ].filter(Boolean) as string[];
+
+  for (const location of candidates) {
+    if (!existsSync(location)) continue;
+
+    try {
+      const content = readFileSync(location, 'utf-8');
+      return JSON.parse(content);
+    } catch (error) {
+      throw new Error(
+        `Failed to parse package.json at ${location}: ${error instanceof Error ? error.message : String(error)}`
+      );
+    }
   }
 
-  try {
-    const content = readFileSync(location, 'utf-8');
-    return JSON.parse(content);
-  } catch (error) {
-    throw new Error(
-      `Failed to parse package.json at ${location}: ${error instanceof Error ? error.message : String(error)}`
-    );
-  }
+  throw new Error(
+    'package.json not found in any expected location. Checked:\n' +
+    candidates.map((c) => `  - ${c}`).join('\n') + '\n\n' +
+    'Set RHIDIUM_PACKAGE_JSON or call setPackageJsonPath() to point to your package.json.'
+  );
 };
 
 const config = loadConfigFile<Config>('config.json', ConfigSchema);
