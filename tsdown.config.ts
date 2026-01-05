@@ -16,6 +16,7 @@ export default defineConfig((options) => {
     clean: true,
     treeshake: true,
     minify: !options.watch,
+    cjsDefault: false,
     exports: {
       enabled: true,
       packageJson: true,
