@@ -34,7 +34,7 @@ type Options = {
 
 const main = async (
   {
-    components,
+    components = [],
     clientOptions = {},
     logInOptions = {},
   }: Options = {},
@@ -54,7 +54,7 @@ const main = async (
   const manager = resolvedClientOptions.manager;
   const client = new Client(resolvedClientOptions);
 
-  if (components && components.length > 0) {
+  if (components.length > 0) {
     manager.register(...components);
   } else {
     manager.register(

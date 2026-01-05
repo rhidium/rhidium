@@ -28,7 +28,6 @@ class Client<Ready extends boolean = boolean>
     token: string | undefined,
     syncOptions?: SyncCommandOptions,
   ): Promise<string> => {
-    const promise = super.login(token);
     this.syncOptions = syncOptions;
 
     super.once(Events.ClientReady, () => {
@@ -39,6 +38,8 @@ class Client<Ready extends boolean = boolean>
           syncOptions,
         );
     });
+
+    const promise = super.login(token);
 
     return promise;
   };

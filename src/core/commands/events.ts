@@ -33,6 +33,10 @@ export class ClientEventListener<
     );
   }
 
+  public toString(): string {
+    return `Listener<${this.event}/${this.once ? 'once' : 'all'}>`;
+  }
+
   public readonly register = (client: Client<true>) => {
     this.debug(
       `Registering event listener for ${this.event} with once: ${this.once}`,

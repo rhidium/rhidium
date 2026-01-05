@@ -39,6 +39,10 @@ class ClientJob {
     this.debug = debug.commands.jobs.extend(this.id);
   }
 
+  public toString(): string {
+    return `Job<${this.id}>`;
+  }
+
   public readonly init = async (client: Client<true>): Promise<void> => {
     this.debug('Initializing job %s', this.id);
 
