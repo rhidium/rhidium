@@ -2,7 +2,7 @@
 import { GatewayIntentBits } from 'discord.js';
 
 import { initializeLogger } from '@core/logger';
-import { appConfig, setConfigDirectory } from './core/config/app';
+import { appConfig, setConfigDirectory, setPackageJsonPath } from './core/config/app';
 import { ClientManager, type ComponentRegistry } from './core/commands/manager';
 import { commandDeploymentEnvironment } from '@core/commands/defaults';
 import Client, { type ClientOptions } from './core/client';
@@ -43,6 +43,7 @@ const main = async (
   }: Options = {},
 ) => {
   setConfigDirectory(process.env['RHIDIUM_CONFIG_DIR'] || './config');
+  setPackageJsonPath(process.env['RHIDIUM_PACKAGE_JSON'] || null);
   setLocalesDirectory(process.env['RHIDIUM_LOCALES_DIR'] || null);
   initializeLogger(appConfig.logging);
 
