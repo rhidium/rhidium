@@ -10,13 +10,13 @@ export default defineConfig((options) => {
       '!src/core/index.namespace.ts',
     ],
     splitting: false, // Disable code splitting for simpler output
-    sourcemap: true,
+    sourcemap: true, // Generate source maps for easier debugging
     unbundle: true, // Note: We want to preserve module boundaries
-    format: ['cjs' as const, 'esm' as const],
-    clean: true,
-    treeshake: true,
-    minify: !options.watch,
-    cjsDefault: false,
+    format: ['cjs' as const, 'esm' as const], // Output both CommonJS and ES Module formats
+    clean: true, // Clean the output directory before each build
+    treeshake: true, // Remove unused code
+    minify: !options.watch, // Minify only in production builds
+    cjsDefault: false, // Use named exports for CommonJS
     exports: {
       enabled: true,
       packageJson: true,
