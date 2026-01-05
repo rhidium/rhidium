@@ -25,7 +25,7 @@ type Options = {
    * 
    * - Merges with default options like intents and manager
    */
-  clientOptions?: ClientOptions;
+  clientOptions?: Partial<ClientOptions>;
   /**
    * Options for logging in the client
    */
@@ -35,10 +35,7 @@ type Options = {
 const main = async (
   {
     components,
-    clientOptions = {
-      intents: [GatewayIntentBits.Guilds],
-      manager: new ClientManager(),
-    },
+    clientOptions = {},
     logInOptions = {},
   }: Options = {},
 ) => {
@@ -49,8 +46,13 @@ const main = async (
 
   await I18n.init();
 
-  const manager = clientOptions.manager;
-  const client = new Client(clientOptions);
+  const resolvedClientOptions = {
+    intents: [GatewayIntentBits.Guilds],
+    manager: new ClientManager(),
+    ...clientOptions,
+  }
+  const manager = resolvedClientOptions.manager;
+  const client = new Client(resolvedClientOptions);
 
   if (components && components.length > 0) {
     manager.register(...components);
