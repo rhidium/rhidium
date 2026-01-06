@@ -1,5 +1,7 @@
 import { defineConfig } from 'tsdown'
 
+const logger = console;
+
 export default defineConfig((options) => {
   return {
     entry: [
@@ -76,7 +78,11 @@ export default defineConfig((options) => {
       onLog(level, log, defaultHandler) {
         if (level === 'warn') {
           if (log.code === 'CIRCULAR_DEPENDENCY' && /Circular dependency: \.\.\/\.\.\/node_modules/.test(log.message)) {
-            console.log("Ignoring circular dependency warning from node_modules.");
+            logger.info("Ignoring circular dependency warning from node_modules.");
+            return;
+          }
+          if (log.code === 'PLUGIN_TIMINGS') {
+            logger.warn(log.message);
             return;
           }
           throw new Error(`Build warning treated as error: ${log.message}`);
