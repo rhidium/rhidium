@@ -1,3 +1,4 @@
+# Note: Prevents `pnpm -r` from turning dist into a workspace package
 packages:
   - "**"
   - "!dist/**"
