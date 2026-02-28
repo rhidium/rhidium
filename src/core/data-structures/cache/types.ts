@@ -1,6 +1,6 @@
 import type { CreateCacheOptions, Events } from 'cache-manager';
-import EventEmitter from 'events';
-import Keyv from 'keyv';
+import type Keyv from 'keyv';
+import type { EventEmitter } from 'node:stream';
 
 export type AbstractCache<T> = {
   get: (key: string) => Promise<T | null | undefined>;

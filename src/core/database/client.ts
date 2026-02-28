@@ -9,6 +9,10 @@ const {
   DATABASE_URL,
 } = process.env;
 
+if (!DATABASE_URL) {
+  throw new Error("DATABASE_URL environment variable is not set. Please set it to your database connection string.");
+}
+
 const debug = debugFactory("rhidium:prisma");
 
 const isProduction = NODE_ENV === "production";

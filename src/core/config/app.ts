@@ -3,7 +3,7 @@ import { Colors, type HexColorString, resolveColor } from 'discord.js';
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, resolve, isAbsolute } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { z } from 'zod';
+import type { z } from 'zod';
 import { ConfigSchema, ExtendedConfigSchema, type Config, type ExtendedConfig } from './types';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -98,7 +98,11 @@ const loadConfigFile = <T>(filename: string, schema: z.ZodSchema<T>): T => {
   locations.push(resolve(__dirname, '../../../../config', filename));
 
   // 4. Local config (standalone)
-  locations.push(resolve(__dirname, '../../../config', filename));
+  locations.push(
+    resolve(__dirname, '../../../config', filename),
+    resolve(__dirname, '../../config', filename),
+    resolve(__dirname, '../config', filename)
+  );
 
   let parsedData: unknown;
   let loadedPath: string | null = null;
@@ -157,6 +161,8 @@ const loadPackageJson = () => {
     resolve(__dirname, '../../../package.json'),
     // 4) Fallback: parent of rhidium (e.g., consumer root)
     resolve(__dirname, '../../../../package.json'),
+    resolve(__dirname, '../../package.json'),
+    resolve(__dirname, '../package.json'),
   ].filter(Boolean) as string[];
 
   for (const location of candidates) {
