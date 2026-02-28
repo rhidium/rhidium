@@ -2,10 +2,16 @@
   "name": "rhidium",
   "license": "ISC",
   "version": "4.0.0-alpha.1",
+  "packageManager": "pnpm@10.4.1",
   "description": "Quickly and easily create powerful Discord bots using a powerful, opinionated, all-in-one framework.",
   "type": "module",
   "main": "./dist/index.mjs",
-  "packageManager": "pnpm@10.4.1",
+  "exports": {
+    ".": "./dist/index.mjs",
+    "./main": "./dist/main.mjs",
+    "./core/*": "./dist/core/*.mjs",
+    "./modules/*": "./dist/modules/*/*.mjs"
+  },
   "engines": {
     "node": ">=16.6.0",
     "npm": ">=7.0.0",
