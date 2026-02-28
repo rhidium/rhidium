@@ -116,6 +116,40 @@ DATABASE_URL="postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST
 
 ```
 
+## Rhidium as a Submodule
+
+To embed the Rhidium repository/source-code into your own (allows direct imports and for Rhidium to be consumed as a workspace package):
+
+> [!TIP]
+> Before adding the submodule, consider forking the repository so that you don't have to rely on us to merge new framework features or bug fixes. Consider pushing them back upstream though!
+
+```bash
+git submodule add -b main git@github.com:rhidium/rhidium.git rhidium
+```
+
+Afterwards:
+
+1. 
+
+### Quick Reference
+
+```bash
+# Clone with submodules
+git clone --recurse-submodules https://github.com/rhidium/dynamic-voice-channels.git
+
+# If already cloned without submodules
+git submodule update --init --recursive
+
+# Pull latest changes (main repo + submodules)
+git pull && git submodule update --remote --merge
+
+# Update submodules to tracked commits
+git submodule update --recursive
+
+# Add new submodules
+git submodule add -b <branch-name> <repo-url> <directory-name>
+```
+
 </details>
 
 ## 📚 Documentation
@@ -125,12 +159,6 @@ We provide multiple resources to help get you started on your project quickly:
 - Explore the [Template / Example](https://github.com/rhidium/rhidium) - If you're new here, the best way to determine if Rhidium is a fit for you is by exploring this complete example.
 - Check out the [API Documentation](https://rhidium.xyz/modules.html) - Once you're convinced, clone the example/template and check out the API docs to learn more about the inner workings and possibilities.
 - Made with [TypeScript](https://www.typescriptlang.org/) and [discord.js](https://discord.js.org/) - comes with [PM2](https://pm2.io/), [Docker](https://www.docker.com/), [docker compose](https://docs.docker.com/compose/) configurations
-
-## 🙋 Support
-
-Join our [support server](https://discord.gg/mirasaki) if you have any questions, feature requests or other feedback:
-
-[![banner](https://invidget.switchblade.xyz/mirasaki)](https://discord.gg/mirasaki)
 
 ## 🗺️ Roadmap / To-Do
 
