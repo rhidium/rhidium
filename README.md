@@ -127,10 +127,6 @@ To embed the Rhidium repository/source-code into your own (allows direct imports
 git submodule add -b main git@github.com:rhidium/rhidium.git rhidium
 ```
 
-Afterwards:
-
-1. 
-
 ### Quick Reference
 
 ```bash
